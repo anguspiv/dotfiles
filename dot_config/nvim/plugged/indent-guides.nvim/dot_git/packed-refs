@@ -1,0 +1,5 @@
+# pack-refs with: peeled fully-peeled sorted 
+3cb9293fff9bab928b40d476dcbaf6bd2256ba7a refs/remotes/origin/async
+f5448310a7753ce30070e4dadb3cb4995203e245 refs/remotes/origin/glepnir-patch-1
+e261e5a43b5a05557a66b760a4132a6c502cc0e4 refs/remotes/origin/main
+cfb96652d24acf1627dcf0aba751541e84a4df36 refs/remotes/origin/rewrite

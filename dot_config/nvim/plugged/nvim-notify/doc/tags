@@ -1,0 +1,11 @@
+NotificationEvents	nvim-notify.txt	/*NotificationEvents*
+NotificationHighlights	nvim-notify.txt	/*NotificationHighlights*
+NotificationRecord	nvim-notify.txt	/*NotificationRecord*
+NotifyOptions	nvim-notify.txt	/*NotifyOptions*
+notify-render()	nvim-notify.txt	/*notify-render()*
+notify.async()	nvim-notify.txt	/*notify.async()*
+notify.dismiss()	nvim-notify.txt	/*notify.dismiss()*
+notify.history()	nvim-notify.txt	/*notify.history()*
+notify.notify()	nvim-notify.txt	/*notify.notify()*
+notify.setup()	nvim-notify.txt	/*notify.setup()*
+nvim-notify	nvim-notify.txt	/*nvim-notify*

@@ -1,0 +1,11 @@
+0480cbd9976529f69aeb692d8e1834d3edde90c5		branch 'master' of https://github.com/neoclide/coc.nvim
+6f159b3a3bfa76c97d8a4621b06392f54540139d	not-for-merge	branch 'feat/references-includeDeclaration' of https://github.com/neoclide/coc.nvim
+a9da141dbcb16e72754269a85c20e14832e81639	not-for-merge	branch 'feat/typings-SemanticTokensBuilder' of https://github.com/neoclide/coc.nvim
+d409bae8d243ea1f364c91fda5e623414fc4aa29	not-for-merge	branch 'feat/use-ts-hi-group' of https://github.com/neoclide/coc.nvim
+5d4c36da4a933b588fbe8d19356fcfcb869d5c41	not-for-merge	branch 'fix/3432' of https://github.com/neoclide/coc.nvim
+d8faa211837900a087e5a37654d225adee7a8cc3	not-for-merge	branch 'fix/create-config-file' of https://github.com/neoclide/coc.nvim
+03c4689f6c86371e570eb3fa1d5fc33726aeeb07	not-for-merge	branch 'fix/filetype-detect' of https://github.com/neoclide/coc.nvim
+6d541365a13ac63bd3674c4987f481301edc2620	not-for-merge	branch 'fix/globpath' of https://github.com/neoclide/coc.nvim
+27e7e31b5daf400e3c4e1506e4738ca9f7109f5a	not-for-merge	branch 'fix/onTypeFormatting' of https://github.com/neoclide/coc.nvim
+2901abc80548b8e6aadb2cec48688e52b0aa6104	not-for-merge	branch 'fix/typos-schema' of https://github.com/neoclide/coc.nvim
+287c743c9f227fdf0e1db452bbb8ae3c5caffc36	not-for-merge	branch 'release' of https://github.com/neoclide/coc.nvim
