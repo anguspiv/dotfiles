@@ -1,6 +1,0 @@
-# pack-refs with: peeled fully-peeled sorted 
-e2e806ea5f3b9ea14708a1af740eac7cc7ff8be4 refs/remotes/origin/albfan-travis
-6fff477431ac3191c69a3a5e5f187925466e275a refs/remotes/origin/master
-2581d006722a66f7cbfac2c6f57e0222d8000b82 refs/remotes/origin/refactor-range-vader
-6b82586d4a9151ee1dbeea1ef678c75a60333c6c refs/tags/0.3.0
-^651a21c17b9884682362c0725efbbba1479661ab
