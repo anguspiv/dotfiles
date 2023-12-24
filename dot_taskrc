@@ -34,3 +34,4 @@ taskd.key=\/Users\/angusp\/.task\/freecinc_1bed5a7a.key.pem
 taskd.certificate=\/Users\/angusp\/.task\/freecinc_1bed5a7a.cert.pem
 taskd.ca=\/Users\/angusp\/.task\/freecinc_1bed5a7a.ca.pem
 taskd.credentials=FreeCinc\/freecinc_1bed5a7a\/9c6a7f7f-7677-4533-9069-d956fdea0f73
+news.version=2.6.0
