@@ -2,8 +2,16 @@
 
 blocks:
   - alignment: left
+    newline: true
+    type: prompt
     segments:
-      - background: "#000000"
+      - type: text
+        style: plain
+        template: "{{if gt .Code -1}}\u0009{{end}}"
+  - alignment: left
+    newline: true
+    segments:
+      - background: transparent
         foreground: "#dd1e1e"
         style: plain
         template: " ⚡"
@@ -30,7 +38,7 @@ blocks:
       #   style: plain
       #   template: " {{ if .WSL }}WSL at {{ end }}{{.Icon}} "
       #   type: os
-      - background: "#272727"
+      - background: transparent
         foreground: "#43CCEA"
         properties:
           folder_icon: 󰉋
@@ -38,34 +46,34 @@ blocks:
           home_icon: 󰋜
           style: folder
         style: plain
-        template: " {{ .Path }} "
+        template: "{{ .Path }} "
         type: path
-      - background: "#272727"
+      - background: transparent
         foreground: "#00ff0d"
         properties:
           fetch_stash_count: true
           fetch_status: true
         style: plain
-        template: "<#000000> </>{{ .HEAD }}{{ if .Staging.Changed }}<#FF6F00>  {{ .Staging.String }}</>{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} "
+        template: "<#ffffff> </>{{ .HEAD }}{{ if .Staging.Changed }}<#FF6F00>  {{ .Staging.String }}</>{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} "
         type: git
       - type: node
         style: plain
         foreground: "#6CA35E"
-        background: "#272727"
+        background: transparent
         foreground_templates:
           - "{{ if .Mismatch }}#ff0000{{ end }}"
-        template: "<#000000> </>{{if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ else }}{{end}} {{ .Full }}{{if .Mismatch }} 󰦎 {{ .Expected }}{{ end }} "
+        template: "<#ffffff> </>{{if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ else }}{{end}} {{ .Full }}{{if .Mismatch }} 󰦎 {{ .Expected }}{{ end }} "
         properties:
           fetch_package_manager: true
           yarn_icon: ""
           npm_icon: ""
           pnpm_icon: "󰣙"
       - type: python
-        style: powerline
+        style: plain
         powerline_symbol: 
         foreground: "#43CCEA"
-        background: "#272727"
-        template: "<#000000> </>{{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}{{ .Venv }} {{ end }} {{ .Full }}{{ end }}"
+        background: transparent
+        template: "<#ffffff> </>{{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}{{ .Venv }} {{ end }} {{ .Full }}{{ end }}"
         properties:
           home_enabled: false
           fetch_virtual_env: true
@@ -75,7 +83,7 @@ blocks:
       - type: project
         style: plain
         foreground: "#43CCEA"
-        background: "#272727"
+        background: transparent
         foreground_templates:
           - "{{ if .Error }}#ff0000{{ end }}"
           - '{{ if eq .Type "node" }}#6CA35E{{ end }}'
@@ -87,64 +95,41 @@ blocks:
           - '{{ if eq .Type "julia" }}#A270BA{{ end }}'
           - '{{ if eq .Type "powershell" }}#539EB5{{ end }}'
         template:
-          "<#000000> </>{{ if .Error }}{{ .Error }}{{ else }}{{ if .Version }}
+          "<#ffffff> </>{{ if .Error }}{{ .Error }}{{ else }}{{ if .Version }}
           {{.Version}}{{ end }} {{ if .Name }}{{ .Name }}{{ end }}{{ end }} "
-      - background: "#272727"
+      - background: transparent
         foreground: "#ffffff"
         properties:
           style: dallas
           threshold: 0.0
-        style: diamond
-        template: "<#000000> </>{{ .FormattedMs }}s "
+        style: plain
+        template: "<#ffffff> </>{{ .FormattedMs }}s "
         trailing_diamond: 
         type: executiontime
     type: prompt
   - alignment: right
     segments:
-      - background: "#272727"
-        foreground: "#43CCEA"
-        leading_diamond: 
-        style: diamond
-        template: " {{ if .SSHSession }} {{ end }}{{ .UserName }}<transparent> / </>{{ .HostName }}"
-        type: session
-      - background: "#272727"
+      - background: transparent
         foreground: "#43CCEA"
         properties:
           time_format: 3:04:05 PM
-        style: diamond
-        template: "<#000000> \ue31e\uf0fb </>{{ .CurrentDate | date .Format }} "
+        style: plain
+        template: " {{ .CurrentDate | date .Format }} "
         type: time
-      - type: battery
-        style: diamond
-        background: "#272727"
-        foreground: "#43CCEA"
-        background_templates:
-          - '{{if eq "Charging" .State.String}}#272727{{end}}'
-          - '{{if eq "Discharging" .State.String}}#272727{{end}}'
-          - '{{if eq "Full" .State.String}}#272727{{end}}'
-        foreground_templates:
-          - '{{if eq "Charging" .State.String}}#43CCEA{{end}}'
-          - '{{if eq "Discharging" .State.String}}#43CCEA{{end}}'
-          - '{{if eq "Full" .State.String}}#4caf50{{end}}'
-          - "{{if lt .Percentage 20}}#dd1e1e{{end}}"
-        template: "<#000000></> {{ if not .Error }}{{ if lt .Percentage 20 }}  {{ else }}{{ .Icon }}{{ end }} {{ .Percentage }}{{ end }} "
-        properties:
-          discharging_icon: "󰁾"
-          charging_icon: "󰂄"
-          charged_icon: "󰂅"
-          not_charging_icon: "󰁹"
+        leading_diamond: 
     type: prompt
 
   - alignment: left
     newline: true
     segments:
-      - foreground: "#00ff0d"
+      - foreground: "#cccccc"
         foreground_templates:
           - "{{ if gt .Code 0 }}#ff0000{{ end }}"
+          - "{{ if eq .Code 0 }}#00ff0d{{ end }}"
         properties:
           always_enabled: true
         style: plain
-        template: " "
+        template: "{{if eq .Code 0}}󰅂{{else}}󰖭{{end}}"
         type: status
     type: prompt
 final_space: true
