@@ -1,5 +1,8 @@
 {
+  "explorer.file.reveal.whenOpen": true,
   "explorer.icon.enableNerdfont": true,
+  "explorer.quitOnOpen": false,
+  "explorer.file.showHiddenFiles": true,
   "eslint.autoFixOnSave": true,
   "eslint.format.enable": true
 }
