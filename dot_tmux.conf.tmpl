@@ -15,9 +15,10 @@ set -sg escape-time 0
 # zss kinda tight
 set-option -g default-shell $SHELL
 
+{{ if eq .chezmoi.os "darwin" }}
 # copy and paster set-option -g default-command
-# "reattach-to-user-namespace -l zsh"
 set-option -g default-command "reattach-to-user-namespace -l zsh"
+{{ end }}
 
 # look good set -g default-terminal "screen-256color"
 set -g default-terminal "screen-256color"
@@ -58,7 +59,9 @@ unbind %
 bind r source-file ~/.tmux.conf
 
 # after copying to a tmux buffer, hit y again to copy to clipboard bind
+{{ if eq .chezmoi.os "darwin" }}
 bind y run "tmux save-buffer - | reattach-to-user-namespace pbcopy"
+{{ end }}
 
 set-option -g @tpm-clean 'C'
 
@@ -83,7 +86,7 @@ status_separator_right="#[fg=#000000,bg=#272727] $status_separator_icon_right#[$
 status_left_end="#[fg=#272727,bg=default]$status_end_icon_left #[default]"
 status_right_end="#[fg=#272727,bg=default]$status_end_icon_right#[$status_default_style]"
 
-status_host="#h"
+status_host="= #h"
 status_host_bg="#43ccea"
 status_host_fg="#000000"
 
@@ -94,7 +97,7 @@ status_who_bg=#008ab8
 status_prefix_fg=#ffffff
 status_prefix_bg=#006989
 
-set -g @prefix_highlight_fg  $status_prefix_fg # default is 'colour231'
+set -g @prefix_highlight_fg $status_prefix_fg # default is 'colour231'
 set -g @prefix_highlight_bg $status_prefix_bg # default is 'colour04'
 
 set -g @online_icon "#[fg=green,bright]󰗠#[$status_default_style]"
@@ -121,7 +124,9 @@ set-option -g status-left-length 140
 set-option -g status-left-style default
 set-option -g status-left "#[fg=$status_prefix_fg,bg=$status_prefix_bg]#{prefix_highlight}#[fg=$status_prefix_bg,bg=$status_host_bg]$status_end_icon_left \
 	#[fg=$status_host_fg,bg=$status_host_bg]$status_host #[fg=$status_host_bg,bg=$status_who_bg]$status_end_icon_left \
-	#[fg=$status_who_fg,bg=$status_who_bg]$status_who #[fg=$status_who_bg,bg=default]$status_end_icon_left"
+	#[fg=$status_who_fg,bg=$status_who_bg]$status_who #[fg=$status_who_bg,bg=default]$status_end_icon_left \
+	#[fg=$status_session_fg,bg=$status_session_bg]$status_session \
+	#[fg=$status_session_bg,bg=default]$status_end_icon_left"
 
 set-option -g status-right-length 140
 set-option -g status-right-style default
@@ -164,4 +169,4 @@ set -g @plugin 'tmux-plugins/tmux-net-speed'
 set -g @plugin 'alexchaichan/tmux-spotify-tui'
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
-run "$HOMEBREW_PREFIX/opt/tpm/share/tpm/tpm"
+run '~/.tmux/plugins/tpm/tpm'
