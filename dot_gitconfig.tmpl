@@ -1,5 +1,5 @@
 [user]
-	signingkey = 10EB17A2696118B4
+	signingkey = 696118B4
 	name = Angus
 	email = angusp@angusp.com
 [alias]
@@ -17,7 +17,8 @@
 	logs = log --show-signature
 	cb = checkout -b
 [gpg]
-	program = gpg
+	program = /usr/local/bin/gpg
+	signingkey = 696118B4
 [tag]
 	forceSignAnnotated = true
 	gpgSign = true
@@ -38,7 +39,7 @@
 	new = green bold
 	whitespace = red reverse
 [commit]
-	gpgSign = true
+	gpgsign = true
 [merge "npm-merge-driver"]
 	name = automatically merge npm lockfiles
 	driver = npx npm-merge-driver merge %A %O %B %P
@@ -49,7 +50,6 @@
   required = true
 [core]
   	pager = diff-so-fancy | less --tabs=4 -RFX
-	editor = nvim
 [add "interactive"]
 	useBuiltin = false
 [interactive]
