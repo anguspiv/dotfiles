@@ -1,5 +1,5 @@
 [user]
-	signingkey = {{ .signingkey | quote }}
+	signingkey = {{ .signingkey }}
 	name = {{ .name | quote }}
 	email = {{ .email | quote }}
 [alias]
@@ -46,9 +46,10 @@
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
-  required = true
+    required = true
 [core]
   	pager = diff-so-fancy | less --tabs=4 -RFX
+    editor = {{ .editor }}
 [add "interactive"]
 	useBuiltin = false
 [interactive]
