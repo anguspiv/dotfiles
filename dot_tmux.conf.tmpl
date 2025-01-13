@@ -101,7 +101,7 @@ status_who_bg=#008ab8
 status_prefix_fg=#ffffff
 status_prefix_bg=#006989
 
-set -g @prefix_highlight_fg $status_prefix_fg # default is 'colour231'
+set -g @prefix_highlight_fg  $status_prefix_fg # default is 'colour231'
 set -g @prefix_highlight_bg $status_prefix_bg # default is 'colour04'
 
 set -g @online_icon "#[fg=green,bright]󰗠#[$status_default_style]"
@@ -128,7 +128,7 @@ set-option -g status-left-length 140
 set-option -g status-left-style default
 set-option -g status-left "#[fg=$status_prefix_fg,bg=$status_prefix_bg]#{prefix_highlight}#[fg=$status_prefix_bg,bg=$status_host_bg]$status_end_icon_left \
 	#[fg=$status_host_fg,bg=$status_host_bg]$status_host #[fg=$status_host_bg,bg=$status_who_bg]$status_end_icon_left \
-	#[fg=$status_who_fg,bg=$status_who_bg]$status_who #[fg=$status_who_bg,bg=default]$status_end_icon_left \
+	#[fg=$status_who_fg,bg=$status_who_bg]$status_who #[fg=$status_who_bg,bg=$status_session_bg]$status_end_icon_left \
 	#[fg=$status_session_fg,bg=$status_session_bg]$status_session \
 	#[fg=$status_session_bg,bg=default]$status_end_icon_left"
 
