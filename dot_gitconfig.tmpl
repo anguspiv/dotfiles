@@ -1,7 +1,7 @@
 [user]
-	signingkey = 696118B4
-	name = Angus
-	email = angusp@angusp.com
+	signingkey = {{ .signingkey | quote }}
+	name = {{ .name | quote }}
+	email = {{ .email | quote }}
 [alias]
 	undo = reset HEAD~1 --mixed
 	ls = log --pretty=format:\"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]\" --decorate
@@ -17,8 +17,7 @@
 	logs = log --show-signature
 	cb = checkout -b
 [gpg]
-	program = /usr/local/bin/gpg
-	signingkey = 696118B4
+	program = gpg
 [tag]
 	forceSignAnnotated = true
 	gpgSign = true
