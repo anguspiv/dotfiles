@@ -1,0 +1,7 @@
+github.com:
+    user: anguspiv
+    oauth_token: REDACTED-REVOKED-TOKEN
+    git_protocol: ssh
+    users:
+        anguspiv:
+            oauth_token: REDACTED-REVOKED-TOKEN
