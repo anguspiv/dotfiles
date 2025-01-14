@@ -1,136 +1,124 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
 
 blocks:
-  - alignment: left
-    newline: true
-    type: prompt
-    segments:
-      - type: text
-        style: plain
-        template: "{{if gt .Code -1}}\u0009{{end}}"
-  - alignment: left
-    newline: true
-    segments:
-      - background: transparent
-        foreground: "#dd1e1e"
-        style: plain
-        template: " ⚡"
-        type: root
-      # - background: "#000000"
-      #   foreground: "#ffffff"
-      #   properties:
-      #     alpine: 
-      #     arch: 󰣇
-      #     centos: 
-      #     debian: 
-      #     elementary: 
-      #     fedora: 
-      #     gentoo: 󰣨
-      #     linux: 
-      #     macos: 
-      #     manjaro: 
-      #     mint: 󰣭
-      #     opensuse: 
-      #     raspbian: 
-      #     ubuntu: 
-      #     windows: 
-      #     wsl: 
-      #   style: plain
-      #   template: " {{ if .WSL }}WSL at {{ end }}{{.Icon}} "
-      #   type: os
-      - background: transparent
-        foreground: "#43CCEA"
-        properties:
-          folder_icon: 󰉋
-          folder_separator_icon: " <#000000> </>"
-          home_icon: 󰋜
-          style: folder
-        style: plain
-        template: "{{ .Path }} "
-        type: path
-      - background: transparent
-        foreground: "#00ff0d"
-        properties:
-          fetch_stash_count: true
-          fetch_status: true
-        style: plain
-        template: "<#ffffff> </>{{ .HEAD }}{{ if .Staging.Changed }}<#FF6F00>  {{ .Staging.String }}</>{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} "
-        type: git
-      - type: node
-        style: plain
-        foreground: "#6CA35E"
-        background: transparent
-        foreground_templates:
-          - "{{ if .Mismatch }}#ff0000{{ end }}"
-        template: "<#ffffff> </>{{if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ else }}{{end}} {{ .Full }}{{if .Mismatch }} 󰦎 {{ .Expected }}{{ end }} "
-        properties:
-          fetch_package_manager: true
-          yarn_icon: ""
-          npm_icon: ""
-          pnpm_icon: "󰣙"
-      - type: python
-        style: plain
-        powerline_symbol: 
-        foreground: "#43CCEA"
-        background: transparent
-        template: "<#ffffff> </>{{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}{{ .Venv }} {{ end }} {{ .Full }}{{ end }}"
-        properties:
-          home_enabled: false
-          fetch_virtual_env: true
-          display_default: true
-          fetch_version: true
-          display_mode: context
-      - type: project
-        style: plain
-        foreground: "#43CCEA"
-        background: transparent
-        foreground_templates:
-          - "{{ if .Error }}#ff0000{{ end }}"
-          - '{{ if eq .Type "node" }}#6CA35E{{ end }}'
-          - '{{ if eq .Type "cargo" }}#ffc933{{ end }}'
-          - '{{ if eq .Type "dotnet" }}#5C2D91{{ end }}'
-          - '{{ if eq .Type "python" }}#FFD43B{{ end }}'
-          - '{{ if eq .Type "php" }}#8892BF{{ end }}'
-          - '{{ if eq .Type "nuspec" }}#004880{{ end }}'
-          - '{{ if eq .Type "julia" }}#A270BA{{ end }}'
-          - '{{ if eq .Type "powershell" }}#539EB5{{ end }}'
-        template:
-          "<#ffffff> </>{{ if .Error }}{{ .Error }}{{ else }}{{ if .Version }}
-          {{.Version}}{{ end }} {{ if .Name }}{{ .Name }}{{ end }}{{ end }} "
-      - background: transparent
-        foreground: "#ffffff"
-        properties:
-          style: dallas
-          threshold: 0.0
-        style: plain
-        template: "<#ffffff> </>{{ .FormattedMs }}s "
-        trailing_diamond: 
-        type: executiontime
-    type: prompt
-  - alignment: right
-    segments:
-      - background: transparent
-        foreground: "#43CCEA"
-        properties:
-          time_format: 3:04:05 PM
-        style: plain
-        template: " {{ .CurrentDate | date .Format }} "
-        type: time
-        leading_diamond: 
-    type: prompt
-
-  - alignment: left
-    newline: true
-    segments:
-      - foreground: "#cccccc"
-        foreground_templates:
-          - "{{ if gt .Code 0 }}#ff0000{{ end }}"
-          - "{{ if eq .Code 0 }}#00ff0d{{ end }}"
-        properties:
-          always_enabled: true
-        style: plain
-        template: "{{if eq .Code 0}}󰅂{{else}}󰖭{{end}}"
-        type: status
-    type: prompt
+- type: prompt
+  alignment: left
+  segments:
+  - properties:
+      cache_duration: none
+    template: "{{if gt .Code -1}}{{end}}"
+    type: text
+    style: plain
+  newline: true
+- type: prompt
+  alignment: left
+  segments:
+  - properties:
+      cache_duration: none
+    template: " ⚡"
+    foreground: "#dd1e1e"
+    background: transparent
+    type: root
+    style: plain
+  - properties:
+      cache_duration: none
+      folder_icon: 󰉋
+      folder_separator_icon: " <#000000>\ue0bd </>"
+      home_icon: 󰋜
+      style: folder
+    template: "{{ .Path }} "
+    foreground: "#43CCEA"
+    background: transparent
+    type: path
+    style: plain
+  - properties:
+      cache_duration: none
+      fetch_stash_count: true
+      fetch_status: true
+    template: "<#ffffff>\ue0b9 </>{{ .HEAD }}{{ if .Staging.Changed }}<#FF6F00> \uf046 {{ .Staging.String }}</>{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} "
+    foreground: "#00ff0d"
+    background: transparent
+    type: git
+    style: plain
+  - properties:
+      cache_duration: none
+      fetch_package_manager: true
+      npm_icon: 
+      pnpm_icon: 󰣙
+      yarn_icon: 
+    template: "<#ffffff>\ue0b9 </>{{if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ else }}\ue718{{end}} {{ .Full }}{{if .Mismatch }} \U000f098e {{ .Expected }}{{ end }} "
+    foreground: "#6CA35E"
+    background: transparent
+    type: node
+    style: plain
+    foreground_templates:
+    - "{{ if .Mismatch }}#ff0000{{ end }}"
+  - properties:
+      cache_duration: none
+      display_default: true
+      display_mode: context
+      fetch_version: true
+      fetch_virtual_env: true
+      home_enabled: false
+    template: "<#ffffff>\ue0b9 </>{{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}{{ .Venv }} {{ end }}\ue73c {{ .Full }}{{ end }}"
+    foreground: "#43CCEA"
+    powerline_symbol: 
+    background: transparent
+    type: python
+    style: plain
+  - properties:
+      cache_duration: none
+    template: "<#ffffff>\ue0b9 </>{{ if .Error }}{{ .Error }}{{ else }}{{ if .Version }}\uf487 {{.Version}}{{ end }} {{ if .Name }}{{ .Name }}{{ end }}{{ end }} "
+    foreground: "#43CCEA"
+    background: transparent
+    type: project
+    style: plain
+    foreground_templates:
+    - "{{ if .Error }}#ff0000{{ end }}"
+    - "{{ if eq .Type \"node\" }}#6CA35E{{ end }}"
+    - "{{ if eq .Type \"cargo\" }}#ffc933{{ end }}"
+    - "{{ if eq .Type \"dotnet\" }}#5C2D91{{ end }}"
+    - "{{ if eq .Type \"python\" }}#FFD43B{{ end }}"
+    - "{{ if eq .Type \"php\" }}#8892BF{{ end }}"
+    - "{{ if eq .Type \"nuspec\" }}#004880{{ end }}"
+    - "{{ if eq .Type \"julia\" }}#A270BA{{ end }}"
+    - "{{ if eq .Type \"powershell\" }}#539EB5{{ end }}"
+  - properties:
+      cache_duration: none
+      style: dallas
+      threshold: 0.0
+    trailing_diamond: 
+    template: "<#ffffff>\ue0b9 </>{{ .FormattedMs }}s "
+    foreground: "#ffffff"
+    background: transparent
+    type: executiontime
+    style: plain
+  newline: true
+- type: prompt
+  alignment: right
+  segments:
+  - properties:
+      cache_duration: none
+      time_format: 3:04:05 PM
+    leading_diamond: 
+    template: " {{ .CurrentDate | date .Format }} "
+    foreground: "#43CCEA"
+    background: transparent
+    type: time
+    style: plain
+- type: prompt
+  alignment: left
+  segments:
+  - properties:
+      always_enabled: true
+      cache_duration: none
+    template: "{{if eq .Code 0}}\U000f0142{{else}}\U000f05ad{{end}}"
+    foreground: "#cccccc"
+    type: status
+    style: plain
+    foreground_templates:
+    - "{{ if gt .Code 0 }}#ff0000{{ end }}"
+    - "{{ if eq .Code 0 }}#00ff0d{{ end }}"
+  newline: true
+version: 3
 final_space: true
-version: 2.0
