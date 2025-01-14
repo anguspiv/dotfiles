@@ -40,7 +40,8 @@ Plug 'myusuf3/numbers.vim'
 " Editing
 Plug 'editorconfig/editorconfig-vim'
 " Plug 'nathanaelkane/vim-indent-guides'
-Plug 'glepnir/indent-guides.nvim'
+" Plug 'glepnir/indent-guides.nvim'
+Plug 'lukas-reineke/indent-blankline.nvim'
 
 " Color Highlighting
 Plug 'norcalli/nvim-colorizer.lua'
@@ -117,7 +118,7 @@ require'lualine'.setup {
 END
 
 " Setup Indent Guides
-lua require('indent_guides').setup()
+lua require('ibl').setup()
 
 lua require('Comment').setup()
 
@@ -307,7 +308,7 @@ nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 lua << END
 
 local nvim_notify = require("notify")
-nvim_notify.setup({ 
+nvim_notify.setup({
 })
 vim.notify = require("notify")
 
