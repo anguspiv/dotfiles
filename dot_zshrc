@@ -141,6 +141,9 @@ source_if_exists() {
 # Additional Config Files
 source_if_exists ~/.config/secrets.sh
 
+# Disable autocorrect
+unsetopt correct_all
+
 # Variable Settings
 if [[ -z "${EDITOR}" ]]; then
     export EDITOR=nvim
@@ -171,8 +174,8 @@ source_if_exists "${HOME}/.iterm2_shell_integration.zsh"
 # eval "$(starship init zsh)"
 
 # Oh My Posh Prompt
-# OMP_THEME="sonicboom_dark"
-# OMP_CONFIG=$HOME/.config/oh-my-posh/.mytheme.omp.yaml
+OMP_THEME="sonicboom_dark"
+OMP_CONFIG=$HOME/.config/oh-my-posh/.mytheme.omp.yaml
 
 if [[ -f "${OMP_CONFIG}" ]]; then
 	eval "$(oh-my-posh init zsh --config ${OMP_CONFIG})"
