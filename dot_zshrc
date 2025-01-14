@@ -174,11 +174,11 @@ source_if_exists "${HOME}/.iterm2_shell_integration.zsh"
 # eval "$(starship init zsh)"
 
 # Oh My Posh Prompt
-OMP_THEME="sonicboom_dark"
-OMP_CONFIG=$HOME/.config/oh-my-posh/.mytheme.omp.yaml
+# OMP_THEME="sonicboom_dark"
+# OMP_CONFIG=$HOME/.config/oh-my-posh/.mytheme.omp.yaml
 
-if [[ -f "${OMP_CONFIG}" ]]; then
-	eval "$(oh-my-posh init zsh --config ${OMP_CONFIG})"
-else
-	eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/${OMP_THEME}.omp.json)"
-fi
+# if [[ -f "${OMP_CONFIG}" ]]; then
+# 	eval "$(oh-my-posh init zsh --config ${OMP_CONFIG})"
+# else
+# 	eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/${OMP_THEME}.omp.json)"
+# fi
