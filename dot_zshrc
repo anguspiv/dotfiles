@@ -182,3 +182,11 @@ source_if_exists "${HOME}/.iterm2_shell_integration.zsh"
 # else
 # 	eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/${OMP_THEME}.omp.json)"
 # fi
+
+# pnpm
+export PNPM_HOME="/Users/angusp/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
