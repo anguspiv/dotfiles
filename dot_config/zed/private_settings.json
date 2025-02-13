@@ -51,7 +51,7 @@
     "shell": {
       "with_arguments": {
         "program": "tmux",
-        "args": ["new", "-e", "GIT_EDITOR=zed --wait"]
+        "args": ["new", "-As", "zed", "-e", "GIT_EDITOR=zed --wait"]
       }
     }
   },
