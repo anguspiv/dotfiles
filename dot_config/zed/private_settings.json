@@ -7,18 +7,20 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
-  "theme": "Andromeda",
+  "application_id": "126235052055223378866",
+  "icon_theme": "VSCode Icons (Dark)",
+  "theme": "Github Dark Default",
   "vim_mode": true,
   "ui_font_size": 13,
   "buffer_font_size": 13,
   "buffer_line_height": { "custom": 1.3 },
-  "buffer_font_family": "MonaspiceNe Nerd Font",
+  "buffer_font_family": "VictorMono Nerd Font Mono",
   "buffer_font_features": {
     "liga": true,
     "calt": true
   },
   "ui_line_height": { "custom": 1.3 },
-  "ui_font_family": "MonaspiceNe Nerd Font",
+  "ui_font_family": "VictorMono Nerd Font Mono",
   "ui_font_features": {
     "liga": true,
     "calt": true
@@ -34,7 +36,7 @@
   },
   "terminal": {
     "font_size": 12,
-    "font_family": "MonaspiceNe Nerd Font",
+    "font_family": "VictorMono Nerd Font Mono",
     "font_features": {
       "liga": true,
       "calt": true
