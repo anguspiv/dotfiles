@@ -19,10 +19,6 @@
   "icon_theme": "Charmed Icons",
   "theme": "GitHub Dark Default",
   "vim_mode": true,
-  "relative_line_numbers": true,
-  "vim": {
-    "toggle_relative_line_numbers": true
-  },
   "ui_font_size": 13,
   "buffer_font_size": 13,
   "buffer_line_height": { "custom": 1.3 },
