@@ -79,3 +79,4 @@ esac
 source <(fzf --zsh)
 
 eval "$(starship init zsh)"
+
