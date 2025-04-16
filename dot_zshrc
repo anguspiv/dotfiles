@@ -13,6 +13,7 @@ zplug "cpitt/zsh-dotenv", as:plugin
 zplug "z-shell/zsh-diff-so-fancy", as:command, use:"bin/"
 zplug "zdharma-continuum/fast-syntax-highlighting"
 
+
 # Then, source plugins and add commands to $PATH
 zplug load
 
