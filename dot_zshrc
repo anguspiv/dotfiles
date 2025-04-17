@@ -7,11 +7,8 @@ source $ZPLUG_HOME/init.zsh
 
 ## ZPlug Plugins
 
-zplug "MichaelAquilina/zsh-auto-notify"
 zplug "hlissner/zsh-autopair", defer:2
 zplug "ael-code/zsh-colored-man-pages"
-# zplug "b4b4r07/enhancd", use:init.sh
-zplug "g-plane/zsh-yarn-autocompletions", hook-build:"./zplug.zsh", defer:2
 zplug "z-shell/zsh-diff-so-fancy", as:command, use:"bin/"
 
 eval "$(fnm env --use-on-cd --shell zsh)"
@@ -160,19 +157,6 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 # iTerm
 source_if_exists "${HOME}/.iterm2_shell_integration.zsh"
-
-# Starship Prompt
-# eval "$(starship init zsh)"
-
-# Oh My Posh Prompt
-# OMP_THEME="sonicboom_dark"
-# OMP_CONFIG=$HOME/.config/oh-my-posh/.mytheme.omp.yaml
-
-# if [[ -f "${OMP_CONFIG}" ]]; then
-# 	eval "$(oh-my-posh init zsh --config ${OMP_CONFIG})"
-# else
-# 	eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/${OMP_THEME}.omp.json)"
-# fi
 
 # pnpm
 export PNPM_HOME="/Users/angusp/Library/pnpm"
