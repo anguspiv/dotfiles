@@ -8,16 +8,14 @@ source $ZPLUG_HOME/init.zsh
 ## ZPlug Plugins
 
 zplug "MichaelAquilina/zsh-auto-notify"
-zplug "manlao/zsh-auto-nvm"
 zplug "hlissner/zsh-autopair", defer:2
 zplug "ael-code/zsh-colored-man-pages"
 # zplug "b4b4r07/enhancd", use:init.sh
 zplug "g-plane/zsh-yarn-autocompletions", hook-build:"./zplug.zsh", defer:2
 zplug "z-shell/zsh-diff-so-fancy", as:command, use:"bin/"
 
-#Load NVM
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+eval "$(fnm env --use-on-cd --shell zsh)"
+eval "$(fnm completion --shell zsh)"
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -39,7 +37,7 @@ ZSH_THEME="robbyrussell"
 
 # Uncomment the following line to use hyphen-insensitive completion.
 # Case-sensitive completion must be off. _ and - will be interchangeable.
-HYPHEN_INSENSITIVE="true"
+#HYPHEN_INSENSITIVE="true"
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
@@ -149,13 +147,6 @@ if [[ -z "${EDITOR}" ]]; then
     export EDITOR=nvim
 fi
 export VISUAL="$EDITOR"
-
-## Android
-export ANDROID_HOME=$HOME/Library/Android/sdk
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/tools
-export PATH=$PATH:$ANDROID_HOME/tools/bin
-export PATH=$PATH:$ANDROID_HOME/platform-tools
 
 ## User Bin
 export PATH=$HOME/.bin:$PATH
