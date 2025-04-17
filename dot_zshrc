@@ -12,7 +12,7 @@ zplug "ael-code/zsh-colored-man-pages"
 zplug "z-shell/zsh-diff-so-fancy", as:command, use:"bin/"
 
 eval "$(fnm env --use-on-cd --shell zsh)"
-eval "$(fnm completion --shell zsh)"
+eval "$(fnm completions --shell zsh)"
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
