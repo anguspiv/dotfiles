@@ -7,9 +7,15 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
+<<<<<<< HEAD
   "application_id": "126235052055223378866",
   "icon_theme": "VSCode Icons (Dark)",
   "theme": "Github Dark Default",
+=======
+  "application_id": "1263505205522337886",
+  "icon_theme": "VSCode Icons (Dark)",
+  "theme": "GitHub Dark Default",
+>>>>>>> e5c9821 (Update .config/zed/settings.json)
   "vim_mode": true,
   "ui_font_size": 13,
   "buffer_font_size": 13,
