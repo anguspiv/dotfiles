@@ -12,6 +12,7 @@ zplug "hlissner/zsh-autopair", defer:2
 zplug "cpitt/zsh-dotenv", as:plugin
 zplug "z-shell/zsh-diff-so-fancy", as:command, use:"bin/"
 zplug "zdharma-continuum/fast-syntax-highlighting"
+zplug "g-plane/pnpm-shell-completion", hook-build:"./zplug.zsh", defer:2
 
 
 # Then, source plugins and add commands to $PATH
@@ -80,4 +81,3 @@ esac
 source <(fzf --zsh)
 
 eval "$(starship init zsh)"
-
