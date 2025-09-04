@@ -44,7 +44,7 @@ source_if_exists() {
 }
 
 # Additional Config Files
-# source_if_exists ~/.config/secrets.sh
+source_if_exists ~/.config/secrets.sh
 
 # Disable autocorrect
 unsetopt correct_all
@@ -79,3 +79,5 @@ esac
 source <(fzf --zsh)
 
 eval "$(starship init zsh)"
+
+. "$HOME/.local/bin/env"
