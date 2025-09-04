@@ -1,0 +1,52 @@
+# Optimized .zshrc managed by Chezmoi
+# Generated for: {{ .name }} <{{ .email }}>
+# Editor: {{ .editor }} | Terminal: {{ .terminal }} | Shell: {{ .shell }}
+
+# Performance: Early return for non-interactive sessions
+[[ $- != *i* ]] && return
+
+# Load modular configuration files
+for config in ~/.config/zsh/{exports,functions,plugins,aliases}.zsh; do
+  [[ -r "$config" ]] && source "$config"
+done
+
+# Initialize completion system
+autoload -U compinit
+compinit -i
+
+# GPG agent startup
+gpgconf --launch gpg-agent
+
+# Setup lazy loading for performance
+setup_lazy_loading
+
+# Load additional configuration files
+source_if_exists ~/.config/secrets.sh
+source_if_exists "${HOME}/.local/bin/env"
+
+{{- if eq .terminal "ghostty" }}
+# Ghostty-specific configuration
+# Add any Ghostty-specific settings here
+{{- else if eq .terminal "wezterm" }}
+# WezTerm-specific configuration  
+# Add any WezTerm-specific settings here
+{{- end }}
+
+# Shell options
+unsetopt correct_all  # Disable autocorrect
+
+# Platform-specific configurations
+{{- if eq .chezmoi.os "darwin" }}
+# macOS specific settings
+export PATH="/usr/local/sbin:$PATH"
+{{- else if eq .chezmoi.os "linux" }}
+# Linux specific settings
+{{- end }}
+
+# Terminal integration (conditionally load if files exist)
+{{- if eq .terminal "wezterm" }}
+source_if_exists "${HOME}/.config/wezterm/wezterm.sh"
+{{- end }}
+
+# iTerm2 integration (if present)
+# source_if_exists "${HOME}/.iterm2_shell_integration.zsh"
