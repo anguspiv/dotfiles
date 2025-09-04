@@ -49,10 +49,12 @@
     required = true
 [core]
   	pager = diff-so-fancy | less --tabs=4 -RFX
-    editor = {{ .editor }}
+    editor = {{ .giteditor | quote }}
 [add "interactive"]
 	useBuiltin = false
 [interactive]
   	diffFilter = diff-so-fancy --patch
 [init]
 	defaultBranch = main
+[mergetool "nvimdiff"]
+  layout = "LOCAL,BASE,REMOTE / MERGED"
