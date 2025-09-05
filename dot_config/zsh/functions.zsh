@@ -27,9 +27,9 @@ setup_lazy_loading() {
         lazy_load_tool "fnm" 'eval "$(fnm env --use-on-cd --shell zsh)" && eval "$(fnm completions --shell zsh)"'
     fi
     
-    # Lazy load zoxide (smart cd)
+    # Initialize zoxide immediately (lightweight and commonly used)
     if command -v zoxide >/dev/null 2>&1; then
-        lazy_load_tool "z" 'eval "$(zoxide init zsh)"'
+        eval "$(zoxide init zsh)"
     fi
     
     # Lazy load starship prompt (keep this immediate for visual feedback)
