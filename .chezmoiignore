@@ -1,2 +1,81 @@
+# Vim/Neovim plugin directories and temp files
 config/nvim/plugged/
 config/nvim/autoload/
+config/nvim/.netrwhist
+config/nvim/plugin/packer_compiled.lua
+config/nvim/lazy-lock.json
+
+# Zed compiled extensions and logs
+config/zed/extensions/
+config/zed/logs/
+config/zed/worktrees/
+
+# VS Code workspace settings (machine-specific)
+config/vscode/workspaceStorage/
+config/vscode/logs/
+config/vscode/CachedExtensions/
+
+# Git machine-specific configs
+.gitconfig.local
+
+# SSH keys and certificates - CRITICAL SECURITY
+.ssh/id_*
+.ssh/*.pem
+.ssh/known_hosts*
+.ssh/config.d/
+
+# GPG keys and sensitive data
+.gnupg/private-keys-v1.d/
+.gnupg/S.gpg-agent*
+.gnupg/random_seed
+
+# Shell history (potentially sensitive)
+.zsh_history
+.bash_history
+.zsh_sessions/
+
+# Claude Code and AI tool data
+.claude/
+.anthropic/
+.openai/
+
+# API keys and secrets (fallback - should be in secrets.sh)
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Mac-specific
+.DS_Store
+.localized
+.Spotlight-V100/
+.Trashes/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+.#*
+
+# Logs and caches
+.cache/
+logs/
+*.log
+
+# Development artifacts
+node_modules/
+.npm/
+.yarn/
+target/
+.venv/
+__pycache__/
+
+# IDE and editor specific
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+
+# OS and system files
+Thumbs.db
+Desktop.ini

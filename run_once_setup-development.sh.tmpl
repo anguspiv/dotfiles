@@ -1,0 +1,82 @@
+{{- if and (eq .chezmoi.os "darwin") (.features.development) -}}
+#!/bin/bash
+
+# One-time development environment setup
+echo "🛠️  Setting up development environment for {{ .name }}..."
+
+# Configure git hooks directory
+git config --global core.hooksPath ~/.config/git/hooks
+
+# Setup development directories
+mkdir -p ~/Development/{personal,work,experiments}
+mkdir -p ~/.config/git/hooks
+
+# Install development fonts if not present
+if ! fc-list | grep -q "JetBrains Mono"; then
+    echo "📦 Installing JetBrains Mono font..."
+    brew install --cask font-jetbrains-mono-nerd-font
+fi
+
+{{- if .features.kubernetes }}
+# Kubernetes development setup
+if ! command -v kubectl >/dev/null 2>&1; then
+    echo "⚙️  Installing kubectl..."
+    brew install kubectl
+fi
+
+# Install k9s for cluster management
+if ! command -v k9s >/dev/null 2>&1; then
+    echo "📊 Installing k9s..."
+    brew install k9s
+fi
+{{- end }}
+
+{{- if .features.docker }}
+# Docker development setup
+if ! docker --version >/dev/null 2>&1; then
+    echo "🐳 Installing Docker..."
+    brew install --cask docker
+    echo "⚠️  Please start Docker Desktop manually after installation"
+fi
+{{- end }}
+
+{{- if .features.ai_tools }}
+# AI development tools
+if ! command -v gh >/dev/null 2>&1; then
+    echo "🤖 Installing GitHub CLI..."
+    brew install gh
+fi
+{{- end }}
+
+# Create useful Git hooks
+cat > ~/.config/git/hooks/pre-commit << 'EOF'
+#!/bin/bash
+# Pre-commit hook to prevent committing secrets
+if git diff --cached --name-only | grep -q "secrets\|\.env"; then
+    echo "⚠️  Warning: You're about to commit files that may contain secrets!"
+    echo "Files: $(git diff --cached --name-only | grep -E 'secrets|\.env')"
+    echo "Type 'yes' to continue or anything else to abort:"
+    read -r response
+    if [[ "$response" != "yes" ]]; then
+        exit 1
+    fi
+fi
+EOF
+
+chmod +x ~/.config/git/hooks/pre-commit
+
+{{- if eq .machine.performance "high" }}
+# High-performance development tools
+if ! command -v ripgrep >/dev/null 2>&1; then
+    echo "🔍 Installing ripgrep for fast searching..."
+    brew install ripgrep
+fi
+
+if ! command -v fd >/dev/null 2>&1; then
+    echo "📁 Installing fd for fast file finding..."
+    brew install fd
+fi
+{{- end }}
+
+echo "✅ Development environment setup complete!"
+{{- end -}}
