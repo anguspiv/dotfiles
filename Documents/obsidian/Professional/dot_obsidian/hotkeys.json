@@ -1,0 +1,11 @@
+{
+  "workspaces:save": [
+    {
+      "modifiers": [
+        "Alt",
+        "Shift"
+      ],
+      "key": "W"
+    }
+  ]
+}
