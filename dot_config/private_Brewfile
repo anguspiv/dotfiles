@@ -78,9 +78,7 @@ cask "slack"
 cask "zoom"
 
 # Personal/Entertainment Apps (comment out for work setup)
-cask "raycast"
 cask "obsidian"
-cask "spotify"
 cask "obs"
 # Essential Development Tools
 mas "Xcode", id: 497799835
