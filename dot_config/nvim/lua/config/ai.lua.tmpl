@@ -1,0 +1,62 @@
+-- AI integration configuration
+-- This file is loaded conditionally based on features.ai_tools flag
+
+{{- if .features.ai_tools }}
+-- Configure AI-specific settings
+vim.g.copilot_enabled = true
+
+-- Enhanced AI keymaps for Claude integration
+local keymap = vim.keymap.set
+
+-- Claude-specific mappings (if Claude CLI is available)
+if vim.fn.executable("claude") == 1 then
+  keymap("n", "<leader>ai", "<cmd>ClaudeChat<cr>", { desc = "Open Claude Chat" })
+  keymap("v", "<leader>ar", "<cmd>ClaudeGenerate<cr>", { desc = "Claude Review Selection" })
+  keymap("n", "<leader>ae", "<cmd>ClaudeExplain<cr>", { desc = "Claude Explain Code" })
+end
+
+-- Enhanced Copilot Chat settings for agentic coding
+require("CopilotChat").setup({
+  question_header = "## User ",
+  answer_header = "## Copilot ",
+  error_header = "## Error ",
+  selection = function(source)
+    local select = require("CopilotChat.select")
+    return select.visual(source) or select.buffer(source)
+  end,
+  prompts = {
+    -- Agentic coding prompts
+    Agent = "Act as a senior software engineer. Analyze the code and provide actionable suggestions for improvement, optimization, and best practices.",
+    Review = "Please review the following code and provide constructive feedback focusing on: 1) Code quality 2) Performance 3) Security 4) Maintainability",
+    Refactor = "Please refactor this code to improve readability, maintainability, and performance while preserving functionality.",
+    Tests = "Generate comprehensive unit tests for this code, including edge cases and error scenarios.",
+    Optimize = "Optimize this code for better performance and memory usage while maintaining readability.",
+    Debug = "Help me debug this code by identifying potential issues and suggesting fixes.",
+    Explain = "Explain this code in detail, including its purpose, how it works, and any potential gotchas.",
+    Document = "Add comprehensive documentation to this code including JSDoc comments, type annotations, and usage examples.",
+  },
+})
+
+-- AI-powered code analysis autocmds
+local ai_group = vim.api.nvim_create_augroup("ai_integration", { clear = true })
+
+-- Auto-suggest improvements for large functions (optional)
+vim.api.nvim_create_autocmd("CursorHold", {
+  group = ai_group,
+  pattern = { "*.js", "*.ts", "*.jsx", "*.tsx" },
+  callback = function()
+    -- Only trigger if function is large (>50 lines)
+    local current_line = vim.fn.line(".")
+    local start_line = vim.fn.search("^\\s*\\(function\\|const.*=>\\|.*function\\)", "bnW")
+    local end_line = vim.fn.search("^}", "nW")
+    
+    if start_line > 0 and end_line > 0 and (end_line - start_line) > 50 then
+      -- Could trigger AI analysis here if desired
+      -- This is just a placeholder for future enhancements
+    end
+  end,
+})
+{{- else }}
+-- AI tools disabled
+vim.g.copilot_enabled = false
+{{- end }}
