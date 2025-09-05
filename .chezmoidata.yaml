@@ -1,0 +1,34 @@
+# Chezmoi data for cross-machine configuration
+# This file contains machine-specific data used in templates
+
+# Machine configuration
+machine:
+  type: "development"  # development, server, minimal
+  performance: "high"  # high, medium, low
+  
+# Feature flags
+features:
+  ai_tools: true
+  development_tools: true
+  git_tools: true
+  
+# Editor preferences
+editor: "nvim"
+visual: "nvim"
+
+# Development environment
+development:
+  languages:
+    - "javascript"
+    - "typescript"
+    - "python"
+    - "lua"
+    - "bash"
+  frameworks:
+    - "react"
+    - "vue"
+    - "node"
+  tools:
+    - "docker"
+    - "git"
+    - "tmux"
