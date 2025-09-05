@@ -1,0 +1,219 @@
+// Zed settings - Managed by Chezmoi
+// Generated for: {{ .name }} <{{ .email }}>
+// Terminal: {{ .terminal }}
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run the `open default settings` command
+// from the command palette or from `Zed` application menu.
+{
+  // Assistant and AI configuration - Enhanced for Claude Code
+  "assistant": {
+    "use_modifier_to_send": true,
+    "play_sound_when_agent_done": true,
+    "always_allow_tool_actions": true,
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-4o"
+    },
+    "version": "2"
+  },
+  
+  // Agent configuration for Claude Code integration
+  "agent": {
+    "default_profile": "ask",
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-4o"
+    },
+    "version": "2"
+  },
+
+  // Auto-updates and extensions
+  "auto_update": true,
+  "auto_install_extensions": {
+    // Core extensions
+    "git_firefly": true,
+    "vim": true,
+    
+    // Language support
+    "astro": true,
+    "deno": true,
+    "graphql": true,
+    "html": true,
+    "prisma": true,
+    "sql": true,
+    "scss": true,
+    "toml": true,
+    "xml": true,
+    
+    // Utilities
+    "discord-presence": true,
+    "env": true,
+    "ini": true,
+    "log": true,
+    "markdown-oxide": true,
+    "nginx": true,
+    "rainbow-csv": true,
+    "tmux": true,
+    
+    // Themes and icons
+    "github-dark-default": true,
+    "vscode-dark-modern": true,
+    "vscode-great-icons": true,
+    "vscode-icons": true
+  },
+
+  // UI and theme configuration
+  "icon_theme": "VSCode Great Icons Theme",
+  "theme": "Github Dark",
+  "vim_mode": true,
+  "relative_line_numbers": true,
+  "vim": {
+    "toggle_relative_line_numbers": true
+  },
+
+  // Panel layout
+  "project_panel": {
+    "dock": "left",
+    "default_width": 240
+  },
+  "outline_panel": {
+    "dock": "right"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "notification_panel": {
+    "dock": "bottom"
+  },
+
+  // Font configuration - keeping MonaspiceNe as primary
+  "ui_font_size": 13,
+  "buffer_font_size": 13,
+  "buffer_line_height": { "custom": 1.3 },
+  "buffer_font_family": "MonaspiceNe Nerd Font",
+  "buffer_font_features": {
+    "liga": true,
+    "calt": true
+  },
+  "ui_line_height": { "custom": 1.3 },
+  "ui_font_family": "MonaspiceNe Nerd Font",
+  "ui_font_features": {
+    "liga": true,
+    "calt": true
+  },
+
+  // Tab and guide configuration
+  "tabs": {
+    "git_status": true,
+    "file_icons": true
+  },
+  "indent_guides": {
+    "enabled": true,
+    "coloring": "indent_aware",
+    "background_coloring": "indent_aware"
+  },
+
+  // Terminal configuration with smart tmux integration
+  "terminal": {
+    "dock": "right",
+    "font_size": 12,
+    "font_family": "MonaspiceNe Nerd Font",
+    "font_features": {
+      "liga": true,
+      "calt": true
+    },
+    "line_height": {
+      "custom": 1.25
+    },
+    "copy_on_select": true,
+    "env": {
+      "GIT_EDITOR": "zed --wait"
+    },
+    "shell": {
+      "with_arguments": {
+        "program": "/Users/angusp/.config/zed/tmux-session.sh",
+        "args": ["{working_directory}"]
+      }
+    }
+  },
+
+  // File manager
+  "file_manager": {
+    "show_hidden_files": true
+  },
+
+  // Call settings
+  "calls": {
+    "mute_on_join": true,
+    "mute_on_leave": true,
+    "share_on_join": false,
+    "share_on_leave": false,
+    "share_on_invite": false
+  },
+
+  // Editor behavior
+  "current_line_highlight": "all",
+  "format_on_save": "on",
+  "formatter": "auto",
+
+  // Language-specific settings - Enhanced
+  "languages": {
+    "JavaScript": {
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true,
+        "source.organizeImports": true
+      }
+    },
+    "TypeScript": {
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true,
+        "source.organizeImports": true
+      }
+    },
+    "TSX": {
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true,
+        "source.organizeImports": true
+      }
+    },
+    "JSON": {
+      "formatter": "prettier"
+    },
+    "Markdown": {
+      "formatter": "prettier"
+    }
+  },
+
+  // Git integration
+  "git": {
+    "inline_blame": {
+      "enabled": true,
+      "delay_ms": 500,
+      "show_commit_summary": true
+    }
+  },
+
+  // Code guidelines and hints
+  "preferred_line_length": 80,
+  "show_wrap_guides": true,
+  "show_whitespaces": "all",
+  "show_signature_help_after_edits": true,
+  "wrap_guides": [80, 100, 120],
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true
+  },
+
+  // Search configuration
+  "search": {
+    "whole_word": false,
+    "case_sensitive": false,
+    "include_ignored": false
+  }
+}
