@@ -1,9 +1,21 @@
 # Optimized .zshrc managed by Chezmoi
 # Generated for: {{ .name }} <{{ .email }}>
-# Editor: {{ .editor }} | Terminal: {{ .terminal }} | Shell: {{ .shell }}
+# Machine: {{ .machine.type }} ({{ .machine.performance }}) | Terminal: {{ .terminal }}
 
 # Performance: Early return for non-interactive sessions
 [[ $- != *i* ]] && return
+
+{{- if eq .machine.performance "high" }}
+# High-performance machine optimizations
+export HISTSIZE=100000
+export HISTFILESIZE=100000
+export SAVEHIST=100000
+{{- else }}
+# Resource-conscious settings for lower-spec machines
+export HISTSIZE=10000
+export HISTFILESIZE=10000
+export SAVEHIST=10000
+{{- end }}
 
 # Load modular configuration files
 for config in ~/.config/zsh/{exports,functions,plugins,aliases}.zsh; do
@@ -12,7 +24,17 @@ done
 
 # Initialize completion system
 autoload -U compinit
+{{- if eq .machine.performance "high" }}
 compinit -i
+{{- else }}
+# Skip security check for faster loading on slower machines
+compinit -i -u
+{{- end }}
+
+{{- if .features.ai_tools }}
+# AI tools integration
+export ANTHROPIC_API_KEY_FILE="$HOME/.config/secrets.sh"
+{{- end }}
 
 # GPG agent startup
 gpgconf --launch gpg-agent
@@ -35,12 +57,50 @@ source_if_exists "${HOME}/.local/bin/env"
 # Shell options
 unsetopt correct_all  # Disable autocorrect
 
+{{- if .features.development }}
+# Development-specific configurations
+export DEV_MODE=true
+
+# Development aliases
+alias dc="docker-compose"
+alias dcu="docker-compose up -d"
+alias dcd="docker-compose down"
+alias dcl="docker-compose logs -f"
+
+{{- if .features.kubernetes }}
+# Kubernetes aliases
+alias k="kubectl"
+alias kgp="kubectl get pods"
+alias kgs="kubectl get services"
+alias kgd="kubectl get deployments"
+{{- end }}
+
+# Git shortcuts for development
+alias gst="git status"
+alias gaa="git add --all"
+alias gcm="git commit -m"
+alias gph="git push"
+alias gpl="git pull"
+
+# Node.js development (if using fnm)
+{{- if eq .machine.performance "high" }}
+# Enable corepack for high-performance machines
+export COREPACK_ENABLE_STRICT=1
+{{- end }}
+{{- end }}
+
 # Platform-specific configurations
 {{- if eq .chezmoi.os "darwin" }}
 # macOS specific settings
 export PATH="/usr/local/sbin:$PATH"
+
+{{- if eq .machine.type "work" }}
+# Work machine specific paths
+export PATH="/opt/company-tools/bin:$PATH"
+{{- end }}
 {{- else if eq .chezmoi.os "linux" }}
 # Linux specific settings
+export PATH="/usr/local/bin:$PATH"
 {{- end }}
 
 # Terminal integration (conditionally load if files exist)

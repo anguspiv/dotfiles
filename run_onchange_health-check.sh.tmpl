@@ -1,0 +1,79 @@
+#!/bin/bash
+# run_onchange_health-check.sh.tmpl
+
+# Chezmoi health check and maintenance
+echo "🔍 Running Chezmoi health check for {{ .machine.hostname }}..."
+
+# Check for missing critical packages
+missing_packages=()
+critical_tools=("git" "zsh" "{{ .editor }}")
+
+{{- if .features.development }}
+critical_tools+=("node" "npm")
+{{- end }}
+
+{{- if .features.docker }}
+critical_tools+=("docker")
+{{- end }}
+
+for tool in "${critical_tools[@]}"; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        missing_packages+=("$tool")
+    fi
+done
+
+if [ ${#missing_packages[@]} -gt 0 ]; then
+    echo "⚠️  Missing critical tools: ${missing_packages[*]}"
+fi
+
+# Check chezmoi status
+if ! chezmoi doctor >/dev/null 2>&1; then
+    echo "🩺 Chezmoi doctor found issues - run 'chezmoi doctor' for details"
+fi
+
+# Check git status in chezmoi repo
+cd ~/.local/share/chezmoi
+if [ -n "$(git status --porcelain)" ]; then
+    echo "📝 Uncommitted changes in chezmoi repo:"
+    git status --porcelain
+fi
+
+{{- if eq .chezmoi.os "darwin" }}
+# Check for outdated packages on macOS
+if command -v brew >/dev/null 2>&1; then
+    outdated=$(brew outdated --quiet | head -5)
+    if [ -n "$outdated" ]; then
+        echo "📦 Top 5 outdated packages:"
+        echo "$outdated"
+    fi
+fi
+{{- end }}
+
+# Check shell integration
+if [[ "$SHELL" != "$(command -v {{ .shell }})" ]]; then
+    echo "⚠️  Shell mismatch: SHELL=$SHELL but expected {{ .shell }}"
+fi
+
+{{- if .features.ai_tools }}
+# Check AI tool configuration
+if [[ -z "$ANTHROPIC_API_KEY" ]]; then
+    echo "🤖 ANTHROPIC_API_KEY not set - check ~/.config/secrets.sh"
+fi
+{{- end }}
+
+# Check tmux sessions (if any)
+if command -v tmux >/dev/null 2>&1; then
+    session_count=$(tmux list-sessions 2>/dev/null | wc -l)
+    if [ "$session_count" -gt 5 ]; then
+        echo "🖥️  Many tmux sessions running ($session_count) - consider cleanup"
+    fi
+fi
+
+# Check disk space on macOS
+if [[ "$(df -h / | awk 'NR==2{print $5}' | sed 's/%//')" -gt 85 ]]; then
+    echo "💾 Disk space low (>85% full)"
+fi
+
+echo "✅ Health check complete!"
+
+# Hash for change detection: {{ .chezmoi.version }}-{{ .machine.hostname }}-{{ now | date "2006-01-02" }}
