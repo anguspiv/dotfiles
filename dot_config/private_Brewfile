@@ -7,13 +7,16 @@ tap "jandedobbeleer/oh-my-posh"
 tap "osx-cross/arm"
 tap "osx-cross/avr"
 tap "wez/wezterm"
+tap "ghostty-org/ghostty"
+brew "autoenv"
 brew "awscli"
 brew "chezmoi"
 brew "chroma"
 brew "curl"
 brew "diff-so-fancy"
 brew "epr"
-brew "exa"
+brew "eza"
+brew "fnm"
 brew "fzf"
 brew "gh"
 brew "git"
@@ -32,7 +35,6 @@ brew "k9s"
 brew "mas"
 brew "neovim"
 brew "node"
-brew "nvm"
 brew "pgcli"
 brew "pinentry-mac"
 brew "pnpm"
@@ -42,6 +44,7 @@ brew "reattach-to-user-namespace"
 brew "redis"
 brew "ruby"
 brew "rust"
+brew "starship"
 brew "speedtest-cli"
 brew "tmux"
 brew "tmuxinator"
@@ -55,30 +58,44 @@ brew "int128/kubelogin/kubelogin"
 brew "jandedobbeleer/oh-my-posh/oh-my-posh"
 brew "qmk/qmk/qmk"
 cask "docker"
+cask "ghostty"
 cask "font-monaspace"
 cask "font-monaspace-nerd-font"
 cask "font-victor-mono-nerd-font"
 cask "google-cloud-sdk"
 cask "kitty"
-cask "raycast"
-cask "wezterm"
-cask "iterm2"
+# Essential Development Tools
 cask "visual-studio-code"
+cask "iterm2"
+cask "wezterm"
+
+# Browsers
 cask "google-chrome"
 cask "arc"
-cask "obsidian"
-cask "spotify"
+
+# Work Communication (may need approval)
 cask "slack"
 cask "zoom"
+
+# Personal/Entertainment Apps (comment out for work setup)
+cask "raycast"
+cask "obsidian"
+cask "spotify"
 cask "obs"
+# Essential Development Tools
+mas "Xcode", id: 497799835
+
+# Productivity Apps (work appropriate)
+mas "Fantastical", id: 975937182
+
+# Personal Apps (comment out for work setup)
 mas "Airmail", id: 918858936
 mas "Bakery", id: 1575220747
 mas "Claquette", id: 587748131
-mas "Fantastical", id: 975937182
 mas "In Your Face", id: 1476964367
 mas "Kindle", id: 302584613
 mas "Soulver 3", id: 1508732804
-mas "Xcode", id: 497799835
+# VS Code Extensions (review and comment out personal/unnecessary ones for work setup)
 vscode "4ops.terraform"
 vscode "aaron-bond.better-comments"
 vscode "abumalick.vscode-nvm"
