@@ -1,16 +1,16 @@
-# Chezmoi data for cross-machine configuration
+# Chezmoi data template - copy to .chezmoidata.yaml and customize for each machine
 # This file contains machine-specific data used in templates
 
-# Personal information
-name: "Angus Perkerson"
-email: "angusp@angusp.com"
+# Personal information - customize for each user
+name: "Your Name"
+email: "your.email@domain.com"
 
-# Machine configuration
+# Machine configuration - adjust based on machine type
 machine:
   type: "development"  # development, server, minimal
   performance: "high"  # high, medium, low
   
-# Feature flags
+# Feature flags - enable/disable based on machine needs
 features:
   ai_tools: true
   development_tools: true
@@ -20,7 +20,7 @@ features:
 editor: "nvim"
 visual: "nvim"
 
-# Development environment
+# Development environment - customize based on your stack
 development:
   languages:
     - "javascript"
