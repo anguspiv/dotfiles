@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# Chezmoi Auto-Sync Script
+# Automatically detects changes and syncs with repository
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Configuration
+CHEZMOI_SOURCE_DIR="${HOME}/.local/share/chezmoi"
+AUTO_COMMIT=${AUTO_COMMIT:-true}
+AUTO_PUSH=${AUTO_PUSH:-true}
+VERBOSE=${VERBOSE:-false}
+
+log() {
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo -e "${BLUE}[$(date +'%H:%M:%S')]${NC} $1"
+    fi
+}
+
+error() {
+    echo -e "${RED}ERROR:${NC} $1" >&2
+}
+
+success() {
+    echo -e "${GREEN}✓${NC} $1"
+}
+
+warning() {
+    echo -e "${YELLOW}⚠${NC} $1"
+}
+
+# Check if chezmoi is installed
+if ! command -v chezmoi >/dev/null 2>&1; then
+    error "chezmoi is not installed or not in PATH"
+    exit 1
+fi
+
+# Change to chezmoi source directory
+if [[ ! -d "$CHEZMOI_SOURCE_DIR" ]]; then
+    error "Chezmoi source directory not found: $CHEZMOI_SOURCE_DIR"
+    exit 1
+fi
+
+cd "$CHEZMOI_SOURCE_DIR"
+
+log "Checking chezmoi status..."
+if ! chezmoi_status=$(chezmoi status 2>&1); then
+    error "Failed to get chezmoi status: $chezmoi_status"
+    exit 1
+fi
+
+# Check if there are any changes
+if [[ -z "$chezmoi_status" ]]; then
+    log "No changes detected in dotfiles"
+    
+    # Check for git changes in source directory
+    if [[ -n "$(git status --porcelain 2>/dev/null || true)" ]]; then
+        warning "Git changes detected in chezmoi source directory"
+        git status --short
+        
+        if [[ "$AUTO_COMMIT" == "true" ]]; then
+            log "Auto-committing git changes..."
+            git add .
+            git commit -m "chore: sync chezmoi source changes
+
+🤖 Generated with chezmoi-sync script
+$(date +'%Y-%m-%d %H:%M:%S')"
+            
+            if [[ "$AUTO_PUSH" == "true" ]]; then
+                git push origin main
+                success "Changes pushed to remote repository"
+            fi
+        fi
+    else
+        success "Everything is up to date"
+        exit 0
+    fi
+else
+    warning "Detected changes in dotfiles:"
+    echo "$chezmoi_status"
+    
+    # Auto-add changed files
+    log "Adding changed files to chezmoi..."
+    echo "$chezmoi_status" | while IFS= read -r line; do
+        # Parse chezmoi status output
+        status_char=$(echo "$line" | cut -c1)
+        file_path=$(echo "$line" | cut -c4-)
+        
+        case "$status_char" in
+            "M"|"A"|"D")
+                if [[ "$file_path" != "Documents"* ]]; then  # Skip Documents folder
+                    log "Adding: $file_path"
+                    chezmoi add "$HOME/$file_path" || warning "Failed to add $file_path"
+                fi
+                ;;
+        esac
+    done
+    
+    # Check git status after adding files
+    if [[ -n "$(git status --porcelain 2>/dev/null || true)" ]]; then
+        if [[ "$AUTO_COMMIT" == "true" ]]; then
+            log "Creating commit with changes..."
+            
+            # Generate commit message based on changes
+            commit_msg="feat: update dotfiles configuration
+
+Changes detected:
+$(echo "$chezmoi_status" | head -10)
+
+🤖 Generated with chezmoi-sync script
+$(date +'%Y-%m-%d %H:%M:%S')"
+            
+            git add .
+            git commit -m "$commit_msg"
+            success "Changes committed to repository"
+            
+            if [[ "$AUTO_PUSH" == "true" ]]; then
+                log "Pushing to remote repository..."
+                git push origin main
+                success "Changes pushed to remote repository"
+            fi
+        else
+            warning "Changes staged but not committed (AUTO_COMMIT=false)"
+            git status --short
+        fi
+    fi
+fi
+
+success "Chezmoi sync completed successfully"

@@ -18,7 +18,7 @@ export SAVEHIST=10000
 {{- end }}
 
 # Load modular configuration files
-for config in ~/.config/zsh/{exports,functions,plugins,aliases}.zsh; do
+for config in ~/.config/zsh/{exports,functions,plugins,aliases,chezmoi-functions}.zsh; do
   [[ -r "$config" ]] && source "$config"
 done
 
