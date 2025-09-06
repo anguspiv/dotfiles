@@ -1,0 +1,35 @@
+{{- $name := promptStringOnce . "name" "What is your full name" -}}
+{{- $email := promptStringOnce . "email" "What is your email address" -}}
+{{- $machineType := promptChoiceOnce . "machine.type" "What type of machine is this" (list "development" "server" "minimal") -}}
+{{- $performance := promptChoiceOnce . "machine.performance" "What is the performance level of this machine" (list "high" "medium" "low") -}}
+{{- $aiTools := promptBoolOnce . "features.ai_tools" "Enable AI tools integration" -}}
+{{- $devTools := promptBoolOnce . "features.development_tools" "Enable development tools" -}}
+{{- $gitTools := promptBoolOnce . "features.git_tools" "Enable git tools" -}}
+
+data:
+  name: {{ $name | quote }}
+  email: {{ $email | quote }}
+  machine:
+    type: {{ $machineType | quote }}
+    performance: {{ $performance | quote }}
+  features:
+    ai_tools: {{ $aiTools }}
+    development_tools: {{ $devTools }}
+    git_tools: {{ $gitTools }}
+  editor: "nvim"
+  visual: "nvim"
+  development:
+    languages:
+      - "javascript"
+      - "typescript"
+      - "python"
+      - "lua"
+      - "bash"
+    frameworks:
+      - "react"
+      - "vue"
+      - "node"
+    tools:
+      - "docker"
+      - "git"
+      - "tmux"
