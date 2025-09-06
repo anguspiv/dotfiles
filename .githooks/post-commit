@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Post-commit hook for chezmoi
+# Automatically push changes after commit
+
+set -e
+
+echo "🚀 Chezmoi post-commit hook: pushing changes to remote..."
+
+# Only push if we're on main branch and have remote
+if git rev-parse --verify HEAD >/dev/null 2>&1 && \
+   git show-ref --verify --quiet refs/heads/main && \
+   git remote | grep -q origin; then
+    
+    if git push origin main; then
+        echo "✅ Successfully pushed to remote repository"
+    else
+        echo "⚠️  Failed to push to remote (you may need to pull first)"
+    fi
+else
+    echo "ℹ️  Skipping push (not on main branch or no remote configured)"
+fi
