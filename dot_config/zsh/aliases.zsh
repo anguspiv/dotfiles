@@ -24,3 +24,11 @@ fi
 if command -v rg >/dev/null 2>&1; then
     alias grep="rg"
 fi
+
+# Tmux session management
+alias tmux-cleanup='tmux list-sessions | grep -E "^[0-9]+:" | cut -d: -f1 | xargs -I {} tmux kill-session -t {}'
+alias tmux-list='tmux list-sessions'
+alias tmux-kill-all='tmux kill-server'
+alias ta='tmux attach-session -t'
+alias tn='tmux new-session -s'
+alias tl='tmux list-sessions'

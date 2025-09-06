@@ -1,0 +1,3 @@
+9a3f2e7948d44d9c67e82694ff66369b6c30a10a 2029 freecinc_1bed5a7a.ca.pem
+55f29aabc90ac7d3780cdfff0ab85673a0fdf404 1858 freecinc_1bed5a7a.cert.pem
+b48cf49eb8eccfc3cdbc0ea94f7607b0110b0c5a 8167 freecinc_1bed5a7a.key.pem
