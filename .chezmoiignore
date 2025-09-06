@@ -79,3 +79,6 @@ __pycache__/
 # OS and system files
 Thumbs.db
 Desktop.ini
+
+# Machine-specific chezmoi data files
+.chezmoidata.yaml
