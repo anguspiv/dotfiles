@@ -1,6 +1,6 @@
 -- Modern Neovim Configuration
--- Generated for: {{ .name }} <{{ .email }}>
--- Machine: {{ .machine.type }} ({{ .machine.performance }})
+-- Generated for: {{ .chezmoi.data.name }} <{{ .chezmoi.data.email }}>
+-- Machine: {{ .chezmoi.data.machine.type }} ({{ .chezmoi.data.machine.performance }})
 -- Optimized for TypeScript/JavaScript Frontend Development
 
 -- Performance optimization: disable some built-in plugins
@@ -60,7 +60,7 @@ require("lazy").setup({
   install = { colorscheme = { "tokyonight", "habamax" } },
   checker = { enabled = true }, -- automatically check for plugin updates
   performance = {
-{{- if eq .machine.performance "high" }}
+{{- if eq .chezmoi.data.machine.performance "high" }}
     cache = {
       enabled = true,
     },
@@ -86,7 +86,7 @@ require("config.options")
 require("config.keymaps")
 require("config.autocmds")
 
-{{- if .features.ai_tools }}
+{{- if .chezmoi.data.features.ai_tools }}
 -- AI tools integration
 require("config.ai")
 {{- end }}
