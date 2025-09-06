@@ -2,8 +2,13 @@ local wezterm = require 'wezterm'
 
 return {
   -- Font consistency with Ghostty
-  font = wezterm.font 'MonaspiceNE Nerd Font Mono',
+  font = wezterm.font('MonaspiceNE Nerd Font', {
+    weight = 'Regular',
+  }),
   font_size = 14.0,
+  
+  -- Enable ligatures and font features
+  harfbuzz_features = { 'calt=1', 'clig=1', 'liga=1' },
   
   -- Tmux integration
   unix_domains = {
