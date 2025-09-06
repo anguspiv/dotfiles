@@ -1,3 +1,7 @@
+{{- $configVersion := 1 -}}
+{{- $currentVersion := .chezmoi.data.configVersion | default 0 -}}
+{{- $needsUpdate := lt $currentVersion $configVersion -}}
+
 {{- $name := promptStringOnce . "name" "What is your full name" -}}
 {{- $email := promptStringOnce . "email" "What is your email address" -}}
 {{- $machineType := promptChoiceOnce . "machine.type" "What type of machine is this" (list "development" "server" "minimal") -}}
@@ -7,6 +11,7 @@
 {{- $gitTools := promptBoolOnce . "features.git_tools" "Enable git tools" -}}
 
 data:
+  configVersion: {{ $configVersion }}
   name: {{ $name | quote }}
   email: {{ $email | quote }}
   machine:

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Check if chezmoi config needs updating
+CONFIG_VERSION={{ .chezmoi.data.configVersion | default 0 }}
+REQUIRED_VERSION=1
+
+if [ "$CONFIG_VERSION" -lt "$REQUIRED_VERSION" ]; then
+    echo "🔄 Your chezmoi configuration is outdated (v$CONFIG_VERSION < v$REQUIRED_VERSION)"
+    echo "Run 'chezmoi init --promptOnce' to update your configuration"
+    echo "Or run 'chezmoi reconfigure' if available in your chezmoi version"
+fi
