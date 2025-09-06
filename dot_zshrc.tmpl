@@ -110,3 +110,11 @@ source_if_exists "${HOME}/.config/wezterm/wezterm.sh"
 
 # iTerm2 integration (if present)
 # source_if_exists "${HOME}/.iterm2_shell_integration.zsh"
+
+# Claude Code CLI alias (if installed)
+if [[ -x "${HOME}/.claude/local/claude" ]]; then
+  alias claude="${HOME}/.claude/local/claude"
+elif command -v claude >/dev/null 2>&1; then
+  # Claude already in PATH
+  alias claude="claude"
+fi
