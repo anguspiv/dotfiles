@@ -1,6 +1,10 @@
 # Chezmoi data for cross-machine configuration
 # This file contains machine-specific data used in templates
 
+# Personal information
+name: "Angus Peart"
+email: "angusp@angusp.com"
+
 # Machine configuration
 machine:
   type: "development"  # development, server, minimal
