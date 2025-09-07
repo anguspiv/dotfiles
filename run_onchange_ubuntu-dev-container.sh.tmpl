@@ -1,0 +1,178 @@
+{{- if eq .machine.type "steamos" -}}
+#!/bin/bash
+
+# Ubuntu Development Container Setup Script
+# This script sets up a full development environment inside Ubuntu container
+
+set -e
+
+echo "🐳 Setting up Ubuntu development container..."
+
+# Update package list
+echo "📦 Updating package list..."
+sudo apt update
+
+# Install essential development tools
+echo "🛠️  Installing development tools..."
+sudo apt install -y \
+    git \
+    neovim \
+    tmux \
+    zsh \
+    curl \
+    wget \
+    unzip \
+    htop \
+    tree \
+    ripgrep \
+    fd-find \
+    bat \
+    exa \
+    jq \
+    fzf \
+    openssh-client \
+    rsync \
+    build-essential
+
+# Install development languages
+{{- if .features.development_tools }}
+echo "🚀 Installing development languages..."
+
+# Node.js and npm
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Python development
+sudo apt install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    python3-dev
+
+# Go language
+sudo apt install -y golang-go
+
+# Rust language
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source ~/.cargo/env
+
+# Additional development tools
+sudo apt install -y \
+    docker.io \
+    docker-compose \
+    postgresql-client \
+    sqlite3
+
+# Install Python development tools
+pip3 install --user \
+    black \
+    flake8 \
+    mypy \
+    pytest \
+    pipx \
+    poetry \
+    jupyterlab
+
+# Install Node.js global tools
+npm install -g \
+    typescript \
+    @types/node \
+    eslint \
+    prettier \
+    nodemon \
+    pm2 \
+    serve \
+    create-react-app \
+    @vue/cli \
+    vite \
+    @angular/cli
+
+# Setup Rust development tools
+rustup default stable
+rustup component add clippy rustfmt rust-analyzer
+
+echo "✅ Development languages installed"
+{{- end }}
+
+# Install modern CLI tools
+echo "🔧 Installing modern CLI tools..."
+
+# Install zoxide (smart cd)
+curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+
+# Install starship prompt
+curl -sS https://starship.rs/install.sh | sh -s -- -y
+
+# Setup zsh as default shell
+if [ "$SHELL" != "/bin/zsh" ] && [ -x "/bin/zsh" ]; then
+    chsh -s /bin/zsh
+    echo "✅ Changed default shell to zsh"
+fi
+
+# Install Oh My Zsh
+if [ ! -d ~/.oh-my-zsh ]; then
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    echo "✅ Oh My Zsh installed"
+fi
+
+# Setup development directories
+echo "📁 Creating development directories..."
+mkdir -p ~/Development/{personal,work,experiments,playground}
+mkdir -p ~/Development/tools
+
+# Create useful aliases and functions
+cat >> ~/.zshrc << 'EOF'
+
+# Development aliases
+alias ll='exa -la'
+alias ls='exa'
+alias cat='batcat'
+alias find='fd'
+alias grep='rg'
+
+# Git aliases
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline'
+
+# Docker aliases
+alias dps='docker ps'
+alias dpa='docker ps -a'
+alias di='docker images'
+
+# Python aliases
+alias py='python3'
+alias pip='pip3'
+
+# Quick navigation
+alias dev='cd ~/Development'
+alias personal='cd ~/Development/personal'
+alias work='cd ~/Development/work'
+
+# Container info
+alias container-info='echo "🐳 Ubuntu Development Container"; echo "📁 Development: ~/Development"; echo "🚪 Exit: exit"'
+EOF
+
+echo "✅ Development environment setup completed!"
+echo ""
+echo "🎉 Ubuntu Development Container Ready!"
+echo ""
+echo "📁 Development directories created:"
+echo "  ~/Development/personal    - Personal projects"
+echo "  ~/Development/work       - Work projects"
+echo "  ~/Development/experiments - Experimental code"
+echo "  ~/Development/playground  - Learning and testing"
+echo ""
+echo "🛠️  Available tools:"
+echo "  Languages: Node.js, Python, Go, Rust"
+echo "  Editors: neovim, VS Code (can be installed via apt)"
+echo "  Tools: git, docker, tmux, modern CLI tools"
+echo ""
+echo "💡 Next steps:"
+echo "  • Run 'container-info' to see this info again"
+echo "  • Use 'dev' to navigate to development folder"
+echo "  • Install VS Code: sudo apt install code"
+echo "  • Start developing!"
+{{ end -}}

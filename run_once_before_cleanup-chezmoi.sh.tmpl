@@ -1,0 +1,233 @@
+#!/bin/bash
+
+# Chezmoi Cleanup Script
+# This script removes chezmoi configuration and managed files from the system
+# WARNING: This will remove your dotfiles and revert to system defaults
+
+set -e
+
+echo "🧹 Chezmoi Cleanup and Removal Tool"
+echo ""
+echo "⚠️  WARNING: This will:"
+echo "   • Remove all chezmoi-managed dotfiles"
+echo "   • Revert to system default configurations"
+echo "   • Remove chezmoi source directory"
+echo "   • Remove chezmoi binary and cache"
+{{- if eq .machine.type "steamos" }}
+echo "   • Remove Distrobox containers and configuration"
+{{- end }}
+echo ""
+
+# Interactive confirmation
+read -p "Are you sure you want to proceed? (type 'yes' to confirm): " confirm
+if [ "$confirm" != "yes" ]; then
+    echo "❌ Cleanup cancelled"
+    exit 0
+fi
+
+echo ""
+echo "🚀 Starting chezmoi cleanup..."
+
+# Function to safely remove files/directories
+safe_remove() {
+    local path="$1"
+    if [ -e "$path" ]; then
+        echo "🗑️  Removing: $path"
+        rm -rf "$path"
+    fi
+}
+
+# Function to backup important files before removal
+backup_important() {
+    echo "💾 Creating backup of important files..."
+    local backup_dir="$HOME/.chezmoi-cleanup-backup-$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$backup_dir"
+    
+    # Backup SSH keys if they exist
+    if [ -d "$HOME/.ssh" ]; then
+        cp -r "$HOME/.ssh" "$backup_dir/"
+        echo "✅ SSH keys backed up to $backup_dir/.ssh"
+    fi
+    
+    # Backup important configs
+    for config in .gitconfig .zshrc .bashrc .profile; do
+        if [ -f "$HOME/$config" ]; then
+            cp "$HOME/$config" "$backup_dir/"
+            echo "✅ $config backed up to $backup_dir/"
+        fi
+    done
+    
+    echo "📁 Backup created at: $backup_dir"
+}
+
+# Create backup first
+backup_important
+
+# Remove chezmoi-managed dotfiles
+echo ""
+echo "🗑️  Removing chezmoi-managed dotfiles..."
+
+# Get list of managed files from chezmoi
+if command -v chezmoi >/dev/null 2>&1; then
+    echo "📋 Getting list of managed files..."
+    chezmoi managed | while read -r file; do
+        if [ -n "$file" ]; then
+            safe_remove "$HOME/$file"
+        fi
+    done
+else
+    # Manual removal of common dotfiles if chezmoi is not available
+    echo "⚠️  Chezmoi not found, manually removing common dotfiles..."
+    safe_remove "$HOME/.zshrc"
+    safe_remove "$HOME/.bashrc"
+    safe_remove "$HOME/.gitconfig"
+    safe_remove "$HOME/.tmux.conf"
+    safe_remove "$HOME/.config/nvim"
+    safe_remove "$HOME/.config/starship.toml"
+    safe_remove "$HOME/.config/zsh"
+{{- if eq .machine.type "steamos" }}
+    safe_remove "$HOME/.config/konsole/Victor Mono.profile"
+    safe_remove "$HOME/.config/steamos"
+{{- end }}
+fi
+
+# Remove chezmoi directories and cache
+echo ""
+echo "🗑️  Removing chezmoi system files..."
+safe_remove "$HOME/.local/share/chezmoi"
+safe_remove "$HOME/.cache/chezmoi"
+safe_remove "$HOME/.config/chezmoi"
+
+# Remove chezmoi binary
+echo ""
+echo "🗑️  Removing chezmoi binary..."
+if command -v chezmoi >/dev/null 2>&1; then
+    chezmoi_path=$(which chezmoi)
+    echo "📍 Found chezmoi at: $chezmoi_path"
+    
+    case "$chezmoi_path" in
+        */usr/local/bin/chezmoi)
+            echo "⚠️  System-installed chezmoi detected. Remove with:"
+            echo "   sudo rm $chezmoi_path"
+            ;;
+        */.local/bin/chezmoi)
+            safe_remove "$chezmoi_path"
+            echo "✅ User-installed chezmoi removed"
+            ;;
+        */brew/*)
+            echo "🍺 Homebrew-installed chezmoi detected. Remove with:"
+            echo "   brew uninstall chezmoi"
+            ;;
+        *)
+            echo "❓ Unknown chezmoi installation location: $chezmoi_path"
+            echo "   Please remove manually if desired"
+            ;;
+    esac
+fi
+
+{{- if eq .machine.type "steamos" }}
+# SteamOS specific cleanup
+echo ""
+echo "🐧 SteamOS specific cleanup..."
+
+# Remove Distrobox containers
+if command -v distrobox >/dev/null 2>&1; then
+    echo "🐳 Removing Distrobox containers..."
+    distrobox list --no-header | while read -r container_info; do
+        if [ -n "$container_info" ]; then
+            container_name=$(echo "$container_info" | awk '{print $2}')
+            echo "🗑️  Removing container: $container_name"
+            distrobox rm -f "$container_name" || true
+        fi
+    done
+fi
+
+# Remove Distrobox if installed in user space
+safe_remove "$HOME/.local/bin/distrobox"
+safe_remove "$HOME/.local/bin/distrobox-*"
+
+# Remove development shortcuts
+safe_remove "$HOME/.local/share/applications/terminal-dev.desktop"
+safe_remove "$HOME/.local/share/applications/dev-terminal.desktop"
+
+# Remove Victor Mono fonts
+echo "🔤 Removing custom fonts..."
+find "$HOME/.local/share/fonts" -name "*VictorMono*" -delete 2>/dev/null || true
+fc-cache -fv >/dev/null 2>&1 || true
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS specific cleanup
+echo ""
+echo "🍎 macOS specific cleanup..."
+
+# Remove Homebrew packages that were auto-installed (optional)
+read -p "Remove Homebrew packages installed by chezmoi? (y/n): " remove_brew
+if [ "$remove_brew" = "y" ] || [ "$remove_brew" = "Y" ]; then
+    echo "🍺 Removing Homebrew packages..."
+    # Add common packages that might have been installed
+    packages_to_remove="starship zoxide eza ripgrep fd bat"
+    for package in $packages_to_remove; do
+        if brew list "$package" >/dev/null 2>&1; then
+            echo "🗑️  Removing: $package"
+            brew uninstall "$package" || true
+        fi
+    done
+fi
+{{- end }}
+
+# Clean up shell configuration
+echo ""
+echo "🐚 Cleaning up shell configuration..."
+
+# Remove chezmoi-related additions from shell configs
+for shell_config in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.profile"; do
+    if [ -f "$shell_config" ]; then
+        echo "🧹 Cleaning $shell_config..."
+        # Create a backup and remove chezmoi-related lines
+        cp "$shell_config" "$shell_config.pre-cleanup"
+        grep -v "chezmoi\|starship\|zoxide\|distrobox" "$shell_config.pre-cleanup" > "$shell_config" || true
+    fi
+done
+
+# Reset shell to default if it was changed
+if [ "$SHELL" != "/bin/bash" ] && [ "$SHELL" != "/bin/zsh" ]; then
+    echo "🐚 Resetting shell to system default..."
+    echo "   Run: chsh -s /bin/bash"
+    echo "   Or: chsh -s /bin/zsh"
+fi
+
+# Final cleanup
+echo ""
+echo "🧹 Final cleanup..."
+
+# Remove any remaining chezmoi references
+safe_remove "$HOME/.local/bin/setup-dev-container"
+
+# Clean up environment variables
+if [ -f "$HOME/.profile" ]; then
+    sed -i.backup '/chezmoi\|distrobox/d' "$HOME/.profile" 2>/dev/null || true
+fi
+
+echo ""
+echo "✅ Chezmoi cleanup completed!"
+echo ""
+echo "📋 Summary:"
+echo "   • Dotfiles removed and backed up"
+echo "   • Chezmoi source directory removed"
+echo "   • Cache and configuration cleaned"
+{{- if eq .machine.type "steamos" }}
+echo "   • Distrobox containers removed"
+echo "   • Custom fonts and shortcuts removed"
+{{- end }}
+echo "   • Shell configuration cleaned"
+echo ""
+echo "💾 Backup location: ~/.chezmoi-cleanup-backup-*"
+echo ""
+echo "🔄 Next steps:"
+echo "   1. Restart your terminal"
+echo "   2. Log out and log back in for shell changes"
+echo "   3. Review backed up files if needed"
+echo "   4. Manually remove chezmoi binary if system-installed"
+echo ""
+echo "🚀 Your system has been restored to pre-chezmoi state!"
