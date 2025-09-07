@@ -1,0 +1,401 @@
+{{- if eq .chezmoi.data.machine.type "steamos" -}}
+#!/bin/bash
+
+# Steam Deck Development Workflow Helper
+# Provides convenient commands for development on Steam Deck
+
+set -e
+
+SCRIPT_NAME=$(basename "$0")
+VERSION="1.0.0"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_color() {
+    local color=$1
+    local message=$2
+    echo -e "${color}${message}${NC}"
+}
+
+# Function to show usage
+show_usage() {
+    cat << EOF
+${SCRIPT_NAME} v${VERSION} - Steam Deck Development Helper
+
+USAGE:
+    ${SCRIPT_NAME} <command> [options]
+
+COMMANDS:
+    setup           Setup development environment
+    containers      Manage development containers
+    project <name>  Create new project structure
+    code <project>  Open project in VS Code
+    serve <port>    Start development server
+    status          Show development environment status
+    update          Update development tools
+    backup          Backup development data
+    restore         Restore development data
+    help            Show this help message
+
+CONTAINER COMMANDS:
+    containers list                 List all containers
+    containers create <name> <img>  Create new container
+    containers enter <name>         Enter container
+    containers remove <name>        Remove container
+    containers update <name>        Update container
+
+PROJECT COMMANDS:
+    project create <name> <type>    Create new project
+    project list                    List projects
+    project open <name>             Open project directory
+
+EXAMPLES:
+    ${SCRIPT_NAME} setup                          # Initial setup
+    ${SCRIPT_NAME} containers list                # List containers
+    ${SCRIPT_NAME} project create myapp react     # Create React project
+    ${SCRIPT_NAME} code myapp                     # Open project in VS Code
+    ${SCRIPT_NAME} serve 3000                     # Start dev server on port 3000
+
+EOF
+}
+
+# Function to check if running on Steam Deck
+check_steam_deck() {
+    if [ ! -f /etc/steamos-release ] && [ ! -f /usr/share/steamos/steamos-release ]; then
+        print_color "$RED" "❌ This script is designed for Steam Deck/SteamOS"
+        exit 1
+    fi
+}
+
+# Function to setup development environment
+setup_dev_env() {
+    print_color "$BLUE" "🚀 Setting up Steam Deck development environment..."
+    
+    # Check if in desktop mode
+    if [ "$XDG_CURRENT_DESKTOP" != "KDE" ]; then
+        print_color "$YELLOW" "⚠️  Switch to Desktop Mode for full setup"
+        return 1
+    fi
+    
+    # Create development directories
+    mkdir -p ~/Development/{personal,work,experiments,learning}
+    mkdir -p ~/.local/bin
+    
+    # Setup environment variables
+    if ! grep -q "DECK_DEV_HOME" ~/.zshrc; then
+        cat >> ~/.zshrc << 'EOF'
+
+# Steam Deck Development Environment
+export DECK_DEV_HOME="$HOME/Development"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Development aliases
+alias dev='cd $DECK_DEV_HOME'
+alias devp='cd $DECK_DEV_HOME/personal'
+alias devw='cd $DECK_DEV_HOME/work'
+alias deve='cd $DECK_DEV_HOME/experiments'
+EOF
+    fi
+    
+    print_color "$GREEN" "✅ Development environment setup complete"
+}
+
+# Function to manage containers
+manage_containers() {
+    local action=$1
+    local name=$2
+    local image=$3
+    
+    case $action in
+        "list")
+            print_color "$BLUE" "📦 Development Containers:"
+            distrobox list
+            ;;
+        "create")
+            if [ -z "$name" ] || [ -z "$image" ]; then
+                print_color "$RED" "❌ Usage: containers create <name> <image>"
+                return 1
+            fi
+            print_color "$BLUE" "📦 Creating container: $name"
+            distrobox create --name "$name" --image "$image"
+            ;;
+        "enter")
+            if [ -z "$name" ]; then
+                print_color "$RED" "❌ Usage: containers enter <name>"
+                return 1
+            fi
+            distrobox enter "$name"
+            ;;
+        "remove")
+            if [ -z "$name" ]; then
+                print_color "$RED" "❌ Usage: containers remove <name>"
+                return 1
+            fi
+            print_color "$YELLOW" "🗑️  Removing container: $name"
+            distrobox rm "$name"
+            ;;
+        "update")
+            if [ -z "$name" ]; then
+                print_color "$RED" "❌ Usage: containers update <name>"
+                return 1
+            fi
+            print_color "$BLUE" "🔄 Updating container: $name"
+            distrobox enter "$name" -- sudo apt update && sudo apt upgrade -y || \
+            distrobox enter "$name" -- sudo dnf update -y || \
+            distrobox enter "$name" -- sudo pacman -Syu
+            ;;
+        *)
+            print_color "$RED" "❌ Unknown container action: $action"
+            return 1
+            ;;
+    esac
+}
+
+# Function to create new project
+create_project() {
+    local name=$1
+    local type=${2:-"generic"}
+    
+    if [ -z "$name" ]; then
+        print_color "$RED" "❌ Usage: project create <name> [type]"
+        return 1
+    fi
+    
+    local project_dir="$HOME/Development/personal/$name"
+    
+    if [ -d "$project_dir" ]; then
+        print_color "$YELLOW" "⚠️  Project $name already exists"
+        return 1
+    fi
+    
+    mkdir -p "$project_dir"
+    cd "$project_dir"
+    
+    case $type in
+        "react")
+            print_color "$BLUE" "⚛️  Creating React project..."
+            distrobox enter ubuntu-dev -- npx create-react-app "$name" .
+            ;;
+        "vue")
+            print_color "$BLUE" "🅥 Creating Vue project..."
+            distrobox enter ubuntu-dev -- npx @vue/cli create "$name" .
+            ;;
+        "node")
+            print_color "$BLUE" "📦 Creating Node.js project..."
+            distrobox enter ubuntu-dev -- npm init -y
+            ;;
+        "python")
+            print_color "$BLUE" "🐍 Creating Python project..."
+            distrobox enter ubuntu-dev -- python3 -m venv venv
+            cat > requirements.txt << EOF
+# Add your Python dependencies here
+black
+flake8
+pytest
+EOF
+            cat > main.py << EOF
+#!/usr/bin/env python3
+"""
+${name} - A Python project
+"""
+
+def main():
+    print("Hello from ${name}!")
+
+if __name__ == "__main__":
+    main()
+EOF
+            ;;
+        "rust")
+            print_color "$BLUE" "🦀 Creating Rust project..."
+            distrobox enter arch-dev -- cargo init --name "$name" .
+            ;;
+        *)
+            print_color "$BLUE" "📁 Creating generic project..."
+            cat > README.md << EOF
+# ${name}
+
+A development project created on Steam Deck.
+
+## Getting Started
+
+1. Enter development container:
+   \`\`\`bash
+   ubuntu-dev  # or fedora-dev, arch-dev
+   \`\`\`
+
+2. Start developing!
+
+EOF
+            ;;
+    esac
+    
+    print_color "$GREEN" "✅ Project $name created in $project_dir"
+}
+
+# Function to open project in VS Code
+open_in_vscode() {
+    local project=$1
+    
+    if [ -z "$project" ]; then
+        print_color "$RED" "❌ Usage: code <project>"
+        return 1
+    fi
+    
+    local project_dir="$HOME/Development/personal/$project"
+    
+    if [ ! -d "$project_dir" ]; then
+        print_color "$RED" "❌ Project $project not found"
+        return 1
+    fi
+    
+    print_color "$BLUE" "💻 Opening $project in VS Code..."
+    code "$project_dir"
+}
+
+# Function to start development server
+start_server() {
+    local port=${1:-3000}
+    
+    print_color "$BLUE" "🌐 Starting development server on port $port..."
+    print_color "$YELLOW" "📱 Access on Steam Deck: http://localhost:$port"
+    print_color "$YELLOW" "🖥️  Access from other devices: http://$(ip route get 1 | awk '{print $7}' | head -1):$port"
+    
+    # Try different common development servers
+    if command -v npm >/dev/null 2>&1; then
+        npm run dev -- --port "$port" --host 0.0.0.0 || \
+        npm start -- --port "$port" --host 0.0.0.0 || \
+        npx serve -l "$port"
+    elif command -v python3 >/dev/null 2>&1; then
+        python3 -m http.server "$port"
+    else
+        print_color "$RED" "❌ No development server found"
+        return 1
+    fi
+}
+
+# Function to show development status
+show_status() {
+    print_color "$BLUE" "🎮 Steam Deck Development Status"
+    echo
+    
+    print_color "$YELLOW" "System Info:"
+    echo "  Desktop Mode: $([ "$XDG_CURRENT_DESKTOP" = "KDE" ] && echo "✅" || echo "❌")"
+    echo "  Storage: $(df -h ~ | awk 'NR==2 {print $3"/"$2" ("$5" used)"}')"
+    echo "  Memory: $(free -h | awk 'NR==2{printf "%.1fG/%.1fG (%.0f%% used)\n", $3/1024, $2/1024, $3*100/$2 }')"
+    echo
+    
+    print_color "$YELLOW" "Development Tools:"
+    command -v git >/dev/null && echo "  Git: ✅" || echo "  Git: ❌"
+    command -v code >/dev/null && echo "  VS Code: ✅" || echo "  VS Code: ❌"
+    command -v distrobox >/dev/null && echo "  Distrobox: ✅" || echo "  Distrobox: ❌"
+    command -v docker >/dev/null && echo "  Docker: ✅" || echo "  Docker: ❌"
+    echo
+    
+    print_color "$YELLOW" "Development Containers:"
+    distrobox list | tail -n +2 | while read line; do
+        if [ -n "$line" ]; then
+            name=$(echo "$line" | awk '{print $2}')
+            status=$(echo "$line" | awk '{print $3}')
+            echo "  $name: $status"
+        fi
+    done
+    echo
+    
+    print_color "$YELLOW" "Projects:"
+    if [ -d "$HOME/Development/personal" ]; then
+        find "$HOME/Development/personal" -maxdepth 1 -type d -not -path "$HOME/Development/personal" | while read dir; do
+            project=$(basename "$dir")
+            echo "  $project"
+        done
+    else
+        echo "  No projects found"
+    fi
+}
+
+# Main function
+main() {
+    check_steam_deck
+    
+    case ${1:-help} in
+        "setup")
+            setup_dev_env
+            ;;
+        "containers")
+            shift
+            manage_containers "$@"
+            ;;
+        "project")
+            shift
+            action=${1:-list}
+            if [ "$action" = "create" ]; then
+                shift
+                create_project "$@"
+            elif [ "$action" = "list" ]; then
+                print_color "$BLUE" "📁 Development Projects:"
+                find "$HOME/Development/personal" -maxdepth 1 -type d -not -path "$HOME/Development/personal" 2>/dev/null | while read dir; do
+                    project=$(basename "$dir")
+                    echo "  $project"
+                done
+            elif [ "$action" = "open" ]; then
+                shift
+                open_in_vscode "$1"
+            else
+                print_color "$RED" "❌ Unknown project action: $action"
+                exit 1
+            fi
+            ;;
+        "code")
+            shift
+            open_in_vscode "$1"
+            ;;
+        "serve")
+            shift
+            start_server "$1"
+            ;;
+        "status")
+            show_status
+            ;;
+        "update")
+            print_color "$BLUE" "🔄 Updating development tools..."
+            sudo steamos-readonly disable
+            sudo pacman -Syu
+            flatpak update
+            ;;
+        "backup")
+            print_color "$BLUE" "💾 Backing up development data..."
+            tar -czf "$HOME/deck-dev-backup-$(date +%Y%m%d).tar.gz" -C "$HOME" Development .config/Code .local/bin
+            print_color "$GREEN" "✅ Backup created: $HOME/deck-dev-backup-$(date +%Y%m%d).tar.gz"
+            ;;
+        "restore")
+            shift
+            backup_file=$1
+            if [ -z "$backup_file" ] || [ ! -f "$backup_file" ]; then
+                print_color "$RED" "❌ Usage: restore <backup-file>"
+                exit 1
+            fi
+            print_color "$BLUE" "🔄 Restoring development data..."
+            tar -xzf "$backup_file" -C "$HOME"
+            print_color "$GREEN" "✅ Development data restored"
+            ;;
+        "help"|"--help"|"-h")
+            show_usage
+            ;;
+        *)
+            print_color "$RED" "❌ Unknown command: $1"
+            echo
+            show_usage
+            exit 1
+            ;;
+    esac
+}
+
+# Run main function with all arguments
+main "$@"
+{{ end -}}
