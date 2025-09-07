@@ -1,0 +1,134 @@
+{{- if eq .chezmoi.data.machine.type "steamos" -}}
+#!/bin/bash
+
+# SteamOS Initial Setup Script
+# Runs once to configure SteamOS-specific settings
+
+set -e
+
+echo "🎮 Initializing SteamOS setup for Steam Deck..."
+
+# Function to check if we're in desktop mode
+check_desktop_mode() {
+    if [ "$XDG_CURRENT_DESKTOP" != "KDE" ]; then
+        echo "⚠️  This setup is designed for Desktop Mode"
+        echo "   Switch to Desktop Mode and run again"
+        return 1
+    fi
+    return 0
+}
+
+# Function to setup directories
+setup_directories() {
+    echo "📁 Creating necessary directories..."
+    
+    mkdir -p ~/.config/fontconfig
+    mkdir -p ~/.local/share/fonts
+    mkdir -p ~/.local/share/applications
+    mkdir -p ~/.config/konsole
+}
+
+# Function to install Victor Mono Nerd Font
+install_victor_mono() {
+    if fc-list | grep -q "VictorMono Nerd Font"; then
+        echo "✅ Victor Mono Nerd Font already installed"
+        return 0
+    fi
+    
+    echo "📥 Installing Victor Mono Nerd Font..."
+    
+    # Download Victor Mono Nerd Font
+    FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/VictorMono.zip"
+    TEMP_DIR=$(mktemp -d)
+    
+    wget -O "$TEMP_DIR/victormono.zip" "$FONT_URL"
+    unzip -q "$TEMP_DIR/victormono.zip" -d ~/.local/share/fonts/
+    
+    # Update font cache
+    fc-cache -fv
+    
+    # Cleanup
+    rm -rf "$TEMP_DIR"
+    
+    echo "✅ Victor Mono Nerd Font installed"
+}
+
+# Function to configure Konsole
+configure_konsole() {
+    echo "🖥️  Configuring Konsole terminal..."
+    
+    # Set Victor Mono profile as default if it exists
+    if [ -f ~/.config/konsole/Victor\ Mono.profile ]; then
+        # Create konsolerc if it doesn't exist
+        if [ ! -f ~/.config/konsolerc ]; then
+            cat > ~/.config/konsolerc << EOF
+[Desktop Entry]
+DefaultProfile=Victor Mono.profile
+
+[MainWindow]
+MenuBar=Disabled
+ToolBarsMovable=Disabled
+EOF
+        fi
+        echo "✅ Konsole configured with Victor Mono profile"
+    fi
+}
+
+# Function to setup desktop shortcuts
+setup_desktop_shortcuts() {
+    echo "🖥️  Setting up desktop shortcuts..."
+    
+    # Development terminal shortcut
+    cat > ~/.local/share/applications/dev-terminal.desktop << EOF
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Dev Terminal
+Comment=Development terminal with custom profile
+Exec=konsole --profile "Victor Mono"
+Icon=utilities-terminal
+Terminal=false
+Categories=Development;System;TerminalEmulator;
+StartupNotify=true
+EOF
+    
+    chmod +x ~/.local/share/applications/dev-terminal.desktop
+    
+    echo "✅ Desktop shortcuts created"
+}
+
+# Function to show post-setup information
+show_info() {
+    echo ""
+    echo "🎉 SteamOS initial setup completed!"
+    echo ""
+    echo "📝 Next steps:"
+    echo "  1. Install packages: chezmoi apply (will run package installer)"
+    echo "  2. Restart Konsole to see font changes"
+    echo "  3. Use Desktop Mode for development work"
+    echo "  4. Consider setting up Distrobox for isolated environments"
+    echo ""
+    echo "💡 Tips:"
+    echo "  • Gaming Mode: Steam interface, controller-optimized"
+    echo "  • Desktop Mode: Full KDE desktop, keyboard/mouse"
+    echo "  • Hold Power + Volume Up for 3s to force Desktop Mode"
+    echo ""
+    echo "🔧 Development tools will be installed on first 'chezmoi apply'"
+}
+
+# Main setup function
+main() {
+    if ! check_desktop_mode; then
+        exit 1
+    fi
+    
+    setup_directories
+    install_victor_mono
+    configure_konsole
+    setup_desktop_shortcuts
+    show_info
+}
+
+# Run main function
+main "$@"
+{{ end -}}

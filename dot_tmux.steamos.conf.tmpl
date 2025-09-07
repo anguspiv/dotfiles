@@ -1,0 +1,86 @@
+{{- if eq .chezmoi.data.machine.type "steamos" -}}
+# SteamOS/Steam Deck Optimized tmux Configuration
+# Optimized for handheld device constraints and touch screen use
+
+# Basic Settings
+set -g default-terminal "screen-256color"
+set -ga terminal-overrides ",*256col*:Tc"
+
+# Increase scrollback buffer for limited screen space
+set -g history-limit 50000
+
+# Handheld-friendly settings
+set -g mouse on                    # Enable mouse support for touch screen
+set -g display-time 4000           # Display messages longer for readability
+set -g status-interval 5           # Update status less frequently to save battery
+
+# Larger status bar for touch interaction
+set -g status-left-length 40
+set -g status-right-length 50
+
+# Steam Deck specific key bindings (easier with on-screen keyboard)
+# Use Ctrl+Space as prefix (easier to type)
+set -g prefix C-Space
+unbind C-b
+bind C-Space send-prefix
+
+# Simplified pane navigation (better for gaming controls)
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# Larger split shortcuts
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+
+# Battery-conscious settings
+{{- if eq .chezmoi.data.machine.performance "handheld" }}
+# Reduce CPU usage on handheld
+set -g visual-activity off
+set -g visual-bell off
+set -g visual-silence off
+set -g bell-action none
+{{- end }}
+
+# Simplified status bar (less clutter on small screen)
+set -g status-style bg=colour235,fg=colour136
+set -g status-left '#[fg=colour166]#S '
+set -g status-right '#[fg=colour64]%H:%M #[fg=colour166]#(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null || echo "AC")%'
+
+# Window status format optimized for small screen
+set -g window-status-format ' #I:#W '
+set -g window-status-current-format '#[fg=colour166,bg=colour235] #I:#W #[default]'
+
+# Pane borders
+set -g pane-border-style fg=colour235
+set -g pane-active-border-style fg=colour136
+
+# Copy mode settings (touch-friendly)
+setw -g mode-keys vi
+bind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
+bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+
+# Quick session management
+bind C new-session
+bind L list-sessions
+bind A choose-session
+
+# Reload config with simple key
+bind r source-file ~/.tmux.conf \; display-message "Config reloaded!"
+
+# Plugins optimized for Steam Deck
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-battery'      # Show battery status
+set -g @plugin 'tmux-plugins/tmux-cpu'          # Monitor CPU usage
+
+# Battery plugin settings
+set -g @batt_icon_status_charged '🔋'
+set -g @batt_icon_status_charging '🔌'
+set -g @batt_icon_status_discharging '⚡'
+
+# Initialize TMUX plugin manager
+run '~/.tmux/plugins/tpm/tpm'
+{{ end -}}
