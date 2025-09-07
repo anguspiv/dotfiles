@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.data.machine.type "steamos" -}}
+{{- if eq .machine.type "steamos" -}}
 # SteamOS Configuration
 
 This directory contains SteamOS-specific configurations for your Steam Deck.
@@ -66,10 +66,10 @@ fc-cache -fv
 - **Ghostty**: May need manual compilation
 
 ## Configuration Applied
-- **Machine Type**: {{ .chezmoi.data.machine.type }}
-- **Performance**: {{ .chezmoi.data.machine.performance }}
-- **Development Tools**: {{ .chezmoi.data.features.development_tools }}
-- **AI Tools**: {{ .chezmoi.data.features.ai_tools }}
-- **Git Tools**: {{ .chezmoi.data.features.git_tools }}
+- **Machine Type**: {{ .machine.type }}
+- **Performance**: {{ .machine.performance }}
+- **Development Tools**: {{ .features.development_tools }}
+- **AI Tools**: {{ .features.ai_tools }}
+- **Git Tools**: {{ .features.git_tools }}
 
 {{ end -}}

@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.data.machine.type "steamos" -}}
+{{- if eq .machine.type "steamos" -}}
 # SteamOS/Steam Deck Optimized tmux Configuration
 # Optimized for handheld device constraints and touch screen use
 
@@ -35,7 +35,7 @@ bind | split-window -h -c "#{pane_current_path}"
 bind - split-window -v -c "#{pane_current_path}"
 
 # Battery-conscious settings
-{{- if eq .chezmoi.data.machine.performance "handheld" }}
+{{- if eq .machine.performance "handheld" }}
 # Reduce CPU usage on handheld
 set -g visual-activity off
 set -g visual-bell off

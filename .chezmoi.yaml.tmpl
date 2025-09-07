@@ -1,5 +1,5 @@
 {{- $configVersion := 1 -}}
-{{- $currentVersion := .chezmoi.data.configVersion | default 0 -}}
+{{- $currentVersion := 0 -}}
 {{- $needsUpdate := lt $currentVersion $configVersion -}}
 
 {{- $name := promptStringOnce . "name" "What is your full name" -}}
@@ -9,6 +9,7 @@
 {{- $aiTools := promptBoolOnce . "features.ai_tools" "Enable AI tools integration" -}}
 {{- $devTools := promptBoolOnce . "features.development_tools" "Enable development tools" -}}
 {{- $gitTools := promptBoolOnce . "features.git_tools" "Enable git tools" -}}
+{{- $kubernetes := promptBoolOnce . "features.kubernetes" "Enable kubernetes tools" -}}
 
 data:
   configVersion: {{ $configVersion }}
@@ -21,8 +22,12 @@ data:
     ai_tools: {{ $aiTools }}
     development_tools: {{ $devTools }}
     git_tools: {{ $gitTools }}
-  editor: "nvim"
-  visual: "nvim"
+    kubernetes: {{ $kubernetes }}
+  editor: "zed"
+  visual: "zed"
+  shell: "zsh"
+  terminal: "ghostty"
+  signingkey: "10EB17A2696118B4"
   development:
     languages:
       - "javascript"
@@ -38,3 +43,4 @@ data:
       - "docker"
       - "git"
       - "tmux"
+

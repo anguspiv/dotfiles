@@ -57,7 +57,7 @@ source_if_exists "${HOME}/.local/bin/env"
 # Shell options
 unsetopt correct_all  # Disable autocorrect
 
-{{- if .features.development }}
+{{- if .features.development_tools }}
 # Development-specific configurations
 export DEV_MODE=true
 
