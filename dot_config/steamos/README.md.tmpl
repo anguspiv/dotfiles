@@ -32,10 +32,14 @@ This directory contains SteamOS-specific configurations for your Steam Deck.
 
 3. **Start Development**:
    ```bash
-   # Use the deck-dev helper tool
-   deck-dev setup
-   deck-dev project create myapp react
-   deck-dev code myapp
+   # Create project directories
+   mkdir -p ~/Development/{personal,work,experiments}
+   
+   # Create a React project
+   cd ~/Development/personal
+   npx create-react-app myapp
+   cd myapp
+   code .
    ```
 
 ### Recommended Development Workflow

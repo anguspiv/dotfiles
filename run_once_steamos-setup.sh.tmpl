@@ -105,8 +105,8 @@ show_info() {
     echo "📝 Next steps:"
     echo "  1. Install packages: chezmoi apply (will run package installer)"
     echo "  2. Restart Konsole to see font changes"
-    echo "  3. Use Desktop Mode for development work"
-    echo "  4. Consider setting up Distrobox for isolated environments"
+    echo "  3. Create development directories: mkdir -p ~/Development/{personal,work,experiments}"
+    echo "  4. Start developing with standard tools (npm, python3, cargo, go, etc.)"
     echo ""
     echo "💡 Tips:"
     echo "  • Gaming Mode: Steam interface, controller-optimized"
@@ -114,6 +114,12 @@ show_info() {
     echo "  • Hold Power + Volume Up for 3s to force Desktop Mode"
     echo ""
     echo "🔧 Development tools will be installed on first 'chezmoi apply'"
+    echo ""
+    echo "🚀 Standard development workflow:"
+    echo "  • Node.js: npx create-react-app myapp"
+    echo "  • Python: python3 -m venv venv && source venv/bin/activate"
+    echo "  • Rust: cargo new myproject"
+    echo "  • Go: go mod init myproject"
 }
 
 # Main setup function
