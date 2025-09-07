@@ -82,3 +82,7 @@ Desktop.ini
 
 # Machine-specific chezmoi config files
 .chezmoi.yaml
+
+# VS Code settings (contains API keys and tokens)
+Library/Application Support/Code/User/settings.json
+Library/Application\ Support/Code/User/settings.json
