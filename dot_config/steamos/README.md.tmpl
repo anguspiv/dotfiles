@@ -30,20 +30,18 @@ This directory contains SteamOS-specific configurations for your Steam Deck.
    sudo pacman -S base-devel git neovim
    ```
 
-3. **Use Distrobox for Isolation**:
+3. **Start Development**:
    ```bash
-   # Install distrobox via Flatpak
-   flatpak install flathub com.github.89luca89.distrobox
-   
-   # Create Ubuntu development container
-   distrobox create --name dev --image ubuntu:22.04
-   distrobox enter dev
+   # Use the deck-dev helper tool
+   deck-dev setup
+   deck-dev project create myapp react
+   deck-dev code myapp
    ```
 
 ### Recommended Development Workflow
-- Use Distrobox containers for development work
-- Keep dotfiles in `/home/deck` (persistent)
-- Use Flatpak for desktop applications
+- Work directly on SteamOS host system
+- Keep all development work in `/home/deck` (persistent across updates)
+- Use Flatpak for desktop applications when needed
 - Use Gaming Mode for gaming, Desktop Mode for development
 
 ### Font Installation

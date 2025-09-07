@@ -84,11 +84,6 @@ install_dev_tools() {
         rust \
         lua \
         luarocks \
-        docker \
-        docker-compose \
-        docker-buildx \
-        podman \
-        distrobox \
         vim \
         code \
         firefox \
@@ -97,9 +92,6 @@ install_dev_tools() {
         redis \
         nginx
         
-    # Enable Docker service
-    sudo systemctl enable --now docker
-    sudo usermod -aG docker deck
     
     # Install additional Python development tools
     pip install --user \

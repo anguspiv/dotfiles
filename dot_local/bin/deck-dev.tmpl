@@ -33,7 +33,6 @@ USAGE:
 
 COMMANDS:
     setup           Setup development environment
-    containers      Manage development containers
     project <name>  Create new project structure
     code <project>  Open project in VS Code
     serve <port>    Start development server
@@ -43,13 +42,6 @@ COMMANDS:
     restore         Restore development data
     help            Show this help message
 
-CONTAINER COMMANDS:
-    containers list                 List all containers
-    containers create <name> <img>  Create new container
-    containers enter <name>         Enter container
-    containers remove <name>        Remove container
-    containers update <name>        Update container
-
 PROJECT COMMANDS:
     project create <name> <type>    Create new project
     project list                    List projects
@@ -57,7 +49,6 @@ PROJECT COMMANDS:
 
 EXAMPLES:
     ${SCRIPT_NAME} setup                          # Initial setup
-    ${SCRIPT_NAME} containers list                # List containers
     ${SCRIPT_NAME} project create myapp react     # Create React project
     ${SCRIPT_NAME} code myapp                     # Open project in VS Code
     ${SCRIPT_NAME} serve 3000                     # Start dev server on port 3000
@@ -100,62 +91,16 @@ alias dev='cd $DECK_DEV_HOME'
 alias devp='cd $DECK_DEV_HOME/personal'
 alias devw='cd $DECK_DEV_HOME/work'
 alias deve='cd $DECK_DEV_HOME/experiments'
+
+# Development tool shortcuts
+alias serve-here='python3 -m http.server 8000'
+alias serve-node='npx serve .'
 EOF
     fi
     
     print_color "$GREEN" "✅ Development environment setup complete"
 }
 
-# Function to manage containers
-manage_containers() {
-    local action=$1
-    local name=$2
-    local image=$3
-    
-    case $action in
-        "list")
-            print_color "$BLUE" "📦 Development Containers:"
-            distrobox list
-            ;;
-        "create")
-            if [ -z "$name" ] || [ -z "$image" ]; then
-                print_color "$RED" "❌ Usage: containers create <name> <image>"
-                return 1
-            fi
-            print_color "$BLUE" "📦 Creating container: $name"
-            distrobox create --name "$name" --image "$image"
-            ;;
-        "enter")
-            if [ -z "$name" ]; then
-                print_color "$RED" "❌ Usage: containers enter <name>"
-                return 1
-            fi
-            distrobox enter "$name"
-            ;;
-        "remove")
-            if [ -z "$name" ]; then
-                print_color "$RED" "❌ Usage: containers remove <name>"
-                return 1
-            fi
-            print_color "$YELLOW" "🗑️  Removing container: $name"
-            distrobox rm "$name"
-            ;;
-        "update")
-            if [ -z "$name" ]; then
-                print_color "$RED" "❌ Usage: containers update <name>"
-                return 1
-            fi
-            print_color "$BLUE" "🔄 Updating container: $name"
-            distrobox enter "$name" -- sudo apt update && sudo apt upgrade -y || \
-            distrobox enter "$name" -- sudo dnf update -y || \
-            distrobox enter "$name" -- sudo pacman -Syu
-            ;;
-        *)
-            print_color "$RED" "❌ Unknown container action: $action"
-            return 1
-            ;;
-    esac
-}
 
 # Function to create new project
 create_project() {
@@ -180,24 +125,25 @@ create_project() {
     case $type in
         "react")
             print_color "$BLUE" "⚛️  Creating React project..."
-            distrobox enter ubuntu-dev -- npx create-react-app "$name" .
+            npx create-react-app "$name" .
             ;;
         "vue")
             print_color "$BLUE" "🅥 Creating Vue project..."
-            distrobox enter ubuntu-dev -- npx @vue/cli create "$name" .
+            npx @vue/cli create "$name" .
             ;;
         "node")
             print_color "$BLUE" "📦 Creating Node.js project..."
-            distrobox enter ubuntu-dev -- npm init -y
+            npm init -y
             ;;
         "python")
             print_color "$BLUE" "🐍 Creating Python project..."
-            distrobox enter ubuntu-dev -- python3 -m venv venv
+            python3 -m venv venv
             cat > requirements.txt << EOF
 # Add your Python dependencies here
 black
 flake8
 pytest
+requests
 EOF
             cat > main.py << EOF
 #!/usr/bin/env python3
@@ -211,10 +157,17 @@ def main():
 if __name__ == "__main__":
     main()
 EOF
+            cat > .gitignore << EOF
+__pycache__/
+*.pyc
+venv/
+.env
+.pytest_cache/
+EOF
             ;;
         "rust")
             print_color "$BLUE" "🦀 Creating Rust project..."
-            distrobox enter arch-dev -- cargo init --name "$name" .
+            cargo init --name "$name" .
             ;;
         *)
             print_color "$BLUE" "📁 Creating generic project..."
@@ -225,12 +178,8 @@ A development project created on Steam Deck.
 
 ## Getting Started
 
-1. Enter development container:
-   \`\`\`bash
-   ubuntu-dev  # or fedora-dev, arch-dev
-   \`\`\`
-
-2. Start developing!
+1. Install dependencies based on your project type
+2. Start developing directly on Steam Deck!
 
 EOF
             ;;
@@ -294,18 +243,10 @@ show_status() {
     print_color "$YELLOW" "Development Tools:"
     command -v git >/dev/null && echo "  Git: ✅" || echo "  Git: ❌"
     command -v code >/dev/null && echo "  VS Code: ✅" || echo "  VS Code: ❌"
-    command -v distrobox >/dev/null && echo "  Distrobox: ✅" || echo "  Distrobox: ❌"
-    command -v docker >/dev/null && echo "  Docker: ✅" || echo "  Docker: ❌"
-    echo
-    
-    print_color "$YELLOW" "Development Containers:"
-    distrobox list | tail -n +2 | while read line; do
-        if [ -n "$line" ]; then
-            name=$(echo "$line" | awk '{print $2}')
-            status=$(echo "$line" | awk '{print $3}')
-            echo "  $name: $status"
-        fi
-    done
+    command -v node >/dev/null && echo "  Node.js: ✅ $(node --version)" || echo "  Node.js: ❌"
+    command -v python3 >/dev/null && echo "  Python: ✅ $(python3 --version)" || echo "  Python: ❌"
+    command -v cargo >/dev/null && echo "  Rust: ✅ $(rustc --version | cut -d' ' -f2)" || echo "  Rust: ❌"
+    command -v go >/dev/null && echo "  Go: ✅ $(go version | cut -d' ' -f3)" || echo "  Go: ❌"
     echo
     
     print_color "$YELLOW" "Projects:"
@@ -326,10 +267,6 @@ main() {
     case ${1:-help} in
         "setup")
             setup_dev_env
-            ;;
-        "containers")
-            shift
-            manage_containers "$@"
             ;;
         "project")
             shift
@@ -370,7 +307,7 @@ main() {
             ;;
         "backup")
             print_color "$BLUE" "💾 Backing up development data..."
-            tar -czf "$HOME/deck-dev-backup-$(date +%Y%m%d).tar.gz" -C "$HOME" Development .config/Code .local/bin
+            tar -czf "$HOME/deck-dev-backup-$(date +%Y%m%d).tar.gz" -C "$HOME" Development .local/bin
             print_color "$GREEN" "✅ Backup created: $HOME/deck-dev-backup-$(date +%Y%m%d).tar.gz"
             ;;
         "restore")
