@@ -1,0 +1,73 @@
+{{- if eq .chezmoi.data.machine.type "steamos" -}}
+# SteamOS Configuration
+
+This directory contains SteamOS-specific configurations for your Steam Deck.
+
+## Important SteamOS Notes
+
+### Read-Only Filesystem
+- SteamOS uses a read-only filesystem by default
+- To install packages: `sudo steamos-readonly disable`
+- Changes to `/usr` are lost after system updates
+- Use `/home` and `~/.local` for persistent configurations
+
+### Package Management
+- **Pacman**: System packages (requires `steamos-readonly disable`)
+- **Flatpak**: Preferred for applications (persistent across updates)
+- **Distrobox**: Recommended for development environments
+
+### Development Setup
+1. **Enable Developer Mode**: 
+   - Settings > System > Developer > Enable Developer Mode
+   - Set a password for the `deck` user
+
+2. **Install Development Tools**:
+   ```bash
+   # Enable pacman
+   sudo steamos-readonly disable
+   
+   # Install base development tools
+   sudo pacman -S base-devel git neovim
+   ```
+
+3. **Use Distrobox for Isolation**:
+   ```bash
+   # Install distrobox via Flatpak
+   flatpak install flathub com.github.89luca89.distrobox
+   
+   # Create Ubuntu development container
+   distrobox create --name dev --image ubuntu:22.04
+   distrobox enter dev
+   ```
+
+### Recommended Development Workflow
+- Use Distrobox containers for development work
+- Keep dotfiles in `/home/deck` (persistent)
+- Use Flatpak for desktop applications
+- Use Gaming Mode for gaming, Desktop Mode for development
+
+### Font Installation
+Victor Mono Nerd Font may need manual installation:
+```bash
+# Create fonts directory
+mkdir -p ~/.local/share/fonts
+
+# Download and install Victor Mono Nerd Font
+wget -O /tmp/victormono.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/VictorMono.zip
+unzip /tmp/victormono.zip -d ~/.local/share/fonts/
+fc-cache -fv
+```
+
+### Terminal Applications
+- **Konsole**: Default terminal emulator
+- **WezTerm**: May need Flatpak installation
+- **Ghostty**: May need manual compilation
+
+## Configuration Applied
+- **Machine Type**: {{ .chezmoi.data.machine.type }}
+- **Performance**: {{ .chezmoi.data.machine.performance }}
+- **Development Tools**: {{ .chezmoi.data.features.development_tools }}
+- **AI Tools**: {{ .chezmoi.data.features.ai_tools }}
+- **Git Tools**: {{ .chezmoi.data.features.git_tools }}
+
+{{ end -}}

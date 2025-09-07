@@ -1,0 +1,162 @@
+{{- if eq .chezmoi.data.machine.type "steamos" -}}
+#!/bin/bash
+
+# SteamOS Package Installation Script
+# This script handles SteamOS-specific package installation
+
+set -e
+
+echo "🐧 Setting up SteamOS development environment..."
+
+# Check if we're actually on SteamOS
+if [ ! -f /etc/steamos-release ] && [ ! -f /usr/share/steamos/steamos-release ]; then
+    echo "❌ This doesn't appear to be SteamOS. Exiting."
+    exit 1
+fi
+
+# Function to check if we can use pacman
+can_use_pacman() {
+    # Check if system is writable
+    if mount | grep -q "/ .*ro,"; then
+        return 1
+    fi
+    return 0
+}
+
+# Function to enable pacman
+enable_pacman() {
+    echo "🔓 Enabling pacman (making filesystem writable)..."
+    sudo steamos-readonly disable
+    
+    # Initialize pacman keyring if needed
+    if [ ! -d /etc/pacman.d/gnupg ]; then
+        sudo pacman-key --init
+        sudo pacman-key --populate archlinux
+    fi
+    
+    # Update package database
+    sudo pacman -Sy
+}
+
+# Function to install essential development tools
+install_dev_tools() {
+    if ! can_use_pacman; then
+        enable_pacman
+    fi
+    
+    echo "📦 Installing essential development tools..."
+    
+    # Core development tools
+    sudo pacman -S --noconfirm \
+        base-devel \
+        git \
+        neovim \
+        tmux \
+        zsh \
+        curl \
+        wget \
+        unzip \
+        htop \
+        tree \
+        ripgrep \
+        fd \
+        bat \
+        eza \
+        zoxide \
+        starship
+    
+{{- if .chezmoi.data.features.development_tools }}
+    # Additional development tools
+    echo "🛠️  Installing additional development tools..."
+    sudo pacman -S --noconfirm \
+        nodejs \
+        npm \
+        python \
+        python-pip \
+        docker \
+        docker-compose \
+        code \
+        firefox
+{{- end }}
+}
+
+# Function to install Flatpak applications
+install_flatpaks() {
+    echo "📱 Installing Flatpak applications..."
+    
+    # Enable Flathub if not already enabled
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    
+    # Essential apps
+    flatpak install -y flathub org.mozilla.firefox
+    flatpak install -y flathub com.visualstudio.code
+    
+{{- if .chezmoi.data.features.ai_tools }}
+    # AI/Development tools
+    flatpak install -y flathub com.github.johnfactotum.Foliate
+{{- end }}
+    
+{{- if .chezmoi.data.features.development_tools }}
+    # Development tools
+    flatpak install -y flathub io.github.shiftey.Desktop
+    flatpak install -y flathub com.github.tchx84.Flatseal
+{{- end }}
+}
+
+# Function to setup shell
+setup_shell() {
+    echo "🐚 Setting up shell environment..."
+    
+    # Change shell to zsh if not already
+    if [ "$SHELL" != "/usr/bin/zsh" ] && [ -x "/usr/bin/zsh" ]; then
+        chsh -s /usr/bin/zsh
+        echo "✅ Changed default shell to zsh"
+    fi
+}
+
+# Function to setup Steam Deck specific configurations
+setup_steam_deck() {
+    echo "🎮 Setting up Steam Deck specific configurations..."
+    
+    # Create desktop shortcuts for development tools
+    mkdir -p ~/.local/share/applications
+    
+    # Terminal shortcut for desktop mode
+    cat > ~/.local/share/applications/terminal-dev.desktop << EOF
+[Desktop Entry]
+Name=Terminal (Dev)
+Comment=Terminal for development work
+Exec=konsole
+Icon=utilities-terminal
+Type=Application
+Categories=Development;System;
+EOF
+    
+    # Make desktop shortcut executable
+    chmod +x ~/.local/share/applications/terminal-dev.desktop
+}
+
+# Main installation flow
+main() {
+    echo "🚀 Starting SteamOS setup..."
+    
+{{- if .chezmoi.data.features.development_tools }}
+    install_dev_tools
+{{- end }}
+    
+    install_flatpaks
+    setup_shell
+    setup_steam_deck
+    
+    echo "✅ SteamOS setup completed!"
+    echo ""
+    echo "📝 Next steps:"
+    echo "  1. Restart your terminal or log out/in for shell changes"
+    echo "  2. The filesystem will be read-only again after reboot"
+    echo "  3. Use 'sudo steamos-readonly disable' to make changes later"
+    echo "  4. Consider using Distrobox for isolated development environments"
+}
+
+# Run main function
+main "$@"
+{{ end -}}

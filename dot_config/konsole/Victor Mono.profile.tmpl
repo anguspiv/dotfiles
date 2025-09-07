@@ -1,0 +1,40 @@
+{{- if eq .chezmoi.data.machine.type "steamos" -}}
+[Appearance]
+ColorScheme=Nord
+Font=Victor Mono,14,-1,5,50,0,0,0,0,0
+
+[Cursor Options]
+BlinkingCursorEnabled=true
+CursorShape=0
+
+[General]
+Environment=TERM=xterm-256color
+Icon=utilities-terminal
+LocalTabTitleFormat=%D : %n
+Name=Victor Mono
+Parent=FALLBACK/
+RemoteTabTitleFormat=(%u) %H
+ShowTerminalSizeHint=true
+TerminalCenter=false
+TerminalMargin=1
+
+[Interaction Options]
+AutoCopySelectedText=false
+CopyTextAsHTML=true
+MiddleClickPasteMode=0
+TrimLeadingSpacesInSelectedText=false
+TrimTrailingSpacesInSelectedText=false
+UnderlineFilesEnabled=false
+
+[Keyboard]
+KeyBindings=default
+
+[Scrolling]
+HistoryMode=1
+HistorySize=10000
+ScrollBarPosition=1
+
+[Terminal Features]
+BlinkingTextEnabled=true
+FlowControlEnabled=true
+{{ end -}}
