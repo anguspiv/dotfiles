@@ -1,12 +1,12 @@
 {{- if eq .machine.type "steamos" -}}
 #!/bin/bash
 
-# SteamOS Package Installation Script
-# This script handles SteamOS-specific package installation
+# SteamOS Package Installation Script with Distrobox
+# This script sets up a minimal host system and Distrobox for development
 
 set -e
 
-echo "🐧 Setting up SteamOS development environment..."
+echo "🐧 Setting up SteamOS with Distrobox development environment..."
 
 # Check if we're actually on SteamOS
 if [ ! -f /etc/steamos-release ] && [ ! -f /usr/share/steamos/steamos-release ]; then
@@ -38,17 +38,16 @@ enable_pacman() {
     sudo pacman -Sy
 }
 
-# Function to install essential development tools
-install_dev_tools() {
+# Function to install minimal host system tools
+install_host_essentials() {
     if ! can_use_pacman; then
         enable_pacman
     fi
     
-    echo "📦 Installing essential development tools..."
+    echo "📦 Installing minimal host system tools..."
     
-    # Core development tools
+    # Only essential tools on host system (saves ~1GB+ space)
     sudo pacman -S --noconfirm \
-        base-devel \
         git \
         neovim \
         tmux \
@@ -57,91 +56,80 @@ install_dev_tools() {
         wget \
         unzip \
         htop \
-        tree \
-        ripgrep \
-        fd \
-        bat \
-        eza \
-        zoxide \
-        starship \
-        openssh \
-        rsync \
-        jq \
-        fzf
+        starship
+}
+
+# Function to install Distrobox
+install_distrobox() {
+    echo "📦 Installing Distrobox..."
     
-{{- if .features.development_tools }}
-    # Development languages and runtimes
-    echo "🛠️  Installing development languages and tools..."
-    sudo pacman -S --noconfirm \
-        nodejs \
-        npm \
-        yarn \
-        python \
-        python-pip \
-        python-pipenv \
-        python-virtualenv \
-        go \
-        rust \
-        lua \
-        luarocks \
-        vim \
-        code \
-        firefox \
-        chromium \
-        postgresql \
-        redis \
-        nginx
-        
+    # Install Distrobox to user space
+    if [ ! -f ~/.local/bin/distrobox ]; then
+        curl -s https://raw.githubusercontent.com/89luca89/distrobox/main/install | sh -s -- --prefix ~/.local
+        echo "✅ Distrobox installed to ~/.local/bin"
+    else
+        echo "✅ Distrobox already installed"
+    fi
     
-    # Install additional Python development tools
-    pip install --user \
-        black \
-        flake8 \
-        mypy \
-        pytest \
-        pipx \
-        poetry
-        
-    # Install Node.js global development tools
-    npm install -g \
-        typescript \
-        @types/node \
-        eslint \
-        prettier \
-        nodemon \
-        pm2 \
-        serve \
-        create-react-app \
-        @vue/cli \
-        vite
-        
-    # Install Rust development tools
-    rustup default stable
-    rustup component add clippy rustfmt rust-analyzer
-{{- end }}
+    # Ensure distrobox is in PATH
+    if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc 2>/dev/null; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+        echo "✅ Added Distrobox to PATH in ~/.zshrc"
+    fi
+}
+
+# Function to setup development container
+setup_dev_container() {
+    echo "🐳 Setting up development container..."
+    
+    # Source PATH for current session
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    # Create development container if it doesn't exist
+    if ! distrobox list | grep -q "dev"; then
+        echo "📦 Creating Ubuntu development container..."
+        distrobox create --name dev --image ubuntu:22.04
+        echo "✅ Development container 'dev' created"
+    else
+        echo "✅ Development container 'dev' already exists"
+    fi
+    
+    # Create chezmoi setup script for container
+    cat > ~/.local/bin/setup-dev-container << 'EOF'
+#!/bin/bash
+echo "🚀 Setting up development environment in container..."
+
+# Update package list
+sudo apt update
+
+# Install chezmoi
+sh -c "$(curl -fsLS get.chezmoi.io)"
+
+# Clone dotfiles and apply configuration
+chezmoi init https://github.com/angusp/dotfiles.git
+echo "📝 Run 'chezmoi init' to configure, then 'chezmoi apply' to install development tools"
+
+echo "✅ Container setup complete!"
+echo ""
+echo "💡 Available commands:"
+echo "  chezmoi init    - Configure your preferences"  
+echo "  chezmoi apply   - Install development tools"
+echo "  exit           - Return to host system"
+EOF
+    
+    chmod +x ~/.local/bin/setup-dev-container
+    echo "✅ Container setup script created at ~/.local/bin/setup-dev-container"
 }
 
 # Function to install Flatpak applications
 install_flatpaks() {
-    echo "📱 Installing Flatpak applications..."
+    echo "📱 Setting up Flatpak..."
     
     # Enable Flathub if not already enabled
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     
-    # Essential apps
-    flatpak install -y flathub org.mozilla.firefox
-    flatpak install -y flathub com.visualstudio.code
-    
-{{- if .features.ai_tools }}
-    # AI/Development tools
-    flatpak install -y flathub com.github.johnfactotum.Foliate
-{{- end }}
-    
-{{- if .features.development_tools }}
-    # Development tools
-    flatpak install -y flathub io.github.shiftey.Desktop
-    flatpak install -y flathub com.github.tchx84.Flatseal
-{{- end }}
+    # No Flatpak apps installed by default - install manually as needed
+    echo "✅ Flatpak configured (install apps manually as needed)"
 }
 
 # Function to setup shell
@@ -179,23 +167,38 @@ EOF
 
 # Main installation flow
 main() {
-    echo "🚀 Starting SteamOS setup..."
+    echo "🚀 Starting SteamOS Distrobox setup..."
     
-{{- if .features.development_tools }}
-    install_dev_tools
-{{- end }}
+    # Always install minimal host tools
+    install_host_essentials
     
+    # Always install and setup Distrobox
+    install_distrobox
+    setup_dev_container
+    
+    # Setup Flatpak
     install_flatpaks
+    
+    # Setup shell and Steam Deck specific configs
     setup_shell
     setup_steam_deck
     
-    echo "✅ SteamOS setup completed!"
+    echo "✅ SteamOS Distrobox setup completed!"
     echo ""
-    echo "📝 Next steps:"
-    echo "  1. Restart your terminal or log out/in for shell changes"
-    echo "  2. The filesystem will be read-only again after reboot"
-    echo "  3. Use 'sudo steamos-readonly disable' to make changes later"
-    echo "  4. Consider using Distrobox for isolated development environments"
+    echo "🐳 Development Environment Setup:"
+    echo "  1. Enter development container: distrobox enter dev"
+    echo "  2. Run setup script: setup-dev-container"
+    echo "  3. Configure chezmoi: chezmoi init"
+    echo "  4. Install full dev environment: chezmoi apply"
+    echo "  5. Exit container: exit"
+    echo ""
+    echo "💡 Benefits:"
+    echo "  • Host system stays minimal (saves root partition space)"
+    echo "  • Development tools in container (unlimited space)"
+    echo "  • Container survives SteamOS updates"
+    echo "  • Access files from both host and container"
+    echo ""
+    echo "🔄 Next session: Just run 'distrobox enter dev' to start developing"
 }
 
 # Run main function

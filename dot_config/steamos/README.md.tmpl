@@ -1,69 +1,162 @@
 {{- if eq .machine.type "steamos" -}}
-# SteamOS Configuration
+# SteamOS Configuration with Distrobox
 
-This directory contains SteamOS-specific configurations for your Steam Deck.
+This directory contains SteamOS-specific configurations optimized for development using Distrobox containers.
 
-## Important SteamOS Notes
+## Development Strategy: Distrobox Approach
 
-### Read-Only Filesystem
-- SteamOS uses a read-only filesystem by default
-- To install packages: `sudo steamos-readonly disable`
-- Changes to `/usr` are lost after system updates
-- Use `/home` and `~/.local` for persistent configurations
+### Why Distrobox?
+- **Space Efficient**: Keeps host system minimal, uses unlimited container space
+- **Persistent**: Survives SteamOS updates
+- **Flexible**: Run any Linux distro (Ubuntu, Fedora, Arch) alongside SteamOS
+- **Integrated**: Seamless file access between host and container
 
-### Package Management
-- **Pacman**: System packages (requires `steamos-readonly disable`)
-- **Flatpak**: Preferred for applications (persistent across updates)
-- **Distrobox**: Recommended for development environments
-
-### Development Setup
-1. **Enable Developer Mode**: 
-   - Settings > System > Developer > Enable Developer Mode
-   - Set a password for the `deck` user
-
-2. **Install Development Tools**:
-   ```bash
-   # Enable pacman
-   sudo steamos-readonly disable
-   
-   # Install base development tools
-   sudo pacman -S base-devel git neovim
-   ```
-
-3. **Start Development**:
-   ```bash
-   # Create project directories
-   mkdir -p ~/Development/{personal,work,experiments}
-   
-   # Create a React project
-   cd ~/Development/personal
-   npx create-react-app myapp
-   cd myapp
-   code .
-   ```
-
-### Recommended Development Workflow
-- Work directly on SteamOS host system
-- Keep all development work in `/home/deck` (persistent across updates)
-- Use Flatpak for desktop applications when needed
-- Use Gaming Mode for gaming, Desktop Mode for development
-
-### Font Installation
-Victor Mono Nerd Font may need manual installation:
-```bash
-# Create fonts directory
-mkdir -p ~/.local/share/fonts
-
-# Download and install Victor Mono Nerd Font
-wget -O /tmp/victormono.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/VictorMono.zip
-unzip /tmp/victormono.zip -d ~/.local/share/fonts/
-fc-cache -fv
+### Architecture Overview
+```
+SteamOS Host (Minimal)          Ubuntu Container (Full Dev)
+├── git, neovim, tmux          ├── All development languages
+├── zsh, basic tools           ├── VS Code, IDEs, browsers  
+├── Distrobox                  ├── Docker, databases
+└── ~/.local/share/chezmoi     └── Full chezmoi environment
 ```
 
-### Terminal Applications
-- **Konsole**: Default terminal emulator
-- **WezTerm**: May need Flatpak installation
-- **Ghostty**: May need manual compilation
+## Quick Start
+
+### 1. Initial Setup
+```bash
+# Run chezmoi to setup host system + Distrobox
+chezmoi apply
+
+# Enter development container
+distrobox enter dev
+
+# Setup full development environment in container
+setup-dev-container
+chezmoi init
+chezmoi apply
+```
+
+### 2. Daily Workflow
+```bash
+# Enter development container
+distrobox enter dev
+
+# Your files are in ~/Development (shared with host)
+cd ~/Development/personal
+code .
+
+# Exit back to host
+exit
+```
+
+## Benefits Over Traditional Approach
+
+| Aspect | Traditional SteamOS | Distrobox Approach |
+|--------|-------------------|-------------------|
+| Root Space Usage | ~1-2GB packages | ~200MB minimal tools |
+| Development Space | Limited by root partition | Unlimited (home partition) |
+| Update Persistence | Lost on SteamOS updates | Survives all updates |
+| Package Management | pacman (read-only issues) | apt/dnf (normal Linux) |
+| IDE Support | Limited by space | Full VS Code, IDEs |
+
+## Configuration Files
+
+### Host System (Minimal)
+- **Konsole Profile**: Victor Mono font with Steam Deck optimizations
+- **Tmux Config**: Handheld-optimized settings for host system
+- **Shell Setup**: Basic zsh with Starship prompt
+- **Git Config**: Basic git configuration
+
+### Container Environment (Full)
+- **Development Languages**: Node.js, Python, Go, Rust, Lua
+- **Modern CLI Tools**: ripgrep, fd, bat, exa, zoxide
+- **Development Tools**: Docker, databases, build tools
+- **Editor Integration**: Full VS Code, neovim setup
+
+## Installation Process
+
+### 1. Host Setup (`run_onchange_steamos-install-packages.sh`)
+- Installs minimal essential tools (~200MB)
+- Installs and configures Distrobox
+- Creates Ubuntu development container
+- Sets up container entry scripts
+
+### 2. Container Setup (`run_onchange_ubuntu-dev-container.sh`)
+- Installs full development environment
+- Configures modern CLI tools
+- Sets up Oh My Zsh and aliases
+- Creates development directory structure
+
+### 3. Font & Desktop (`run_once_steamos-setup.sh`)
+- Installs Victor Mono Nerd Font
+- Configures Konsole terminal
+- Sets up desktop shortcuts
+
+## Container Commands
+
+### Management
+```bash
+distrobox list                    # List containers
+distrobox enter dev              # Enter development container
+distrobox create --name test --image fedora:39  # Create new container
+distrobox rm dev                 # Remove container
+```
+
+### Development Workflow
+```bash
+# Quick development session
+distrobox enter dev
+cd ~/Development/myproject
+code .                           # VS Code in container
+npm run dev                      # Development server
+
+# Container commands are available in host
+distrobox-export --app code      # Export VS Code to host menu
+```
+
+## File System Layout
+
+### Host System
+```
+/home/deck/
+├── .local/share/chezmoi/        # Chezmoi source (host config)
+├── .config/                     # Host system configs
+└── Development/                 # Shared development folder
+```
+
+### Container System  
+```
+/home/deck/  (same home directory)
+├── Development/                 # Same files as host
+├── .local/share/chezmoi/        # Container-specific chezmoi
+└── container-specific configs   # Full development setup
+```
+
+## Troubleshooting
+
+### Container Issues
+```bash
+# Recreate container if corrupted
+distrobox rm dev
+distrobox create --name dev --image ubuntu:22.04
+distrobox enter dev
+setup-dev-container
+
+# Check container status
+distrobox list
+podman ps -a
+```
+
+### Space Management
+```bash
+# Host system cleanup
+sudo pacman -Scc
+sudo journalctl --vacuum-time=1d
+
+# Container cleanup (inside container)
+sudo apt autoremove
+sudo apt autoclean
+```
 
 ## Configuration Applied
 - **Machine Type**: {{ .machine.type }}
@@ -71,5 +164,6 @@ fc-cache -fv
 - **Development Tools**: {{ .features.development_tools }}
 - **AI Tools**: {{ .features.ai_tools }}
 - **Git Tools**: {{ .features.git_tools }}
+- **Container Approach**: Ubuntu 22.04 with full development stack
 
 {{ end -}}
