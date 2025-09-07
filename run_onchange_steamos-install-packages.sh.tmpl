@@ -63,20 +63,69 @@ install_dev_tools() {
         bat \
         eza \
         zoxide \
-        starship
+        starship \
+        openssh \
+        rsync \
+        jq \
+        fzf
     
 {{- if .chezmoi.data.features.development_tools }}
-    # Additional development tools
-    echo "🛠️  Installing additional development tools..."
+    # Development languages and runtimes
+    echo "🛠️  Installing development languages and tools..."
     sudo pacman -S --noconfirm \
         nodejs \
         npm \
+        yarn \
         python \
         python-pip \
+        python-pipenv \
+        python-virtualenv \
+        go \
+        rust \
+        lua \
+        luarocks \
         docker \
         docker-compose \
+        docker-buildx \
+        podman \
+        distrobox \
+        vim \
         code \
-        firefox
+        firefox \
+        chromium \
+        postgresql \
+        redis \
+        nginx
+        
+    # Enable Docker service
+    sudo systemctl enable --now docker
+    sudo usermod -aG docker deck
+    
+    # Install additional Python development tools
+    pip install --user \
+        black \
+        flake8 \
+        mypy \
+        pytest \
+        pipx \
+        poetry
+        
+    # Install Node.js global development tools
+    npm install -g \
+        typescript \
+        @types/node \
+        eslint \
+        prettier \
+        nodemon \
+        pm2 \
+        serve \
+        create-react-app \
+        @vue/cli \
+        vite
+        
+    # Install Rust development tools
+    rustup default stable
+    rustup component add clippy rustfmt rust-analyzer
 {{- end }}
 }
 

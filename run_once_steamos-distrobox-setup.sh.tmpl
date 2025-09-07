@@ -1,0 +1,269 @@
+{{- if and (eq .chezmoi.data.machine.type "steamos") (.chezmoi.data.features.development_tools) -}}
+#!/bin/bash
+
+# SteamOS Distrobox Development Environment Setup
+# Creates isolated development containers for different projects
+
+set -e
+
+echo "📦 Setting up Distrobox development environments..."
+
+# Function to check if Distrobox is available
+check_distrobox() {
+    if ! command -v distrobox >/dev/null 2>&1; then
+        echo "❌ Distrobox not found. Installing via Flatpak..."
+        flatpak install -y flathub io.github.89luca89.distrobox
+        
+        # Create symlink for easier access
+        mkdir -p ~/.local/bin
+        ln -sf /var/lib/flatpak/app/io.github.89luca89.distrobox/current/active/files/bin/distrobox ~/.local/bin/distrobox
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+}
+
+# Function to create Ubuntu development container
+create_ubuntu_dev() {
+    echo "🐧 Creating Ubuntu development container..."
+    
+    if distrobox list | grep -q "ubuntu-dev"; then
+        echo "✅ Ubuntu dev container already exists"
+        return 0
+    fi
+    
+    distrobox create \
+        --name ubuntu-dev \
+        --image ubuntu:22.04 \
+        --init-hooks "apt update && apt install -y sudo curl git build-essential" \
+        --additional-packages "sudo curl git build-essential python3 python3-pip nodejs npm"
+    
+    echo "✅ Ubuntu development container created"
+}
+
+# Function to create Fedora development container  
+create_fedora_dev() {
+    echo "🎩 Creating Fedora development container..."
+    
+    if distrobox list | grep -q "fedora-dev"; then
+        echo "✅ Fedora dev container already exists"
+        return 0
+    fi
+    
+    distrobox create \
+        --name fedora-dev \
+        --image fedora:39 \
+        --init-hooks "dnf update -y && dnf install -y sudo curl git gcc gcc-c++ make" \
+        --additional-packages "sudo curl git gcc gcc-c++ make python3 python3-pip nodejs npm"
+    
+    echo "✅ Fedora development container created"
+}
+
+# Function to create Arch development container (closer to SteamOS)
+create_arch_dev() {
+    echo "🏛️  Creating Arch development container..."
+    
+    if distrobox list | grep -q "arch-dev"; then
+        echo "✅ Arch dev container already exists"
+        return 0
+    fi
+    
+    distrobox create \
+        --name arch-dev \
+        --image archlinux:latest \
+        --init-hooks "pacman -Syu --noconfirm && pacman -S --noconfirm sudo curl git base-devel" \
+        --additional-packages "sudo curl git base-devel python nodejs npm"
+    
+    echo "✅ Arch development container created"
+}
+
+# Function to setup development aliases
+setup_dev_aliases() {
+    echo "🔧 Setting up development aliases..."
+    
+    # Create aliases for easy container access
+    cat >> ~/.zshrc << 'EOF'
+
+# Distrobox Development Aliases
+alias ubuntu-dev='distrobox enter ubuntu-dev'
+alias fedora-dev='distrobox enter fedora-dev'  
+alias arch-dev='distrobox enter arch-dev'
+alias dbox-ls='distrobox list'
+alias dbox-rm='distrobox rm'
+alias dbox-stop='distrobox stop'
+EOF
+    
+    echo "✅ Development aliases added to ~/.zshrc"
+}
+
+# Function to create desktop shortcuts for containers
+create_desktop_shortcuts() {
+    echo "🖥️  Creating desktop shortcuts for development containers..."
+    
+    mkdir -p ~/.local/share/applications
+    
+    # Ubuntu dev shortcut
+    cat > ~/.local/share/applications/ubuntu-dev.desktop << EOF
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Ubuntu Dev
+Comment=Ubuntu development container
+Exec=konsole -e distrobox enter ubuntu-dev
+Icon=distributor-logo-ubuntu
+Terminal=false
+Categories=Development;System;
+StartupNotify=true
+EOF
+    
+    # Fedora dev shortcut
+    cat > ~/.local/share/applications/fedora-dev.desktop << EOF
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Fedora Dev
+Comment=Fedora development container
+Exec=konsole -e distrobox enter fedora-dev
+Icon=distributor-logo-fedora
+Terminal=false
+Categories=Development;System;
+StartupNotify=true
+EOF
+    
+    # Arch dev shortcut
+    cat > ~/.local/share/applications/arch-dev.desktop << EOF
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Arch Dev
+Comment=Arch development container
+Exec=konsole -e distrobox enter arch-dev
+Icon=distributor-logo-archlinux
+Terminal=false
+Categories=Development;System;
+StartupNotify=true
+EOF
+    
+    chmod +x ~/.local/share/applications/*-dev.desktop
+    
+    echo "✅ Desktop shortcuts created"
+}
+
+# Function to setup container development environment
+setup_container_dotfiles() {
+    echo "🔧 Setting up dotfiles in containers..."
+    
+    # Script to run inside containers
+    cat > /tmp/setup-container.sh << 'EOF'
+#!/bin/bash
+# Install chezmoi in container
+curl -sfL https://git.io/chezmoi | sh
+sudo mv ./bin/chezmoi /usr/local/bin/
+
+# Initialize dotfiles
+chezmoi init --apply {{ .chezmoi.data.name | lower | replace " " "" }}
+EOF
+    chmod +x /tmp/setup-container.sh
+    
+    # Run setup in each container
+    for container in ubuntu-dev fedora-dev arch-dev; do
+        if distrobox list | grep -q "$container"; then
+            echo "🔧 Setting up dotfiles in $container..."
+            distrobox enter "$container" -- /tmp/setup-container.sh
+        fi
+    done
+    
+    rm /tmp/setup-container.sh
+    echo "✅ Dotfiles setup in containers"
+}
+
+# Function to create development project directories
+create_project_dirs() {
+    echo "📁 Creating development project directories..."
+    
+    mkdir -p ~/Development/{personal,work,experiments,learning}
+    mkdir -p ~/Development/personal/{websites,tools,scripts}
+    mkdir -p ~/Development/work/{projects,documentation}
+    
+    # Create a projects overview
+    cat > ~/Development/README.md << EOF
+# Steam Deck Development Environment
+
+## Development Containers
+
+- **ubuntu-dev**: Ubuntu 22.04 container for general development
+- **fedora-dev**: Fedora 39 container for Red Hat ecosystem
+- **arch-dev**: Arch Linux container (similar to SteamOS base)
+
+## Quick Access
+
+\`\`\`bash
+# Enter containers
+ubuntu-dev  # or: distrobox enter ubuntu-dev
+fedora-dev  # or: distrobox enter fedora-dev
+arch-dev    # or: distrobox enter arch-dev
+
+# List containers
+dbox-ls
+
+# Remove container
+dbox-rm <container-name>
+\`\`\`
+
+## Project Structure
+
+- **personal/**: Personal projects and side projects
+- **work/**: Work-related development
+- **experiments/**: Testing new technologies
+- **learning/**: Educational projects and tutorials
+
+## Tips
+
+- Use containers for development to avoid affecting SteamOS
+- Host filesystem is accessible at \`/run/host\` inside containers
+- Install development tools inside containers, not on host
+- Use VS Code with Remote-Containers extension for container development
+EOF
+    
+    echo "✅ Project directories and documentation created"
+}
+
+# Function to show usage information
+show_usage_info() {
+    echo ""
+    echo "🎉 Distrobox development environment setup completed!"
+    echo ""
+    echo "📝 Available containers:"
+    distrobox list
+    echo ""
+    echo "🚀 Quick start:"
+    echo "  ubuntu-dev    # Enter Ubuntu development container"
+    echo "  fedora-dev    # Enter Fedora development container"
+    echo "  arch-dev      # Enter Arch development container"
+    echo ""
+    echo "💡 Development workflow:"
+    echo "  1. Use containers for all development work"
+    echo "  2. Projects in ~/Development are shared with containers"
+    echo "  3. Install language runtimes and tools inside containers"
+    echo "  4. Use host VS Code with Remote-Containers extension"
+    echo ""
+    echo "🔧 Container management:"
+    echo "  dbox-ls       # List all containers"
+    echo "  dbox-stop     # Stop containers"
+    echo "  dbox-rm       # Remove containers"
+}
+
+# Main function
+main() {
+    check_distrobox
+    create_ubuntu_dev
+    create_fedora_dev
+    create_arch_dev
+    setup_dev_aliases
+    create_desktop_shortcuts
+    setup_container_dotfiles
+    create_project_dirs
+    show_usage_info
+}
+
+# Run main function
+main "$@"
+{{ end -}}
