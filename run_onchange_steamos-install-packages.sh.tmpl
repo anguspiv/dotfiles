@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.data.machine.type "steamos" -}}
+{{- if eq .machine.type "steamos" -}}
 #!/bin/bash
 
 # SteamOS Package Installation Script
@@ -69,7 +69,7 @@ install_dev_tools() {
         jq \
         fzf
     
-{{- if .chezmoi.data.features.development_tools }}
+{{- if .features.development_tools }}
     # Development languages and runtimes
     echo "🛠️  Installing development languages and tools..."
     sudo pacman -S --noconfirm \
@@ -132,12 +132,12 @@ install_flatpaks() {
     flatpak install -y flathub org.mozilla.firefox
     flatpak install -y flathub com.visualstudio.code
     
-{{- if .chezmoi.data.features.ai_tools }}
+{{- if .features.ai_tools }}
     # AI/Development tools
     flatpak install -y flathub com.github.johnfactotum.Foliate
 {{- end }}
     
-{{- if .chezmoi.data.features.development_tools }}
+{{- if .features.development_tools }}
     # Development tools
     flatpak install -y flathub io.github.shiftey.Desktop
     flatpak install -y flathub com.github.tchx84.Flatseal
@@ -181,7 +181,7 @@ EOF
 main() {
     echo "🚀 Starting SteamOS setup..."
     
-{{- if .chezmoi.data.features.development_tools }}
+{{- if .features.development_tools }}
     install_dev_tools
 {{- end }}
     
