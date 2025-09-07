@@ -1,11 +1,15 @@
 local wezterm = require 'wezterm'
 
 return {
-  -- Font consistency with Ghostty  
-  font = wezterm.font('Monaspace Neon', {
+  -- Victor Mono Nerd Font with ligatures
+  font = wezterm.font('VictorMono Nerd Font', {
     weight = 'Regular',
+    italic = false,
   }),
   font_size = 14.0,
+  
+  -- Enable ligatures properly for Victor Mono
+  harfbuzz_features = { 'calt=1', 'liga=1', 'dlig=1', 'ss01=1' },
   
   -- Colors to match tmux Nordic theme
   color_scheme = 'nord',
