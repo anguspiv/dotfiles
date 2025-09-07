@@ -2,17 +2,17 @@
 # run_onchange_health-check.sh.tmpl
 
 # Chezmoi health check and maintenance
-echo "🔍 Running Chezmoi health check for {{ .machine.hostname }}..."
+echo "🔍 Running Chezmoi health check for {{ .chezmoi.hostname }}..."
 
 # Check for missing critical packages
 missing_packages=()
 critical_tools=("git" "zsh" "{{ .editor }}")
 
-{{- if .features.development }}
+{{- if .features.development_tools }}
 critical_tools+=("node" "npm")
 {{- end }}
 
-{{- if .features.docker }}
+{{- if .features.development_tools }}
 critical_tools+=("docker")
 {{- end }}
 
@@ -76,4 +76,4 @@ fi
 
 echo "✅ Health check complete!"
 
-# Hash for change detection: {{ .chezmoi.version }}-{{ .machine.hostname }}-{{ now | date "2006-01-02" }}
+# Hash for change detection: {{ .chezmoi.version }}-{{ .chezmoi.hostname }}-{{ now | date "2006-01-02" }}
