@@ -2,123 +2,88 @@ packages:
   darwin:
     taps:
       - dbcli/tap
-      - heroku/brew
-      - homebrew/bundle
-      - homebrew/services
       - int128/kubelogin
-      - jandedobbeleer/oh-my-posh
-      - osx-cross/arm
-      - osx-cross/avr
-      - qmk/qmk
-      - wez/wezterm
     brews:
       - autoenv
-      - icu4c@76
-      - pycparser
-      - cffi
       - awscli
       - chezmoi
       - chroma
-      - libssh2
       - curl
-      - deno
       - diff-so-fancy
-      - docutils
       - epr
-      - libgit2
       - eza
-      - fish
+      - fnm
       - fzf
       - gh
-      - libarchive
-      - ghostscript
       - git
       - git-extras
+      - git-flow-avh
       - glow
-      - p11-kit
-      - unbound
-      - gnutls
       - gnupg
-      - openssl@1.1
-      - python@3.10
+      - python@3.13
       - grc
-      - netpbm
-      - groff
-      - pkgconf
-      - guile
       - helm
-      - hub
       - jq
-      - node
-      - pandoc
-      - jupyterlab
+      - kubernetes-cli
       - k9s
-      - krb5
-      - lastpass-cli
-      - lnav
       - mas
       - neovim
-      - nghttp2
-      - nvm
-      - openldap
-      - openshift-cli
+      - node
       - pgcli
-      - pillow
       - pinentry-mac
       - pnpm
-      - postgresql@15
-      - pygments
-      - python-tabulate
-      - python@3.9
+      - postgresql@16
       - reattach-to-user-namespace
       - redis
       - ruby
       - rust
-      - socat
-      - speedtest-cli
       - starship
-      - task
-      - taskwarrior-tui
+      - speedtest-cli
       - tmux
       - tmuxinator
       - tpm
-      - vercel-cli
       - wget
       - wifi-password
       - zoxide
       - zplug
       - zsh-syntax-highlighting
-      - heroku/brew/heroku
       - int128/kubelogin/kubelogin
-      - jandedobbeleer/oh-my-posh/oh-my-posh
-      - qmk/qmk/qmk
     casks:
-      - "font-monaspace"
-      - "font-monaspace-nerd-font"
-      - "font-victor-mono-nerd-font"
-      - "ghostty"
-      - "github@beta"
-      - "google-cloud-sdk"
-      - "kitty"
-      - "raycast"
-      - "wezterm"
-      - "zed"
-      - "zoom"
+      - docker
+      - ghostty
+      - font-monaspace
+      - font-monaspace-nerd-font
+      - font-monaspice-nerd-font
+      - font-victor-mono-nerd-font
+      - google-cloud-sdk
+      - kitty
+      - visual-studio-code
+      - iterm2
+      - wezterm
+      - zed
+      - google-chrome
+      - arc
+      - slack
+      - zoom
+      - obsidian
+      - obs
     mas:
-      - name: "Airmail"
-        id: 918858936
-      - name: "Fantastical"
-        id: 975937182
-      - name: "In Your Face"
-        id: 1476964367
-      - name: "Keystroke Pro"
-        id: 1572206224
-      - name: "Slack"
-        id: 803453959
-      - name: "Soulver 3"
-        id: 1508732804
       - name: "Xcode"
         id: 497799835
+      - name: "Fantastical"
+        id: 975937182
+      - name: "Airmail"
+        id: 918858936
+      - name: "Bakery"
+        id: 1575220747
+      - name: "Claquette"
+        id: 587748131
+      - name: "In Your Face"
+        id: 1476964367
+      - name: "Kindle"
+        id: 302584613
+      - name: "Soulver 3"
+        id: 1508732804
     vscode:
       - 4ops.terraform
       - aaron-bond.better-comments
@@ -127,13 +92,13 @@ packages:
       - adelphes.android-dev-ext
       - adpyke.codesnap
       - alefragnani.project-manager
+      - amazonwebservices.codewhisperer-for-command-line-companion
       - andyhuzhill.typewriterscrollmode
-      - anseki.vscode-color
+      - anthropic.claude-code
       - apollographql.vscode-apollo
       - astro-build.astro-vscode
       - asvetliakov.vscode-neovim
       - atlassian.atlascode
-      - ban.spellright
       - benspaulding.procfile
       - bierner.github-markdown-preview
       - bierner.markdown-checkbox
@@ -146,12 +111,12 @@ packages:
       - christian-kohler.npm-intellisense
       - christian-kohler.path-intellisense
       - codezombiech.gitignore
-      - connorshea.vscode-test-explorer-status-bar
       - cssho.vscode-svgviewer
       - csstools.postcss
       - davidanson.vscode-markdownlint
       - dbaeumer.vscode-eslint
       - dcortes92.freemarker
+      - devantler.gitlab-extension-pack
       - diemasmichiels.emulate
       - donjayamanne.githistory
       - dotjoshjohnson.xml
@@ -173,7 +138,6 @@ packages:
       - github.codespaces
       - github.copilot
       - github.copilot-chat
-      - github.github-vscode-theme
       - github.remotehub
       - github.vscode-github-actions
       - github.vscode-pull-request-github
@@ -182,22 +146,15 @@ packages:
       - graphql.vscode-graphql
       - graphql.vscode-graphql-syntax
       - gruntfuggly.todo-tree
-      - hbenl.vscode-test-explorer
-      - hbenl.vscode-test-explorer-liveshare
       - hookyqr.jsdoctagcomplete
       - hungvo.htext
       - ibm.output-colorizer
-      - ionutvmi.path-autocomplete
-      - jasonn-porch.gitlab-mr
       - joaopalmeiro.icons-octicons
       - jock.svg
       - joshbolduc.story-explorer
-      - jpoissonnier.vscode-styled-components
       - kevinrose.vsc-python-indent
-      - kingwl.vscode-vitest-runner
       - kruemelkatze.vscode-dashboard
       - kumar-harsh.graphql-for-vscode
-      - lihui.vs-color-picker
       - littlefoxteam.vscode-python-test-adapter
       - lucono.karma-test-explorer
       - magicstack.magicpython
@@ -213,11 +170,11 @@ packages:
       - mitaki28.vscode-clang
       - monokai.theme-monokai-pro-vscode
       - mrmlnc.vscode-stylefmt
-      - ms-azuretools.vscode-azureresourcegroups
       - ms-python.debugpy
       - ms-python.isort
       - ms-python.python
       - ms-python.vscode-pylance
+      - ms-python.vscode-python-envs
       - ms-toolsai.jupyter
       - ms-toolsai.jupyter-keymap
       - ms-toolsai.jupyter-renderers
@@ -226,14 +183,11 @@ packages:
       - ms-vscode-remote.remote-containers
       - ms-vscode.azure-account
       - ms-vscode.azure-repos
-      - ms-vscode.live-server
       - ms-vscode.remote-repositories
       - ms-vscode.test-adapter-converter
       - ms-vscode.vscode-github-issue-notebooks
       - ms-vscode.vscode-js-profile-flame
-      - ms-vscode.vscode-typescript-next
       - ms-vsliveshare.vsliveshare
-      - ms-vsliveshare.vsliveshare-pack
       - msjsdiag.vscode-react-native
       - naumovs.color-highlight
       - njpwerner.autodocstring
@@ -247,6 +201,7 @@ packages:
       - pkief.material-product-icons
       - prisma.prisma
       - qezhu.gitlink
+      - rajeshwaran.developer-theme-dark
       - redhat.vscode-yaml
       - richie5um2.vscode-sort-json
       - ritwickdey.liveserver
@@ -259,10 +214,9 @@ packages:
       - spmeesseman.vscode-taskexplorer
       - spywhere.guides
       - steoates.autoimport
-      - stevencl.adddoccomments
+      - streetsidesoftware.code-spell-checker
       - stylelint.vscode-stylelint
       - tamasfe.even-better-toml
-      - team-sapling.sapling
       - thomas-baumgaertner.vcl
       - tombonnike.vscode-status-bar-format-toggle
       - tuxtina.json2yaml
@@ -270,6 +224,7 @@ packages:
       - tyriar.sort-lines
       - unifiedjs.vscode-mdx
       - usernamehw.errorlens
+      - vercel.turbo-vsc
       - vincaslt.highlight-matching-tag
       - visualstudioexptteam.intellicode-api-usage-examples
       - visualstudioexptteam.vscodeintellicode
@@ -277,6 +232,7 @@ packages:
       - vivaxy.vscode-conventional-commits
       - vscode-icons-team.vscode-icons
       - vscodevim.vim
+      - vsls-contrib.gitdoc
       - vspacecode.whichkey
       - wayou.vscode-todo-highlight
       - webrender.synthwave-x-fluoromachine
