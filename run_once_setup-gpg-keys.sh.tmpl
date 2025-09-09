@@ -35,9 +35,36 @@ check_gpg_installed() {
     fi
 }
 
+# Function to auto-detect existing GPG key
+auto_detect_key() {
+    local email="{{ .email }}"
+    local detected_key
+    
+    detected_key=$(gpg --list-secret-keys --keyid-format=long "$email" 2>/dev/null | grep sec | sed 's/.*\/\([A-F0-9]*\).*/\1/' | head -1)
+    
+    if [ -n "$detected_key" ]; then
+        echo "🔍 Auto-detected GPG key: $detected_key"
+        echo "$detected_key"
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Function to check if our signing key exists
 check_signing_key() {
     local key_id="{{ .signingkey }}"
+    
+    # If no key configured, try to auto-detect
+    if [ -z "$key_id" ]; then
+        if key_id=$(auto_detect_key); then
+            echo "✅ Using auto-detected signing key: $key_id"
+            return 0
+        else
+            echo "❌ No signing key configured and none auto-detected"
+            return 1
+        fi
+    fi
     
     if gpg --list-secret-keys --keyid-format=long | grep -q "$key_id"; then
         echo "✅ Signing key $key_id found in keyring"
@@ -220,6 +247,11 @@ skip_gpg_setup() {
 # Function to test GPG signing
 test_gpg_signing() {
     local key_id="{{ .signingkey }}"
+    
+    # Use auto-detected key if none configured
+    if [ -z "$key_id" ]; then
+        key_id=$(auto_detect_key) || return 1
+    fi
     
     echo ""
     echo "🧪 Testing GPG signing..."
