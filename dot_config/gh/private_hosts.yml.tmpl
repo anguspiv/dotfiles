@@ -1,0 +1,8 @@
+{{- $githubToken := promptStringOnce . "github.oauth_token" "GitHub OAuth token (will be stored securely)" -}}
+github.com:
+    user: anguspiv
+    oauth_token: {{ $githubToken }}
+    git_protocol: ssh
+    users:
+        anguspiv:
+            oauth_token: {{ $githubToken }}
