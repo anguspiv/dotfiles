@@ -4,17 +4,20 @@
 
 {{- $name := promptStringOnce . "name" "What is your full name" -}}
 {{- $email := promptStringOnce . "email" "What is your email address" -}}
+{{- $signingkey := promptStringOnce . "signingkey" "What is your GPG signing key ID (leave empty if none)" -}}
 {{- $machineType := promptChoiceOnce . "machine.type" "What type of machine is this" (list "development" "server" "minimal" "steamos") -}}
 {{- $performance := promptChoiceOnce . "machine.performance" "What is the performance level of this machine" (list "high" "medium" "low" "handheld") -}}
 {{- $aiTools := promptBoolOnce . "features.ai_tools" "Enable AI tools integration" -}}
 {{- $devTools := promptBoolOnce . "features.development_tools" "Enable development tools" -}}
 {{- $gitTools := promptBoolOnce . "features.git_tools" "Enable git tools" -}}
 {{- $kubernetes := promptBoolOnce . "features.kubernetes" "Enable kubernetes tools" -}}
+{{- $docker := promptBoolOnce . "features.docker" "Enable docker tools" -}}
 
 data:
   configVersion: {{ $configVersion }}
   name: {{ $name | quote }}
   email: {{ $email | quote }}
+  signingkey: {{ $signingkey | quote }}
   machine:
     type: {{ $machineType | quote }}
     performance: {{ $performance | quote }}
@@ -23,11 +26,11 @@ data:
     development_tools: {{ $devTools }}
     git_tools: {{ $gitTools }}
     kubernetes: {{ $kubernetes }}
+    docker: {{ $docker }}
   editor: "zed"
   visual: "zed"
   shell: "zsh"
   terminal: "ghostty"
-  signingkey: "10EB17A2696118B4"
   development:
     languages:
       - "javascript"

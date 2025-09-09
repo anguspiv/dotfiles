@@ -1,0 +1,53 @@
+{{- if and (eq .chezmoi.os "darwin") (.features.git_tools) -}}
+#!/bin/bash
+
+echo "🔐 Setting up GPG signing key for git commits..."
+
+# Check if a signing key is already configured and working
+current_key=$(git config --global user.signingkey 2>/dev/null)
+if [[ -n "$current_key" ]] && gpg --list-secret-keys "$current_key" >/dev/null 2>&1; then
+    echo "✅ Git signing key already configured and working: $current_key"
+    exit 0
+fi
+
+# Find available secret keys for the configured email
+email="{{ .email }}"
+echo "🔍 Looking for GPG keys for $email..."
+
+# Get secret keys that match the email
+matching_keys=$(gpg --list-secret-keys --with-colons 2>/dev/null | \
+    awk -F: -v email="$email" '
+    /^sec:/ { key_id = $5; key_found = 0 }
+    /^uid:/ && $10 ~ email { key_found = 1 }
+    key_found && /^sec:/ { print substr(key_id, length(key_id)-15) }
+    ' | head -1)
+
+if [[ -n "$matching_keys" ]]; then
+    signing_key="$matching_keys"
+    echo "✅ Found matching GPG key: $signing_key"
+    
+    # Configure git to use this key
+    git config --global user.signingkey "$signing_key"
+    git config --global commit.gpgsign true
+    
+    echo "✅ Git configured to use GPG key: $signing_key"
+    echo "✅ GPG commit signing enabled globally"
+    
+    # Test the signing
+    if echo "test" | gpg --clearsign >/dev/null 2>&1; then
+        echo "✅ GPG signing test successful"
+    else
+        echo "⚠️  GPG signing test failed - you may need to unlock your key"
+    fi
+else
+    echo "❌ No GPG secret keys found for $email"
+    echo ""
+    echo "To create a new GPG key, run:"
+    echo "  gpg --full-generate-key"
+    echo ""
+    echo "Make sure to use the email: $email"
+    echo "Then re-run chezmoi apply to configure git signing"
+fi
+
+echo "🔐 GPG setup complete!"
+{{- end -}}

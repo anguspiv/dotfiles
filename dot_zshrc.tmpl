@@ -2,6 +2,9 @@
 # Generated for: {{ .name }} <{{ .email }}>
 # Machine: {{ .machine.type }} ({{ .machine.performance }}) | Terminal: {{ .terminal }}
 
+# Amazon Q pre block. Keep at the top of this file.
+[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
+
 # Performance: Early return for non-interactive sessions
 [[ $- != *i* ]] && return
 
@@ -36,8 +39,8 @@ compinit -i -u
 export ANTHROPIC_API_KEY_FILE="$HOME/.config/secrets.sh"
 {{- end }}
 
-# GPG agent startup
-gpgconf --launch gpg-agent
+# GPG agent startup (disabled for performance)
+# gpgconf --launch gpg-agent
 
 # Setup lazy loading for performance
 setup_lazy_loading
@@ -118,3 +121,10 @@ elif command -v claude >/dev/null 2>&1; then
   # Claude already in PATH
   alias claude="claude"
 fi
+
+# Google Cloud SDK integration (disabled for performance)
+# if [ -f '/usr/local/share/google-cloud-sdk/path.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/path.zsh.inc'; fi
+# if [ -f '/usr/local/share/google-cloud-sdk/completion.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/completion.zsh.inc'; fi
+
+# Amazon Q post block. Keep at the bottom of this file.
+[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"

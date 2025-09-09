@@ -1,5 +1,4 @@
 [user]
-	signingkey = {{ .signingkey }}
 	name = {{ .name | quote }}
 	email = {{ .email | quote }}
 [alias]
@@ -59,3 +58,11 @@
 	defaultBranch = main
 [mergetool "nvimdiff"]
   layout = "LOCAL,BASE,REMOTE / MERGED"
+[bulkworkspaces]
+	disney = /Users/Angus.Perkerson/workspace/disney
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/local/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/local/bin/gh auth git-credential
