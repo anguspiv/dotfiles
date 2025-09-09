@@ -50,6 +50,7 @@
 [core]
   	pager = diff-so-fancy | less --tabs=4 -RFX
     editor = {{ .editor | quote }}
+	hooksPath = {{ .chezmoi.homeDir }}/.config/git/hooks
 [add "interactive"]
 	useBuiltin = false
 [interactive]
