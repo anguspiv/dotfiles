@@ -1,0 +1,276 @@
+#!/bin/bash
+
+# GPG Key Setup Script
+# Checks for existing GPG keys and helps set up signing key if needed
+
+set -e
+
+echo "🔐 Setting up GPG keys for code signing..."
+
+# Function to check if GPG is installed
+check_gpg_installed() {
+    if ! command -v gpg >/dev/null 2>&1; then
+        echo "❌ GPG not found. Installing..."
+        {{- if eq .chezmoi.os "darwin" }}
+        if command -v brew >/dev/null 2>&1; then
+            brew install gnupg
+        else
+            echo "⚠️  Please install Homebrew first or install GPG manually"
+            exit 1
+        fi
+        {{- else if eq .machine.type "steamos" }}
+        # Install GPG on SteamOS
+        if command -v pacman >/dev/null 2>&1; then
+            sudo pacman -S --noconfirm gnupg
+        else
+            echo "⚠️  Cannot install GPG automatically on this system"
+            exit 1
+        fi
+        {{- else }}
+        echo "⚠️  Please install GPG for your system first"
+        exit 1
+        {{- end }}
+    else
+        echo "✅ GPG is installed"
+    fi
+}
+
+# Function to check if our signing key exists
+check_signing_key() {
+    local key_id="{{ .signingkey }}"
+    
+    if gpg --list-secret-keys --keyid-format=long | grep -q "$key_id"; then
+        echo "✅ Signing key $key_id found in keyring"
+        return 0
+    else
+        echo "❌ Signing key $key_id not found in keyring"
+        return 1
+    fi
+}
+
+# Function to list existing keys
+list_existing_keys() {
+    echo ""
+    echo "📋 Current GPG keys in keyring:"
+    if gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep -q "sec"; then
+        gpg --list-secret-keys --keyid-format=long | grep -E "(sec|uid)" | sed 's/^/   /'
+    else
+        echo "   No secret keys found"
+    fi
+    echo ""
+}
+
+# Function to prompt for key import
+prompt_key_import() {
+    local key_id="{{ .signingkey }}"
+    
+    echo "🔑 GPG signing key setup required"
+    echo ""
+    echo "Your chezmoi configuration expects signing key: $key_id"
+    echo ""
+    echo "Choose an option:"
+    echo "  1) Import existing key from file"
+    echo "  2) Import from keyserver"
+    echo "  3) Generate new key"
+    echo "  4) Skip GPG setup (disable signing)"
+    echo ""
+    
+    read -p "Enter choice (1-4): " choice
+    
+    case $choice in
+        1)
+            import_from_file
+            ;;
+        2)
+            import_from_keyserver "$key_id"
+            ;;
+        3)
+            generate_new_key
+            ;;
+        4)
+            skip_gpg_setup
+            ;;
+        *)
+            echo "❌ Invalid choice. Skipping GPG setup."
+            ;;
+    esac
+}
+
+# Function to import key from file
+import_from_file() {
+    echo ""
+    echo "📁 Importing GPG key from file..."
+    echo ""
+    echo "Common locations for GPG keys:"
+    echo "  • ~/Desktop/"
+    echo "  • ~/Downloads/"
+    echo "  • USB drive"
+    echo ""
+    
+    read -p "Enter path to your GPG private key file: " key_file
+    
+    if [ ! -f "$key_file" ]; then
+        echo "❌ File not found: $key_file"
+        return 1
+    fi
+    
+    echo "🔓 Importing key from $key_file..."
+    if gpg --import "$key_file"; then
+        echo "✅ Key imported successfully"
+        setup_trust
+    else
+        echo "❌ Failed to import key"
+        return 1
+    fi
+}
+
+# Function to import from keyserver
+import_from_keyserver() {
+    local key_id="$1"
+    
+    echo ""
+    echo "🌐 Importing key $key_id from keyserver..."
+    
+    # Try multiple keyservers
+    local keyservers=(
+        "hkps://keys.openpgp.org"
+        "hkps://keyserver.ubuntu.com"
+        "hkps://pgp.mit.edu"
+    )
+    
+    for keyserver in "${keyservers[@]}"; do
+        echo "🔍 Trying $keyserver..."
+        if gpg --keyserver "$keyserver" --recv-keys "$key_id" 2>/dev/null; then
+            echo "✅ Key imported from $keyserver"
+            setup_trust
+            return 0
+        fi
+    done
+    
+    echo "❌ Failed to import key from any keyserver"
+    echo "💡 You may need to:"
+    echo "   • Upload your key to a keyserver first"
+    echo "   • Use option 1 to import from a file"
+    return 1
+}
+
+# Function to generate new key
+generate_new_key() {
+    echo ""
+    echo "🆕 Generating new GPG key..."
+    echo ""
+    echo "⚠️  This will create a new key, not import your existing one."
+    echo "   Your existing key ID {{ .signingkey }} will not match."
+    echo ""
+    read -p "Continue with new key generation? (y/N): " confirm
+    
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo "❌ Key generation cancelled"
+        return 1
+    fi
+    
+    echo "📝 Please follow the GPG key generation prompts..."
+    echo "   Recommended settings:"
+    echo "   • Key type: RSA and RSA (default)"
+    echo "   • Key size: 4096"
+    echo "   • Expiration: 0 (no expiration) or 2y (2 years)"
+    echo "   • Name: {{ .name }}"
+    echo "   • Email: {{ .email }}"
+    echo ""
+    
+    gpg --full-generate-key
+    
+    echo ""
+    echo "🔍 Your new key ID:"
+    gpg --list-secret-keys --keyid-format=long "{{ .email }}" | grep sec | sed 's/.*\/\([A-F0-9]*\).*/\1/'
+    echo ""
+    echo "⚠️  Update your chezmoi configuration with the new key ID:"
+    echo "   chezmoi edit-config"
+    echo "   Change signingkey to your new key ID"
+}
+
+# Function to setup key trust
+setup_trust() {
+    local key_id="{{ .signingkey }}"
+    
+    echo ""
+    echo "🔒 Setting up key trust..."
+    
+    # Set ultimate trust for our own key
+    echo -e "5\ny\n" | gpg --command-fd 0 --expert --edit-key "$key_id" trust quit 2>/dev/null || true
+    
+    echo "✅ Key trust configured"
+}
+
+# Function to skip GPG setup
+skip_gpg_setup() {
+    echo ""
+    echo "⏭️  Skipping GPG setup..."
+    echo ""
+    echo "⚠️  Git commit signing is currently enabled but will fail without a key."
+    echo ""
+    echo "To disable Git signing:"
+    echo "  git config --global commit.gpgsign false"
+    echo "  git config --global tag.gpgsign false"
+    echo ""
+    echo "To setup GPG later, run this script again:"
+    echo "  chezmoi execute-template < ~/.local/share/chezmoi/run_once_setup-gpg-keys.sh.tmpl | bash"
+}
+
+# Function to test GPG signing
+test_gpg_signing() {
+    local key_id="{{ .signingkey }}"
+    
+    echo ""
+    echo "🧪 Testing GPG signing..."
+    
+    # Test signing
+    if echo "test" | gpg --armor --detach-sign --local-user "$key_id" >/dev/null 2>&1; then
+        echo "✅ GPG signing test successful"
+        
+        # Test git signing
+        echo "🔧 Testing Git commit signing..."
+        if git config --global user.signingkey "$key_id" 2>/dev/null; then
+            echo "✅ Git signing configured successfully"
+        else
+            echo "⚠️  Git signing configuration may need manual setup"
+        fi
+    else
+        echo "❌ GPG signing test failed"
+        echo "💡 You may need to:"
+        echo "   • Enter your GPG passphrase"
+        echo "   • Check key permissions"
+        echo "   • Verify key is properly imported"
+    fi
+}
+
+# Main function
+main() {
+    check_gpg_installed
+    
+    echo ""
+    list_existing_keys
+    
+    if check_signing_key; then
+        echo "🎉 GPG signing key is already set up!"
+        test_gpg_signing
+    else
+        prompt_key_import
+        
+        # Check again after import attempt
+        if check_signing_key; then
+            test_gpg_signing
+        fi
+    fi
+    
+    echo ""
+    echo "🔐 GPG setup complete!"
+    echo ""
+    echo "💡 Useful commands:"
+    echo "   gpg --list-secret-keys          # List your keys"
+    echo "   gpg --armor --export KEY_ID     # Export public key"
+    echo "   git log --show-signature        # Verify signed commits"
+}
+
+# Run main function
+main "$@"
