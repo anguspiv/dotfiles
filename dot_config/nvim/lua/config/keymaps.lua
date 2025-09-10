@@ -2,13 +2,12 @@
 -- Optimized for TypeScript/JavaScript development
 
 local function map(mode, lhs, rhs, opts)
-  local keys = require("lazy.core.handler").handlers.keys
   opts = opts or {}
   opts.silent = opts.silent ~= false
   if opts.remap and not vim.g.vscode then
     opts.remap = nil
   end
-  keys.register({ lhs, rhs, mode = mode, opts = opts })
+  vim.keymap.set(mode, lhs, rhs, opts)
 end
 
 -- Better up/down
