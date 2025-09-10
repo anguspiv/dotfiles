@@ -8,6 +8,7 @@ return {
       "mason.nvim",
       "williamboman/mason-lspconfig.nvim",
       "hrsh7th/cmp-nvim-lsp",
+      "b0o/schemastore.nvim", -- JSON schemas for LSP
     },
     opts = {
       -- Global capabilities
@@ -15,7 +16,7 @@ return {
       -- Global server settings
       servers = {
         -- TypeScript/JavaScript
-        tsserver = {
+        ts_ls = {
           settings = {
             typescript = {
               inlayHints = {
@@ -55,14 +56,19 @@ return {
         -- HTML
         html = {},
         -- JSON
-        jsonls = {
-          settings = {
-            json = {
-              schemas = require("schemastore").json.schemas(),
-              validate = { enable = true },
+        jsonls = function()
+          local has_schemastore, schemastore = pcall(require, "schemastore")
+          local schemas = has_schemastore and schemastore.json.schemas() or {}
+          
+          return {
+            settings = {
+              json = {
+                schemas = schemas,
+                validate = { enable = true },
+              },
             },
-          },
-        },
+          }
+        end,
         -- Tailwind CSS
         tailwindcss = {
           filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact" },
@@ -171,9 +177,4 @@ return {
     },
   },
 
-  -- JSON schemas
-  {
-    "b0o/schemastore.nvim",
-    lazy = true,
-  },
 }

@@ -25,6 +25,11 @@ opt.pumheight = 10 -- Maximum number of entries in a popup
 opt.showmode = false -- Don't show mode since we have a statusline
 opt.conceallevel = 2 -- Hide concealed text
 
+-- Command-line completion
+opt.wildmenu = true -- Show command completions
+opt.wildmode = "longest:full,full" -- Command-line completion mode
+opt.wildoptions = "pum" -- Use popup menu for command completion
+
 -- Indentation
 opt.expandtab = true -- Use spaces instead of tabs
 opt.shiftwidth = 2 -- Size of an indent
@@ -48,7 +53,7 @@ opt.splitright = true -- Put new windows right of current
 opt.splitbelow = true -- Put new windows below current
 
 -- Performance
-opt.lazyredraw = true -- Don't redraw while executing macros
+-- opt.lazyredraw = true -- Don't redraw while executing macros (disabled for Noice compatibility)
 opt.ttyfast = true -- Send more characters for redraws
 opt.synmaxcol = 300 -- Don't syntax highlight long lines
 
@@ -58,8 +63,8 @@ opt.foldlevel = 99
 opt.foldlevelstart = 99
 opt.foldenable = true
 opt.fillchars = {
-  foldopen = "",
-  foldclose = "",
+  foldopen = "▼",
+  foldclose = "▶",
   fold = " ",
   foldsep = " ",
   diff = "╱",
