@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Smart Git Editor - Context-aware editor selection
+# Uses the appropriate editor based on terminal environment
+
+# Check if we're in VS Code integrated terminal
+if [[ "$TERM_PROGRAM" == "vscode" ]]; then
+    exec code --wait "$@"
+fi
+
+# Check if we're in Zed terminal
+if [[ "$TERM_PROGRAM" == "zed" ]] || [[ -n "$ZED_TERM" ]]; then
+    exec zed --wait "$@"
+fi
+
+# Check if we're in other known terminals with GUI editor support
+if [[ "$TERM_PROGRAM" == "iTerm.app" ]] || [[ "$TERM_PROGRAM" == "Apple_Terminal" ]]; then
+    # In regular terminal - check if GUI editors are available
+    if command -v zed >/dev/null 2>&1; then
+        exec zed --wait "$@"
+    elif command -v code >/dev/null 2>&1; then
+        exec code --wait "$@"
+    fi
+fi
+
+# Default fallback to neovim for all other cases (SSH, tmux, etc.)
+exec nvim "$@"
