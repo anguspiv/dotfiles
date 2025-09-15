@@ -11,8 +11,8 @@ return {
   -- Enable ligatures properly for Victor Mono
   harfbuzz_features = { 'calt=1', 'liga=1', 'dlig=1', 'ss01=1' },
   
-  -- GitHub's official dark theme
-  color_scheme = 'github_dark',
+  -- Gruvbox dark theme - retro warm earth tones
+  color_scheme = 'gruvbox_dark',
   enable_tab_bar = false,
   
   -- Terminal integration - use standard term type (fixes typing issues)
