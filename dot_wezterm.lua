@@ -12,7 +12,7 @@ return {
   harfbuzz_features = { 'calt=1', 'liga=1', 'dlig=1', 'ss01=1' },
   
   -- Gruvbox dark theme - retro warm earth tones
-  color_scheme = 'gruvbox_dark',
+  color_scheme = 'Breath Darker (Gogh)', -- 'Blue Matrix', 
   enable_tab_bar = false,
   
   -- Terminal integration - use standard term type (fixes typing issues)
