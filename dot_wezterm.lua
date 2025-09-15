@@ -11,8 +11,8 @@ return {
   -- Enable ligatures properly for Victor Mono
   harfbuzz_features = { 'calt=1', 'liga=1', 'dlig=1', 'ss01=1' },
   
-  -- Colors to match tmux Nordic theme
-  color_scheme = 'nord',
+  -- GitHub's official dark theme
+  color_scheme = 'github_dark',
   enable_tab_bar = false,
   
   -- Terminal integration - use standard term type (fixes typing issues)
