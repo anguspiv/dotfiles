@@ -1,7 +1,0 @@
-
-source /usr/local/opt/autoenv/activate.sh
-
-# Ensure zshrc is sourced for interactive shells
-if [[ -f ~/.zshrc ]]; then
-    source ~/.zshrc
-fi

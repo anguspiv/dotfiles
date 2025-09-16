@@ -1,7 +1,5 @@
 -- AI integration configuration
 -- This file is loaded conditionally based on features.ai_tools flag
-
-{{- if .features.ai_tools }}
 -- Configure AI-specific settings
 vim.g.copilot_enabled = true
 
@@ -14,6 +12,19 @@ if vim.fn.executable("claude") == 1 then
   keymap("v", "<leader>ar", "<cmd>ClaudeGenerate<cr>", { desc = "Claude Review Selection" })
   keymap("n", "<leader>ae", "<cmd>ClaudeExplain<cr>", { desc = "Claude Explain Code" })
 end
+
+{{- if eq .chezmoi.hostname "C02GJ00AMD6P" }}
+-- Amazon Q specific mappings (if Q CLI is available)
+if vim.fn.executable("q") == 1 then
+  keymap("n", "<leader>qq", "<cmd>AmazonQ<cr>", { desc = "Amazon Q Chat" })
+  keymap("v", "<leader>qr", "<cmd>AmazonQ refactor<cr>", { desc = "Amazon Q Refactor" })
+  keymap("n", "<leader>qf", "<cmd>.AmazonQ fix<cr>", { desc = "Amazon Q Fix Line" })
+  keymap("n", "<leader>qo", "<cmd>%AmazonQ optimize<cr>", { desc = "Amazon Q Optimize File" })
+  keymap("n", "<leader>qe", "<cmd>AmazonQ explain<cr>", { desc = "Amazon Q Explain" })
+  -- <leader>qa is defined in the plugin keymap for agent selection
+end
+
+{{- end }}
 
 -- Enhanced Copilot Chat settings for agentic coding
 require("CopilotChat").setup({
@@ -56,7 +67,3 @@ vim.api.nvim_create_autocmd("CursorHold", {
     end
   end,
 })
-{{- else }}
--- AI tools disabled
-vim.g.copilot_enabled = false
-{{- end }}

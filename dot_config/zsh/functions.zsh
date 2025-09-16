@@ -22,9 +22,10 @@ lazy_load_tool() {
 
 # Setup lazy loading for performance-heavy tools
 setup_lazy_loading() {
-    # Lazy load fnm (Node version manager)
+    # Initialize fnm immediately for auto-switching
     if command -v fnm >/dev/null 2>&1; then
-        lazy_load_tool "fnm" 'eval "$(fnm env --use-on-cd --shell zsh)" && eval "$(fnm completions --shell zsh)"'
+        eval "$(fnm env --use-on-cd --shell zsh)"
+        eval "$(fnm completions --shell zsh)"
     fi
     
     # Initialize zoxide immediately (lightweight and commonly used)
