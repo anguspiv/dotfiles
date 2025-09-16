@@ -3,7 +3,9 @@
 # Machine: {{ .machine.type }} ({{ .machine.performance }}) | Terminal: {{ .terminal }}
 
 # Amazon Q pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
+if [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]]; then
+    builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
+fi
 
 # Performance: Early return for non-interactive sessions
 [[ $- != *i* ]] && return
@@ -127,4 +129,6 @@ fi
 # if [ -f '/usr/local/share/google-cloud-sdk/completion.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/completion.zsh.inc'; fi
 
 # Amazon Q post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
+if [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]]; then
+    builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
+fi

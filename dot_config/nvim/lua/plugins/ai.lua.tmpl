@@ -124,4 +124,61 @@ return {
       vim.g.claude_api_key = os.getenv("ANTHROPIC_API_KEY")
     end,
   },
+{{- if eq .chezmoi.hostname "C02GJ00AMD6P" }}
+
+  -- Amazon Q integration
+  {
+    "awslabs/amazonq.nvim",
+    enabled = function()
+      return vim.fn.executable("q") == 1
+    end,
+    cmd = { "AmazonQ" },
+    keys = {
+      { "<leader>qq", "<cmd>AmazonQ<cr>", desc = "Amazon Q Chat" },
+      { "<leader>qr", "<cmd>AmazonQ refactor<cr>", desc = "Amazon Q Refactor", mode = { "v" } },
+      { "<leader>qf", "<cmd>.AmazonQ fix<cr>", desc = "Amazon Q Fix Line" },
+      { "<leader>qo", "<cmd>%AmazonQ optimize<cr>", desc = "Amazon Q Optimize File" },
+      { "<leader>qe", "<cmd>AmazonQ explain<cr>", desc = "Amazon Q Explain" },
+      { "<leader>qa", function() 
+          vim.ui.input({ 
+            prompt = "Agent name (or Enter for default): ",
+            completion = "file" -- This might help with tab completion
+          }, function(agent)
+            if agent and agent ~= "" then
+              -- Show a message about what we're doing
+              vim.notify("Starting Q chat with agent: " .. agent, vim.log.levels.INFO)
+              vim.cmd("terminal q chat --agent " .. vim.fn.shellescape(agent))
+            else
+              vim.notify("Starting Q chat with default agent", vim.log.levels.INFO)
+              vim.cmd("terminal q chat")
+            end
+          end)
+        end, desc = "Amazon Q Terminal with Agent" },
+      { "zq", "zq", desc = "Amazon Q Context", mode = { "v" } },
+    },
+    config = function()
+      require("amazonq").setup({
+        ssoStartUrl = 'https://view.awsapps.com/start', -- Amazon Q Free Tier
+        -- Enable inline suggestions
+        inline_suggest = true,
+      })
+      
+      -- Add command to check Q CLI configuration
+      vim.api.nvim_create_user_command('QInfo', function()
+        vim.cmd("terminal q --help")
+      end, { desc = 'Show Q CLI help and configuration' })
+      
+      -- Add command to test agent
+      vim.api.nvim_create_user_command('QTestAgent', function(opts)
+        local agent = opts.args
+        if agent == "" then
+          vim.notify("Usage: :QTestAgent <agent_name>", vim.log.levels.WARN)
+          return
+        end
+        vim.notify("Testing agent: " .. agent, vim.log.levels.INFO)
+        vim.cmd("terminal q chat --agent " .. vim.fn.shellescape(agent))
+      end, { nargs = 1, desc = 'Test a specific Q agent' })
+    end,
+  },
+{{- end }}
 }
