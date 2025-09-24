@@ -65,7 +65,17 @@
 	disney = /Users/Angus.Perkerson/workspace/disney
 [credential "https://github.com"]
 	helper = 
+{{- if eq .chezmoi.arch "arm64" }}
+	helper = !/opt/homebrew/bin/gh auth git-credential
+{{- else }}
 	helper = !/usr/local/bin/gh auth git-credential
+{{- end }}
 [credential "https://gist.github.com"]
 	helper = 
+{{- if eq .chezmoi.arch "arm64" }}
+	helper = !/opt/homebrew/bin/gh auth git-credential
+{{- else }}
 	helper = !/usr/local/bin/gh auth git-credential
+{{- end }}
+[credential "https://gitlab.disney.com"]
+	helper = osxkeychain
