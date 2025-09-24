@@ -1,7 +1,7 @@
 # ZPlug Plugin Configuration
 
 # ZPLUG Setup
-export ZPLUG_HOME=/usr/local/opt/zplug
+export ZPLUG_HOME=$(brew --prefix)/opt/zplug
 source $ZPLUG_HOME/init.zsh
 
 ## ZPlug Plugins with optimized loading

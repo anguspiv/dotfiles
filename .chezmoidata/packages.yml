@@ -86,7 +86,6 @@ packages:
       - christian-kohler.npm-intellisense
       - christian-kohler.path-intellisense
       - codezombiech.gitignore
-      - cssho.vscode-svgviewer
       - csstools.postcss
       - davidanson.vscode-markdownlint
       - dbaeumer.vscode-eslint
