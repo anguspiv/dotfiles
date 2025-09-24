@@ -13,6 +13,21 @@
 {{- $kubernetes := promptBoolOnce . "features.kubernetes" "Enable kubernetes tools" -}}
 {{- $docker := promptBoolOnce . "features.docker" "Enable docker tools" -}}
 
+{{- /* Work-specific secrets prompts */ -}}
+{{- $writeToken := promptStringOnce . "secrets.write_token" "WRITE_TOKEN (leave empty if none)" -}}
+{{- $glToken := promptStringOnce . "secrets.gl_token" "GitLab token (leave empty if none)" -}}
+{{- $jiraToken := promptStringOnce . "secrets.jira_token" "JIRA token (leave empty if none)" -}}
+{{- $figmaToken := promptStringOnce . "secrets.figma_token" "Figma token (leave empty if none)" -}}
+{{- $confluenceToken := promptStringOnce . "secrets.confluence_token" "Confluence token (leave empty if none)" -}}
+{{- $confluenceHost := promptStringOnce . "secrets.confluence_host" "Confluence host URL" "https://confluence.disney.com" -}}
+{{- $confluenceUsername := promptStringOnce . "secrets.confluence_username" "Confluence username" -}}
+{{- $gitlabHost := promptStringOnce . "secrets.gitlab_host" "GitLab host" "gitlab.disney.com" -}}
+
+{{- /* Work-specific secrets prompts */ -}}
+{{- $workApiKey := promptStringOnce . "secrets.work_api_key" "Work API key (leave empty if none)" -}}
+{{- $workDbUrl := promptStringOnce . "secrets.work_db_url" "Work database URL (leave empty if none)" -}}
+{{- $workSlackToken := promptStringOnce . "secrets.work_slack_token" "Work Slack token (leave empty if none)" -}}
+
 data:
   configVersion: {{ $configVersion }}
   name: {{ $name | quote }}
@@ -27,6 +42,15 @@ data:
     git_tools: {{ $gitTools }}
     kubernetes: {{ $kubernetes }}
     docker: {{ $docker }}
+  secrets:
+    write_token: {{ $writeToken | quote }}
+    gl_token: {{ $glToken | quote }}
+    jira_token: {{ $jiraToken | quote }}
+    figma_token: {{ $figmaToken | quote }}
+    confluence_token: {{ $confluenceToken | quote }}
+    confluence_host: {{ $confluenceHost | quote }}
+    confluence_username: {{ $confluenceUsername | quote }}
+    gitlab_host: {{ $gitlabHost | quote }}
   editor: "zed"
   visual: "zed"
   shell: "zsh"
