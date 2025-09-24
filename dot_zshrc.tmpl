@@ -27,13 +27,22 @@ for config in ~/.config/zsh/{exports,functions,plugins,aliases,chezmoi-functions
   [[ -r "$config" ]] && source "$config"
 done
 
-# Initialize completion system
+# Initialize completion system with caching
 autoload -U compinit
 {{- if eq .machine.performance "high" }}
-compinit -i
+# High-performance machines: cache completions for 24 hours
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+    compinit -i
+else
+    compinit -i -C
+fi
 {{- else }}
-# Skip security check for faster loading on slower machines
-compinit -i -u
+# Lower-spec machines: cache for 24 hours, skip security check
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+    compinit -i -u
+else
+    compinit -i -u -C
+fi
 {{- end }}
 
 {{- if .features.ai_tools }}
