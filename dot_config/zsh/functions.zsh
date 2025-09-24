@@ -29,34 +29,15 @@ setup_lazy_loading() {
     has_starship=$(command -v starship >/dev/null 2>&1 && echo 1 || echo 0)
     has_fzf=$([[ -f ~/.fzf.zsh ]] || command -v fzf >/dev/null 2>&1 && echo 1 || echo 0)
 
-    # True lazy loading for fnm (Node version manager)
+    # Initialize fnm immediately for proper Node version management
     if [[ $has_fnm -eq 1 ]]; then
-        fnm() {
-            unfunction fnm
-            eval "$(command fnm env --use-on-cd --shell zsh)"
-            eval "$(command fnm completions --shell zsh)"
-            fnm "$@"
-        }
-        # Create cd wrapper for auto-switching (essential for fnm)
-        _original_cd=$(which cd 2>/dev/null || echo "builtin cd")
-        cd() {
-            $_original_cd "$@"
-            [[ $has_fnm -eq 1 ]] && command fnm use --silent 2>/dev/null || true
-        }
+        eval "$(fnm env --use-on-cd --shell zsh)"
+        eval "$(fnm completions --shell zsh)"
     fi
 
-    # True lazy loading for zoxide (smart cd)
+    # Initialize zoxide immediately for cd replacement
     if [[ $has_zoxide -eq 1 ]]; then
-        z() {
-            unfunction z
-            eval "$(zoxide init zsh)"
-            z "$@"
-        }
-        zi() {
-            unfunction zi
-            eval "$(zoxide init zsh)"
-            zi "$@"
-        }
+        eval "$(zoxide init zsh)"
     fi
 
     # Starship prompt - initialize immediately (needed for prompt display)
