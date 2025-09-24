@@ -10,14 +10,12 @@ packages:
       - chroma
       - curl
       - diff-so-fancy
-      - epr
       - eza
       - fnm
       - fzf
       - gh
       - git
       - git-extras
-      - git-flow-avh
       - glow
       - gnupg
       - python@3.13
@@ -38,67 +36,51 @@ packages:
       - ruby
       - rust
       - starship
-      - speedtest-cli
       - tmux
       - tmuxinator
       - tpm
       - wget
-      - wifi-password
       - zoxide
       - zplug
       - zsh-syntax-highlighting
       - int128/kubelogin/kubelogin
+      - glab
+      - jira-cli
     casks:
       - docker
-      - ghostty
-      - font-monaspace
       - font-monaspace-nerd-font
-      - font-monaspice-nerd-font
       - font-victor-mono-nerd-font
-      - google-cloud-sdk
-      - kitty
       - visual-studio-code
-      - iterm2
       - wezterm
       - zed
       - google-chrome
-      - arc
       - slack
       - zoom
       - obsidian
-      - obs
+      - setapp
+      - firefox
+      - brave-browser
+      - github
     mas:
       - name: "Xcode"
         id: 497799835
       - name: "Fantastical"
         id: 975937182
-      - name: "Airmail"
-        id: 918858936
-      - name: "Bakery"
-        id: 1575220747
-      - name: "Claquette"
-        id: 587748131
       - name: "In Your Face"
         id: 1476964367
-      - name: "Kindle"
-        id: 302584613
-      - name: "Soulver 3"
-        id: 1508732804
     vscode:
       - 4ops.terraform
       - aaron-bond.better-comments
       - abumalick.vscode-nvm
       - adamwalzer.string-converter
-      - adelphes.android-dev-ext
-      - adpyke.codesnap
       - alefragnani.project-manager
-      - amazonwebservices.codewhisperer-for-command-line-companion
-      - andyhuzhill.typewriterscrollmode
+      - anseki.vscode-color
       - anthropic.claude-code
       - apollographql.vscode-apollo
       - astro-build.astro-vscode
       - asvetliakov.vscode-neovim
       - atlassian.atlascode
+      - ban.spellright
       - benspaulding.procfile
       - chouzz.vscode-better-align
       - christian-kohler.npm-intellisense
@@ -109,7 +91,7 @@ packages:
       - davidanson.vscode-markdownlint
       - dbaeumer.vscode-eslint
       - dcortes92.freemarker
-      - diemasmichiels.emulate
+      - devantler.gitlab-extension-pack
       - dotjoshjohnson.xml
       - dsznajder.es7-react-js-snippets
       - dweizhe.docthis-customize-tags
@@ -146,15 +128,14 @@ packages:
       - magicstack.magicpython
       - malmaud.tmux
       - mariomatheu.syntax-project-pbxproj
-      - mattpocock.ts-error-translator
       - mechatroner.rainbow-csv
       - mgmcdermott.vscode-language-babel
       - mhutchie.git-graph
       - mikeburgh.xml-format
       - mikestead.dotenv
       - mintlify.document
-      - mitaki28.vscode-clang
       - mrmlnc.vscode-stylefmt
+      - ms-azuretools.vscode-azureresourcegroups
       - ms-python.debugpy
       - ms-python.isort
       - ms-python.python
@@ -166,8 +147,6 @@ packages:
       - ms-toolsai.vscode-jupyter-cell-tags
       - ms-toolsai.vscode-jupyter-slideshow
       - ms-vscode-remote.remote-containers
-      - ms-vscode.azure-account
-      - ms-vscode.azure-repos
       - ms-vscode.remote-repositories
       - ms-vscode.vscode-github-issue-notebooks
       - ms-vscode.vscode-js-profile-flame
@@ -176,18 +155,15 @@ packages:
       - naumovs.color-highlight
       - njpwerner.autodocstring
       - oderwat.indent-rainbow
-      - orta.vscode-ios-common-files
       - orta.vscode-jest
       - pastez.vschroma
       - pflannery.vscode-versionlens
-      - piersdeseilligny.betterfountain
       - pkief.material-product-icons
       - prisma.prisma
       - qezhu.gitlink
       - redhat.vscode-yaml
       - richie5um2.vscode-sort-json
       - ritwickdey.liveserver
-      - robbowen.synthwave-vscode
       - sdras.night-owl
       - shailen.netlify
       - shanoor.vscode-nginx
@@ -199,6 +175,7 @@ packages:
       - streetsidesoftware.code-spell-checker
       - stylelint.vscode-stylelint
       - tamasfe.even-better-toml
+      - team-sapling.sapling
       - thomas-baumgaertner.vcl
       - tombonnike.vscode-status-bar-format-toggle
       - tuxtina.json2yaml
@@ -216,12 +193,9 @@ packages:
       - vsls-contrib.gitdoc
       - vspacecode.whichkey
       - wayou.vscode-todo-highlight
-      - webrender.synthwave-x-fluoromachine
       - wix.glean
       - wix.vscode-import-cost
       - xadillax.viml
-      - xaver.clang-format
       - xshrim.txt-syntax
       - xyc.vscode-mdx-preview
-      - youssef.viow
       - yzhang.markdown-all-in-one
