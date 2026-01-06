@@ -1,0 +1,44 @@
+{
+	// Neovim Extension Settings
+	"vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
+	"vscode-neovim.neovimInitVimPaths.darwin": "~/.config/nvim/init.lua",
+	
+	// Use Neovim for all editing
+	"vscode-neovim.useCtrlKeysNormalMode": true,
+	"vscode-neovim.useCtrlKeysInsertMode": false,
+	
+	// Performance optimizations
+	"vscode-neovim.highlightGroups.highlights": {
+		"Normal": { "background": "NONE" },
+		"NormalNC": { "background": "NONE" },
+		"CursorLine": { "background": "NONE" },
+		"CursorLineNr": { "background": "NONE" },
+		"LineNr": { "background": "NONE" },
+		"SignColumn": { "background": "NONE" }
+	},
+	
+	// Disable VSCode features that conflict with Neovim
+	"editor.minimap.enabled": false,
+	"editor.scrollBeyondLastLine": false,
+	"editor.cursorBlinking": "solid",
+	"editor.cursorSmoothCaretAnimation": "off",
+	
+	// Let Neovim handle these
+	"editor.formatOnSave": false,
+	"editor.codeActionsOnSave": {},
+	
+	// Neovim-specific settings
+	"vscode-neovim.neovimViewportWidthOverride": 1000,
+	"vscode-neovim.neovimViewportHeightOverride": 1000,
+	
+	// Disable VSCode LSP when using Neovim (to avoid conflicts)
+	// You can enable specific languages if needed
+	"typescript.tsserver.useSeparateSyntaxServer": false,
+	"javascript.validate.enable": false,
+	"typescript.validate.enable": false,
+	
+	// Keep your existing settings
+	"atlascode.bitbucket.enabled": false,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"cSpell.words": ["fitt", "iast"]
+}

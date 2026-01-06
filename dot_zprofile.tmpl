@@ -1,6 +1,6 @@
-{{- if eq .chezmoi.hostname "C02GJ00AMD6P" }}
-# Amazon Q pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zprofile.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zprofile.pre.zsh"
+{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+# Kiro CLI pre block. Keep at the top of this file.
+[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
 {{- end }}
 source $(brew --prefix)/opt/autoenv/activate.sh
 
@@ -8,8 +8,7 @@ source $(brew --prefix)/opt/autoenv/activate.sh
 if [[ -f ~/.zshrc ]]; then
     source ~/.zshrc
 fi
-{{- if eq .chezmoi.hostname "C02GJ00AMD6P" }}
-
-# Amazon Q post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zprofile.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zprofile.post.zsh"
+{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+# Kiro CLI post block. Keep at the bottom of this file.
+[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
 {{- end }}
