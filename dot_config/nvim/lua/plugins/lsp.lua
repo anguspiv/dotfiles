@@ -1,8 +1,12 @@
 -- LSP Configuration for TypeScript/JavaScript Development
+-- Skip LSP setup when running in VSCode/Cursor (let the editor handle LSP)
+local is_vscode = vim.g.vscode == 1
+
 return {
   -- LSP Configuration
   {
     "neovim/nvim-lspconfig",
+    enabled = not is_vscode, -- Disable Neovim LSP when in VSCode/Cursor
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
       "mason.nvim",
@@ -113,6 +117,7 @@ return {
   -- Mason: LSP installer
   {
     "williamboman/mason.nvim",
+    enabled = not is_vscode, -- Disable Mason when in VSCode/Cursor
     cmd = "Mason",
     build = ":MasonUpdate",
     opts = {
@@ -162,6 +167,7 @@ return {
   -- TypeScript utilities
   {
     "jose-elias-alvarez/typescript.nvim",
+    enabled = not is_vscode, -- Disable TypeScript.nvim when in VSCode/Cursor
     dependencies = { "nvim-lspconfig" },
     opts = {
       server = {

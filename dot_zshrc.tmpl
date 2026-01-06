@@ -2,10 +2,10 @@
 # Generated for: {{ .name }} <{{ .email }}>
 # Machine: {{ .machine.type }} ({{ .machine.performance }}) | Terminal: {{ .terminal }}
 
-# Amazon Q pre block. Keep at the top of this file.
-if [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]]; then
-    builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
-fi
+{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+# Kiro CLI pre block. Keep at the top of this file.
+[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
+{{- end }}
 
 # Performance: Early return for non-interactive sessions
 [[ $- != *i* ]] && return
@@ -22,8 +22,8 @@ export HISTFILESIZE=10000
 export SAVEHIST=10000
 {{- end }}
 
-# Load modular configuration files
-for config in ~/.config/zsh/{exports,functions,plugins,aliases,chezmoi-functions}.zsh; do
+# Load modular configuration files (skip exports - now in .zshenv)
+for config in ~/.config/zsh/{functions,plugins,aliases,chezmoi-functions}.zsh; do
   [[ -r "$config" ]] && source "$config"
 done
 
@@ -46,8 +46,7 @@ fi
 {{- end }}
 
 {{- if .features.ai_tools }}
-# AI tools integration
-export ANTHROPIC_API_KEY_FILE="$HOME/.config/secrets.sh"
+# AI tools integration (file path already set in .zshenv)
 {{- end }}
 
 # GPG agent startup (disabled for performance)
@@ -72,8 +71,7 @@ source_if_exists "${HOME}/.local/bin/env"
 unsetopt correct_all  # Disable autocorrect
 
 {{- if .features.development_tools }}
-# Development-specific configurations
-export DEV_MODE=true
+# Development-specific configurations (DEV_MODE set in .zshenv)
 
 # Development aliases
 alias dc="docker-compose"
@@ -96,17 +94,12 @@ alias gcm="git commit -m"
 alias gph="git push"
 alias gpl="git pull"
 
-# Node.js development (if using fnm)
-{{- if eq .machine.performance "high" }}
-# Enable corepack for high-performance machines
-export COREPACK_ENABLE_STRICT=1
-{{- end }}
+# Node.js development (fnm and corepack configured in .zshenv)
 {{- end }}
 
-# Platform-specific configurations
+# Platform-specific configurations (PATH set in .zshenv)
 {{- if eq .chezmoi.os "darwin" }}
 # macOS specific settings
-export PATH="/usr/local/sbin:$PATH"
 
 {{- if eq .machine.type "work" }}
 # Work machine specific paths
@@ -114,7 +107,6 @@ export PATH="/opt/company-tools/bin:$PATH"
 {{- end }}
 {{- else if eq .chezmoi.os "linux" }}
 # Linux specific settings
-export PATH="/usr/local/bin:$PATH"
 {{- end }}
 
 # Terminal integration (conditionally load if files exist)
@@ -137,7 +129,7 @@ fi
 # if [ -f '/usr/local/share/google-cloud-sdk/path.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/path.zsh.inc'; fi
 # if [ -f '/usr/local/share/google-cloud-sdk/completion.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/completion.zsh.inc'; fi
 
-# Amazon Q post block. Keep at the bottom of this file.
-if [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]]; then
-    builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
-fi
+{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+# Kiro CLI post block. Keep at the bottom of this file.
+[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
+{{- end }}

@@ -3,6 +3,10 @@
 -- Machine: {{ .machine.type }} ({{ .machine.performance }})
 -- Optimized for TypeScript/JavaScript Frontend Development
 
+-- Detect if running in VSCode/Cursor (vscode-neovim extension)
+-- This must be set early before any other configuration
+vim.g.vscode = vim.g.vscode or 0
+
 -- Performance optimization: disable some built-in plugins
 local disabled_built_ins = {
   "netrw",

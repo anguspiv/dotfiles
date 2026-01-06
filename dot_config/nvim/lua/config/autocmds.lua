@@ -94,30 +94,35 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 })
 
 -- TypeScript/JavaScript specific autocmds
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("typescript_javascript"),
-  pattern = { "typescript", "javascript", "typescriptreact", "javascriptreact" },
-  callback = function()
-    -- Enable format on save
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      buffer = 0,
-      callback = function()
-        vim.lsp.buf.format({ async = false })
-      end,
-    })
-    
-    -- Organize imports on save
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      buffer = 0,
-      callback = function()
-        vim.lsp.buf.code_action({
-          context = { only = { "source.organizeImports" } },
-          apply = true,
-        })
-      end,
-    })
-  end,
-})
+-- Skip format-on-save when in VSCode/Cursor (let the editor handle it)
+local is_vscode = vim.g.vscode == 1
+
+if not is_vscode then
+  vim.api.nvim_create_autocmd("FileType", {
+    group = augroup("typescript_javascript"),
+    pattern = { "typescript", "javascript", "typescriptreact", "javascriptreact" },
+    callback = function()
+      -- Enable format on save
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        buffer = 0,
+        callback = function()
+          vim.lsp.buf.format({ async = false })
+        end,
+      })
+      
+      -- Organize imports on save
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        buffer = 0,
+        callback = function()
+          vim.lsp.buf.code_action({
+            context = { only = { "source.organizeImports" } },
+            apply = true,
+          })
+        end,
+      })
+    end,
+  })
+end
 
 -- Performance: disable syntax highlighting for large files
 vim.api.nvim_create_autocmd("BufReadPre", {

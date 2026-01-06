@@ -90,16 +90,21 @@ map("n", "<leader><tab>d", "<cmd>tabclose<cr>", { desc = "Close Tab" })
 map("n", "<leader><tab>[", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 
 -- Development-specific keymaps
-map("n", "<leader>cf", "<cmd>lua vim.lsp.buf.format()<cr>", { desc = "Format Document" })
-map("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>", { desc = "Code Action" })
-map("n", "<leader>cr", "<cmd>lua vim.lsp.buf.rename()<cr>", { desc = "Rename" })
-map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", { desc = "Go to Definition" })
-map("n", "gr", "<cmd>lua vim.lsp.buf.references()<cr>", { desc = "References" })
-map("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>", { desc = "Go to Implementation" })
-map("n", "K", "<cmd>lua vim.lsp.buf.hover()<cr>", { desc = "Hover" })
+-- Only set LSP keymaps when not in VSCode/Cursor (editor handles LSP)
+local is_vscode = vim.g.vscode == 1
 
--- TypeScript specific
-map("n", "<leader>to", "<cmd>TypescriptOrganizeImports<cr>", { desc = "Organize Imports" })
-map("n", "<leader>tr", "<cmd>TypescriptRenameFile<cr>", { desc = "Rename File" })
-map("n", "<leader>ti", "<cmd>TypescriptAddMissingImports<cr>", { desc = "Add Missing Imports" })
-map("n", "<leader>tu", "<cmd>TypescriptRemoveUnused<cr>", { desc = "Remove Unused" })
+if not is_vscode then
+  map("n", "<leader>cf", "<cmd>lua vim.lsp.buf.format()<cr>", { desc = "Format Document" })
+  map("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>", { desc = "Code Action" })
+  map("n", "<leader>cr", "<cmd>lua vim.lsp.buf.rename()<cr>", { desc = "Rename" })
+  map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", { desc = "Go to Definition" })
+  map("n", "gr", "<cmd>lua vim.lsp.buf.references()<cr>", { desc = "References" })
+  map("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>", { desc = "Go to Implementation" })
+  map("n", "K", "<cmd>lua vim.lsp.buf.hover()<cr>", { desc = "Hover" })
+
+  -- TypeScript specific
+  map("n", "<leader>to", "<cmd>TypescriptOrganizeImports<cr>", { desc = "Organize Imports" })
+  map("n", "<leader>tr", "<cmd>TypescriptRenameFile<cr>", { desc = "Rename File" })
+  map("n", "<leader>ti", "<cmd>TypescriptAddMissingImports<cr>", { desc = "Add Missing Imports" })
+  map("n", "<leader>tu", "<cmd>TypescriptRemoveUnused<cr>", { desc = "Remove Unused" })
+end
