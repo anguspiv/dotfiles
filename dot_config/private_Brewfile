@@ -82,7 +82,8 @@ cask "zed"
 
 # Browsers
 cask "google-chrome"
-cask "arc"
+cask "firefox"
+cask "zen-browser"
 
 # Development Tools
 cask "docker-desktop"
