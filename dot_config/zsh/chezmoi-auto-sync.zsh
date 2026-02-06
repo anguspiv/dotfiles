@@ -14,8 +14,8 @@ CHEZMOI_CHECK_INTERVAL=${CHEZMOI_CHECK_INTERVAL:-3600}  # Default: 1 hour
 # - "auto"   : Automatically sync (requires git to be clean)
 CHEZMOI_SYNC_MODE=${CHEZMOI_SYNC_MODE:-notify}
 
-# Show reminders on shell startup
-CHEZMOI_STARTUP_CHECK=${CHEZMOI_STARTUP_CHECK:-true}
+# Show reminders on shell startup (disabled for tmux - prevents spam on new panes)
+CHEZMOI_STARTUP_CHECK=${CHEZMOI_STARTUP_CHECK:-false}
 
 # File to track last check time
 CHEZMOI_LAST_CHECK_FILE="${HOME}/.cache/chezmoi_last_check"
@@ -49,8 +49,8 @@ _chezmoi_update_check_time() {
 
 # Check if there are local changes
 _chezmoi_has_local_changes() {
-    local status=$(chezmoi status 2>/dev/null)
-    [[ -n "$status" ]]
+    local chezmoi_status=$(chezmoi status 2>/dev/null)
+    [[ -n "$chezmoi_status" ]]
 }
 
 # Check if remote has updates
@@ -321,8 +321,10 @@ alias cmcheck="_chezmoi_auto_check"
 # INITIALIZATION
 # =====================================================
 
-# Run startup check
-_chezmoi_startup_check
+# Only run startup check in first shell of tmux session (or non-tmux shells)
+if [[ -z "$TMUX" ]] || [[ "$TMUX_PANE" == "%0" ]]; then
+    _chezmoi_startup_check
+fi
 
 # Start periodic checking (if enabled)
 # Uncomment to enable background checking:
