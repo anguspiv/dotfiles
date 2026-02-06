@@ -1,38 +1,128 @@
 #!/usr/bin/env bash
-# Starship-style right status with Nerd Font icons on RIGHT
+# Starship-style right status - icons on RIGHT of values
 
 OUTPUT=""
 
-# Chezmoi (text → icon on right)
-if command -v chezmoi >/dev/null 2>&1; then
-    LOCAL_CHANGES=$(chezmoi status 2>/dev/null | wc -l | tr -d ' ')
-    if [[ "$LOCAL_CHANGES" -gt 0 ]]; then
-        OUTPUT+="#[fg=#ebcb8b]${LOCAL_CHANGES}   "
+# Filled powerline arrow (U+E0B2) and thin arrow (U+E0B3)
+FILLED_ARROW=$(printf '\xee\x82\xb2')
+THIN_ARROW=$(printf '\xee\x82\xb3')
+
+# Start with padding
+OUTPUT+="   "
+
+# Determine network status and color first
+NETWORK_OUTPUT=""
+NETWORK_COLOR="#a3be8c"  # default green
+NETWORK_BG=""
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if ping -c 1 -W 1000 8.8.8.8 >/dev/null 2>&1; then
+        PRIMARY_INTERFACE=$(route get default 2>/dev/null | awk '/interface:/ { print $2 }')
+        if [[ "$PRIMARY_INTERFACE" == en* ]]; then
+            if [[ "$PRIMARY_INTERFACE" == "en0" ]] && system_profiler SPAirPortDataType 2>/dev/null | grep -q "Status: Connected"; then
+                SSID=$(networksetup -getairportnetwork "$PRIMARY_INTERFACE" 2>/dev/null | cut -d: -f2 | xargs)
+                if [ -n "$SSID" ] && [[ "$SSID" != *"not associated"* ]]; then
+                    NETWORK_OUTPUT="${SSID} 󰤨"
+                    NETWORK_COLOR="#a3be8c"
+                else
+                    NETWORK_OUTPUT="Down 󰤭"
+                    NETWORK_COLOR="#bf616a"
+                    NETWORK_BG="yes"
+                fi
+            else
+                NETWORK_OUTPUT="Eth 󰈀"
+                NETWORK_COLOR="#a3be8c"
+            fi
+        else
+            NETWORK_OUTPUT="Up 󰤨"
+            NETWORK_COLOR="#a3be8c"
+        fi
     else
-        OUTPUT+="#[fg=#a3be8c]  "
+        NETWORK_OUTPUT="Down 󰤭"
+        NETWORK_COLOR="#bf616a"
+        NETWORK_BG="yes"
     fi
 fi
 
-# Battery (percentage → icon on right)
+# Arrow before network
+if [[ -n "$NETWORK_BG" ]]; then
+    OUTPUT+="#[fg=${NETWORK_COLOR},bg=#2e3440]${FILLED_ARROW}#[bg=${NETWORK_COLOR},fg=#2e3440,bold] ${NETWORK_OUTPUT} "
+else
+    OUTPUT+="#[fg=${NETWORK_COLOR}]${THIN_ARROW} #[fg=${NETWORK_COLOR}]${NETWORK_OUTPUT}"
+fi
+
+# Determine chezmoi status and color
+CHEZMOI_BG=""
+if command -v chezmoi >/dev/null 2>&1; then
+    LOCAL_CHANGES=$(chezmoi status 2>/dev/null | wc -l | tr -d ' ')
+    if [[ "$LOCAL_CHANGES" -gt 0 ]]; then
+        CHEZMOI_COLOR="#ebcb8b"
+        CHEZMOI_OUTPUT="${LOCAL_CHANGES} 󰆓"
+        CHEZMOI_BG="yes"
+    else
+        CHEZMOI_COLOR="#a3be8c"
+        CHEZMOI_OUTPUT="Synced 󰄬"
+    fi
+    
+    # Arrow before chezmoi - check if previous section had background
+    if [[ -n "$CHEZMOI_BG" ]]; then
+        if [[ -n "$NETWORK_BG" ]]; then
+            OUTPUT+="#[fg=${CHEZMOI_COLOR},bg=${NETWORK_COLOR}]${FILLED_ARROW}#[bg=${CHEZMOI_COLOR},fg=#2e3440,bold] ${CHEZMOI_OUTPUT} "
+        else
+            OUTPUT+=" #[fg=${CHEZMOI_COLOR},bg=#2e3440]${FILLED_ARROW}#[bg=${CHEZMOI_COLOR},fg=#2e3440,bold] ${CHEZMOI_OUTPUT} "
+        fi
+    else
+        if [[ -n "$NETWORK_BG" ]]; then
+            OUTPUT+="#[fg=#2e3440,bg=${NETWORK_COLOR}]${FILLED_ARROW}#[default] ${CHEZMOI_OUTPUT}"
+        else
+            OUTPUT+=" #[fg=${CHEZMOI_COLOR}]${THIN_ARROW} #[fg=${CHEZMOI_COLOR}]${CHEZMOI_OUTPUT}"
+        fi
+    fi
+fi
+
+# Determine battery status and color
+BATTERY_BG=""
 if [[ "$OSTYPE" == "darwin"* ]]; then
     BATTERY_INFO=$(pmset -g batt 2>/dev/null)
     PERCENTAGE=$(echo "$BATTERY_INFO" | grep -o '[0-9]*%' | tr -d '%')
     CHARGING=$(echo "$BATTERY_INFO" | grep -q 'AC Power' && echo "1" || echo "0")
 
     if [[ $CHARGING -eq 1 ]]; then
-        OUTPUT+="#[fg=#a3be8c]${PERCENTAGE}%   "
+        BATTERY_COLOR="#a3be8c"
+        BATTERY_OUTPUT="${PERCENTAGE}% 󱐋"
     elif [[ $PERCENTAGE -ge 80 ]]; then
-        OUTPUT+="#[fg=#a3be8c]${PERCENTAGE}%   "
+        BATTERY_COLOR="#a3be8c"
+        BATTERY_OUTPUT="${PERCENTAGE}% 󰁹"
     elif [[ $PERCENTAGE -ge 60 ]]; then
-        OUTPUT+="#[fg=#88c0d0]${PERCENTAGE}%   "
+        BATTERY_COLOR="#88c0d0"
+        BATTERY_OUTPUT="${PERCENTAGE}% 󰂀"
     elif [[ $PERCENTAGE -ge 40 ]]; then
-        OUTPUT+="#[fg=#ebcb8b]${PERCENTAGE}%   "
+        BATTERY_COLOR="#ebcb8b"
+        BATTERY_OUTPUT="${PERCENTAGE}% 󰁾"
+        BATTERY_BG="yes"
     else
-        OUTPUT+="#[fg=#bf616a]${PERCENTAGE}%   "
+        BATTERY_COLOR="#bf616a"
+        BATTERY_OUTPUT="${PERCENTAGE}% 󰁺"
+        BATTERY_BG="yes"
+    fi
+    
+    # Arrow before battery - check if previous section had background
+    if [[ -n "$BATTERY_BG" ]]; then
+        if [[ -n "$CHEZMOI_BG" ]]; then
+            OUTPUT+="#[fg=${BATTERY_COLOR},bg=${CHEZMOI_COLOR}]${FILLED_ARROW}#[bg=${BATTERY_COLOR},fg=#2e3440,bold] ${BATTERY_OUTPUT} "
+        else
+            OUTPUT+=" #[fg=${BATTERY_COLOR},bg=#2e3440]${FILLED_ARROW}#[bg=${BATTERY_COLOR},fg=#2e3440,bold] ${BATTERY_OUTPUT} "
+        fi
+    else
+        if [[ -n "$CHEZMOI_BG" ]]; then
+            OUTPUT+="#[fg=#2e3440,bg=${CHEZMOI_COLOR}]${FILLED_ARROW}#[default] ${BATTERY_OUTPUT}"
+        else
+            OUTPUT+=" #[fg=${BATTERY_COLOR}]${THIN_ARROW} #[fg=${BATTERY_COLOR}]${BATTERY_OUTPUT}"
+        fi
     fi
 fi
 
-# CPU (percentage → icon on right)
+# Determine CPU status and color
+CPU_BG=""
 if [[ "$OSTYPE" == "darwin"* ]]; then
     CPU=$(ps -A -o %cpu | awk '{s+=$1} END {printf "%.0f", s}')
 else
@@ -40,14 +130,32 @@ else
 fi
 
 if [[ $CPU -ge 80 ]]; then
-    OUTPUT+="#[fg=#bf616a]${CPU}%   "
+    CPU_COLOR="#bf616a"
+    CPU_BG="yes"
 elif [[ $CPU -ge 50 ]]; then
-    OUTPUT+="#[fg=#ebcb8b]${CPU}%   "
+    CPU_COLOR="#ebcb8b"
+    CPU_BG="yes"
 else
-    OUTPUT+="#[fg=#a3be8c]${CPU}%   "
+    CPU_COLOR="#a3be8c"
 fi
 
-# Memory (percentage → icon on right)
+# Arrow before CPU - check if previous section had background
+if [[ -n "$CPU_BG" ]]; then
+    if [[ -n "$BATTERY_BG" ]]; then
+        OUTPUT+="#[fg=${CPU_COLOR},bg=${BATTERY_COLOR}]${FILLED_ARROW}#[bg=${CPU_COLOR},fg=#2e3440,bold] ${CPU}% 󰻠 "
+    else
+        OUTPUT+=" #[fg=${CPU_COLOR},bg=#2e3440]${FILLED_ARROW}#[bg=${CPU_COLOR},fg=#2e3440,bold] ${CPU}% 󰻠 "
+    fi
+else
+    if [[ -n "$BATTERY_BG" ]]; then
+        OUTPUT+="#[fg=#2e3440,bg=${BATTERY_COLOR}]${FILLED_ARROW}#[default] ${CPU}% 󰻠"
+    else
+        OUTPUT+=" #[fg=${CPU_COLOR}]${THIN_ARROW} #[fg=${CPU_COLOR}]${CPU}% 󰻠"
+    fi
+fi
+
+# Determine memory status and color
+MEM_BG=""
 if [[ "$OSTYPE" == "darwin"* ]]; then
     MEM=$(ps -A -o %mem | awk '{s+=$1} END {printf "%.0f", s}')
 else
@@ -55,17 +163,43 @@ else
 fi
 
 if [[ $MEM -ge 80 ]]; then
-    OUTPUT+="#[fg=#bf616a]${MEM}%   "
+    MEM_COLOR="#bf616a"
+    MEM_BG="yes"
 elif [[ $MEM -ge 60 ]]; then
-    OUTPUT+="#[fg=#ebcb8b]${MEM}%   "
+    MEM_COLOR="#ebcb8b"
+    MEM_BG="yes"
 else
-    OUTPUT+="#[fg=#a3be8c]${MEM}%   "
+    MEM_COLOR="#a3be8c"
 fi
 
-# Time (time → icon on right)
-OUTPUT+="#[fg=#88c0d0]$(date +'%H:%M')   "
+# Arrow before memory - check if previous section had background
+if [[ -n "$MEM_BG" ]]; then
+    if [[ -n "$CPU_BG" ]]; then
+        OUTPUT+="#[fg=${MEM_COLOR},bg=${CPU_COLOR}]${FILLED_ARROW}#[bg=${MEM_COLOR},fg=#2e3440,bold] ${MEM}% 󰍛 "
+    else
+        OUTPUT+=" #[fg=${MEM_COLOR},bg=#2e3440]${FILLED_ARROW}#[bg=${MEM_COLOR},fg=#2e3440,bold] ${MEM}% 󰍛 "
+    fi
+else
+    if [[ -n "$CPU_BG" ]]; then
+        OUTPUT+="#[fg=#2e3440,bg=${CPU_COLOR}]${FILLED_ARROW}#[default] ${MEM}% 󰍛"
+    else
+        OUTPUT+=" #[fg=${MEM_COLOR}]${THIN_ARROW} #[fg=${MEM_COLOR}]${MEM}% 󰍛"
+    fi
+fi
 
-# Date (date → icon on right with right padding)
-OUTPUT+="#[fg=#81a1c1]$(date +'%b %d')    "
+# Time (fixed color)
+TIME_COLOR="#88c0d0"
+if [[ -n "$MEM_BG" ]]; then
+    OUTPUT+="#[fg=#2e3440,bg=${MEM_COLOR}]${FILLED_ARROW}#[default] $(date +'%H:%M') 󰥔"
+else
+    OUTPUT+=" #[fg=${TIME_COLOR}]${THIN_ARROW} #[fg=${TIME_COLOR}]$(date +'%H:%M') 󰥔"
+fi
+
+# Date (fixed color)
+DATE_COLOR="#81a1c1"
+OUTPUT+=" #[fg=${DATE_COLOR}]${THIN_ARROW} #[fg=${DATE_COLOR}]$(date +'%b %d') 󰃭"
+
+# Right edge padding
+OUTPUT+="  "
 
 echo "$OUTPUT"
