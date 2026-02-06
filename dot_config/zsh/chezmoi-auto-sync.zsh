@@ -1,0 +1,334 @@
+# Chezmoi Auto-Sync Configuration
+# Multiple strategies for keeping dotfiles synchronized
+
+# =====================================================
+# CONFIGURATION
+# =====================================================
+
+# How often to check for changes (in seconds)
+CHEZMOI_CHECK_INTERVAL=${CHEZMOI_CHECK_INTERVAL:-3600}  # Default: 1 hour
+
+# Auto-sync mode (choose one):
+# - "notify" : Just notify about changes (default, safest)
+# - "prompt" : Prompt to sync when changes detected
+# - "auto"   : Automatically sync (requires git to be clean)
+CHEZMOI_SYNC_MODE=${CHEZMOI_SYNC_MODE:-notify}
+
+# Show reminders on shell startup
+CHEZMOI_STARTUP_CHECK=${CHEZMOI_STARTUP_CHECK:-true}
+
+# File to track last check time
+CHEZMOI_LAST_CHECK_FILE="${HOME}/.cache/chezmoi_last_check"
+
+# =====================================================
+# HELPER FUNCTIONS
+# =====================================================
+
+# Check if chezmoi is installed
+_chezmoi_installed() {
+    command -v chezmoi >/dev/null 2>&1
+}
+
+# Get time since last check (in seconds)
+_chezmoi_time_since_check() {
+    if [[ ! -f "$CHEZMOI_LAST_CHECK_FILE" ]]; then
+        echo "999999"  # Force check
+        return
+    fi
+
+    local last_check=$(cat "$CHEZMOI_LAST_CHECK_FILE")
+    local now=$(date +%s)
+    echo $((now - last_check))
+}
+
+# Update last check timestamp
+_chezmoi_update_check_time() {
+    mkdir -p "$(dirname "$CHEZMOI_LAST_CHECK_FILE")"
+    date +%s > "$CHEZMOI_LAST_CHECK_FILE"
+}
+
+# Check if there are local changes
+_chezmoi_has_local_changes() {
+    local status=$(chezmoi status 2>/dev/null)
+    [[ -n "$status" ]]
+}
+
+# Check if remote has updates
+_chezmoi_has_remote_updates() {
+    chezmoi cd 2>/dev/null || return 1
+    git fetch --quiet 2>/dev/null || return 1
+
+    local behind=$(git rev-list --count HEAD..@{u} 2>/dev/null)
+    cd - >/dev/null
+
+    [[ "$behind" -gt 0 ]]
+}
+
+# =====================================================
+# NOTIFICATION FUNCTIONS
+# =====================================================
+
+_chezmoi_notify() {
+    local title="$1"
+    local message="$2"
+
+    # Terminal notification
+    echo "📦 $title: $message"
+
+    # macOS notification (if available)
+    if command -v osascript >/dev/null 2>&1; then
+        osascript -e "display notification \"$message\" with title \"Chezmoi\" subtitle \"$title\"" 2>/dev/null
+    fi
+
+    # Linux notification (if available)
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send "Chezmoi: $title" "$message" 2>/dev/null
+    fi
+}
+
+# =====================================================
+# SYNC FUNCTIONS
+# =====================================================
+
+# Pull updates from remote
+chezmoi_pull() {
+    echo "🔄 Pulling chezmoi updates..."
+
+    if chezmoi git pull 2>/dev/null; then
+        echo "📥 Changes pulled from remote"
+
+        # Show what changed
+        local changes=$(chezmoi diff --no-pager 2>/dev/null | head -20)
+        if [[ -n "$changes" ]]; then
+            echo "\n📝 Changes detected:"
+            echo "$changes"
+            echo "\n💡 Run 'chezmoi apply' to apply changes"
+        else
+            echo "✅ Already up to date"
+        fi
+    else
+        echo "❌ Failed to pull updates"
+        return 1
+    fi
+}
+
+# Push local changes to remote
+chezmoi_push() {
+    echo "🚀 Pushing chezmoi changes..."
+
+    # Check for uncommitted changes
+    if _chezmoi_has_local_changes; then
+        echo "📝 Uncommitted local changes detected"
+        chezmoi status
+        return 1
+    fi
+
+    chezmoi cd 2>/dev/null || return 1
+
+    # Check if we have commits to push
+    local ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null)
+    if [[ "$ahead" -gt 0 ]]; then
+        if git push; then
+            echo "✅ Pushed $ahead commit(s) to remote"
+        else
+            echo "❌ Failed to push"
+            cd - >/dev/null
+            return 1
+        fi
+    else
+        echo "✅ Already up to date with remote"
+    fi
+
+    cd - >/dev/null
+}
+
+# Full sync: pull, apply, commit, push
+chezmoi_full_sync() {
+    echo "🔄 Starting full chezmoi sync..."
+
+    # Pull updates
+    if _chezmoi_has_remote_updates; then
+        chezmoi_pull || return 1
+
+        # Prompt to apply
+        if [[ -n "$(chezmoi diff 2>/dev/null)" ]]; then
+            read -p "Apply changes? (y/N): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                chezmoi apply
+            fi
+        fi
+    fi
+
+    # Commit local changes if any
+    if _chezmoi_has_local_changes; then
+        echo "\n📝 Local changes detected:"
+        chezmoi status
+
+        read -p "Commit and push changes? (y/N): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            chezmoi cd
+
+            read -p "Commit message: " commit_msg
+            if [[ -n "$commit_msg" ]]; then
+                git add .
+                git commit -m "$commit_msg"
+                git push
+                echo "✅ Changes committed and pushed"
+            fi
+
+            cd - >/dev/null
+        fi
+    fi
+
+    echo "✅ Sync complete"
+}
+
+# =====================================================
+# AUTO-CHECK FUNCTIONS
+# =====================================================
+
+# Main check function
+_chezmoi_auto_check() {
+    # Skip if chezmoi not installed
+    _chezmoi_installed || return 0
+
+    # Check if it's time for a check
+    local time_since_check=$(_chezmoi_time_since_check)
+    if [[ "$time_since_check" -lt "$CHEZMOI_CHECK_INTERVAL" ]]; then
+        return 0
+    fi
+
+    # Update check time
+    _chezmoi_update_check_time
+
+    # Check for changes
+    local has_local=false
+    local has_remote=false
+
+    if _chezmoi_has_local_changes; then
+        has_local=true
+    fi
+
+    if _chezmoi_has_remote_updates; then
+        has_remote=true
+    fi
+
+    # Handle based on mode
+    case "$CHEZMOI_SYNC_MODE" in
+        notify)
+            if [[ "$has_local" == true ]]; then
+                _chezmoi_notify "Local Changes" "You have uncommitted dotfile changes. Run 'cmsync' to sync."
+            fi
+            if [[ "$has_remote" == true ]]; then
+                _chezmoi_notify "Remote Updates" "New dotfile updates available. Run 'chezmoi update' to pull."
+            fi
+            ;;
+
+        prompt)
+            if [[ "$has_remote" == true ]]; then
+                echo "\n📦 Chezmoi: Remote updates available"
+                read -p "Pull updates now? (y/N): " -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Yy]$ ]]; then
+                    chezmoi_pull
+                fi
+            fi
+
+            if [[ "$has_local" == true ]]; then
+                echo "\n📦 Chezmoi: Local changes detected"
+                read -p "Sync changes now? (y/N): " -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Yy]$ ]]; then
+                    chezmoi_full_sync
+                fi
+            fi
+            ;;
+
+        auto)
+            if [[ "$has_remote" == true ]]; then
+                echo "🔄 Auto-pulling chezmoi updates..."
+                chezmoi update
+            fi
+
+            # Auto-push only if git is clean
+            if [[ "$has_local" == true ]]; then
+                echo "⚠️  Local changes detected but not auto-pushing (use 'prompt' or 'notify' mode for safety)"
+            fi
+            ;;
+    esac
+}
+
+# Startup check (lightweight)
+_chezmoi_startup_check() {
+    # Skip if disabled
+    [[ "$CHEZMOI_STARTUP_CHECK" != true ]] && return 0
+
+    # Skip if chezmoi not installed
+    _chezmoi_installed || return 0
+
+    # Quick check for local changes only (no network)
+    if _chezmoi_has_local_changes; then
+        echo "📝 Chezmoi: You have uncommitted changes. Run 'cms' to see them."
+    fi
+}
+
+# =====================================================
+# PERIODIC CHECK (Background)
+# =====================================================
+
+# Start periodic checking in background
+_chezmoi_start_periodic_check() {
+    # Only run in interactive shells
+    [[ -o interactive ]] || return 0
+
+    # Don't run if already running
+    [[ -n "$CHEZMOI_CHECK_PID" ]] && return 0
+
+    (
+        while true; do
+            sleep "$CHEZMOI_CHECK_INTERVAL"
+            _chezmoi_auto_check
+        done
+    ) &
+
+    export CHEZMOI_CHECK_PID=$!
+}
+
+# =====================================================
+# INTEGRATION FUNCTIONS
+# =====================================================
+
+# Check on directory change (optional)
+_chezmoi_chpwd_check() {
+    # Only check if we're in home directory or chezmoi directory
+    if [[ "$PWD" == "$HOME" ]] || [[ "$PWD" == "$HOME/.local/share/chezmoi"* ]]; then
+        _chezmoi_auto_check
+    fi
+}
+
+# =====================================================
+# ALIASES & SHORTCUTS
+# =====================================================
+
+alias cmpull="chezmoi_pull"
+alias cmpush="chezmoi_push"
+alias cmsync="chezmoi_full_sync"
+alias cmcheck="_chezmoi_auto_check"
+
+# =====================================================
+# INITIALIZATION
+# =====================================================
+
+# Run startup check
+_chezmoi_startup_check
+
+# Start periodic checking (if enabled)
+# Uncomment to enable background checking:
+# _chezmoi_start_periodic_check
+
+# Hook into directory changes (optional)
+# Uncomment to check when changing directories:
+# autoload -U add-zsh-hook
+# add-zsh-hook chpwd _chezmoi_chpwd_check

@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Daily chezmoi reminder script
+# Add to crontab: 0 9,17 * * * ~/.local/bin/chezmoi-daily-reminder
+
+set -euo pipefail
+
+# Configuration
+REMINDER_FILE="$HOME/.cache/chezmoi_reminder_$(date +%Y-%m-%d)"
+LOCK_FILE="$HOME/.cache/chezmoi_reminder.lock"
+
+# Only run once per day
+if [[ -f "$REMINDER_FILE" ]]; then
+    exit 0
+fi
+
+# Prevent multiple instances
+if [[ -f "$LOCK_FILE" ]]; then
+    exit 0
+fi
+
+touch "$LOCK_FILE"
+trap "rm -f '$LOCK_FILE'" EXIT
+
+# Check if chezmoi is installed
+if ! command -v chezmoi >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Function to send notification
+notify() {
+    local title="$1"
+    local message="$2"
+
+    # macOS notification
+    if command -v osascript >/dev/null 2>&1; then
+        osascript -e "display notification \"$message\" with title \"Chezmoi Reminder\" subtitle \"$title\"" 2>/dev/null
+    fi
+
+    # Linux notification
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send "Chezmoi: $title" "$message" 2>/dev/null
+    fi
+
+    # Log to file
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $title: $message" >> "$HOME/.cache/chezmoi_reminders.log"
+}
+
+# Check for local changes
+if [[ -n "$(chezmoi status 2>/dev/null)" ]]; then
+    notify "Local Changes" "You have uncommitted dotfile changes. Open terminal and run 'cmsync'"
+    touch "$REMINDER_FILE"
+    exit 0
+fi
+
+# Check for remote updates (requires network)
+cd "$HOME/.local/share/chezmoi" 2>/dev/null || exit 0
+git fetch --quiet 2>/dev/null || exit 0
+
+BEHIND=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo "0")
+if [[ "$BEHIND" -gt 0 ]]; then
+    notify "Remote Updates" "Your dotfiles have $BEHIND update(s). Open terminal and run 'chezmoi update'"
+    touch "$REMINDER_FILE"
+    exit 0
+fi
+
+# Mark reminder as shown for today
+touch "$REMINDER_FILE"
+
+# Clean old reminders (keep last 7 days)
+find "$HOME/.cache" -name "chezmoi_reminder_*" -mtime +7 -delete 2>/dev/null || true

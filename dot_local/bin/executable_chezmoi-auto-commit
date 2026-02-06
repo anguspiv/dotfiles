@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Auto-commit chezmoi changes with smart messages
+# Can be called manually or via git hook
+
+set -euo pipefail
+
+cd "$HOME/.local/share/chezmoi" || exit 1
+
+# Check if there are changes
+if [[ -z "$(git status --porcelain)" ]]; then
+    echo "✅ No changes to commit"
+    exit 0
+fi
+
+# Show what changed
+echo "📝 Changes detected:"
+git status --short
+
+# Generate smart commit message
+generate_commit_message() {
+    local changes=$(git diff --cached --name-only 2>/dev/null || git diff --name-only)
+    local file_count=$(echo "$changes" | wc -l | tr -d ' ')
+
+    # Detect type of changes
+    if echo "$changes" | grep -q "dot_zshrc"; then
+        echo "Update zsh configuration"
+    elif echo "$changes" | grep -q "dot_tmux"; then
+        echo "Update tmux configuration"
+    elif echo "$changes" | grep -q "dot_config/nvim"; then
+        echo "Update neovim configuration"
+    elif echo "$changes" | grep -q "dot_gitconfig"; then
+        echo "Update git configuration"
+    elif [[ "$file_count" -eq 1 ]]; then
+        local file=$(echo "$changes" | head -1)
+        echo "Update $(basename "$file")"
+    else
+        echo "Update dotfiles ($file_count files changed)"
+    fi
+}
+
+# Stage all changes
+git add -A
+
+# Generate message
+COMMIT_MSG=$(generate_commit_message)
+MACHINE_CONTEXT="${MACHINE_CONTEXT:-unknown}"
+HOSTNAME="${HOSTNAME:-$(hostname)}"
+
+# Create commit with context
+git commit -m "$COMMIT_MSG
+
+Updated from: $MACHINE_CONTEXT machine ($HOSTNAME)
+Date: $(date '+%Y-%m-%d %H:%M:%S')" || {
+    echo "❌ Commit failed"
+    exit 1
+}
+
+echo "✅ Committed: $COMMIT_MSG"
+
+# Ask to push (or auto-push if AUTO_PUSH=true)
+if [[ "${AUTO_PUSH:-false}" == "true" ]]; then
+    echo "🚀 Auto-pushing to remote..."
+    git push
+else
+    read -p "Push to remote? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        git push && echo "✅ Pushed to remote"
+    else
+        echo "💡 Run 'chezmoi cd && git push' to push later"
+    fi
+fi
