@@ -92,6 +92,8 @@ cask "github"         # GitHub Desktop
 # Productivity
 cask "alfred"
 cask "claude-code"
+cask "raindropio"      # Bookmark manager
+cask "proton-pass"     # Password manager
 
 # Communication
 cask "slack"
