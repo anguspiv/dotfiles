@@ -29,16 +29,16 @@ get_battery_macos() {
         if [[ $status == *"charging"* ]]; then
             echo "⚡${percentage}%"
         elif [ "$percentage" -gt 75 ]; then
-            echo "🔋${percentage}%"
+            echo "󰁹${percentage}%"
         elif [ "$percentage" -gt 50 ]; then
-            echo "🔋${percentage}%"
+            echo "󰂀${percentage}%"
         elif [ "$percentage" -gt 25 ]; then
-            echo "🪫${percentage}%"
+            echo "󰁼${percentage}%"
         else
-            echo "🪫${percentage}%"  # Low battery warning
+            echo "󰁺${percentage}%"  # Low battery warning
         fi
     else
-        echo "🔌 AC"
+        echo "󰚥"
     fi
 }
 
@@ -56,13 +56,13 @@ get_battery_linux() {
             if [[ $status == *"charging"* ]]; then
                 echo "⚡${percentage}%"
             elif [ "$percentage" -gt 75 ]; then
-                echo "🔋${percentage}%"
+                echo "󰁹${percentage}%"
             elif [ "$percentage" -gt 50 ]; then
-                echo "🔋${percentage}%"
+                echo "󰂀${percentage}%"
             elif [ "$percentage" -gt 25 ]; then
-                echo "🪫${percentage}%"
+                echo "󰁼${percentage}%"
             else
-                echo "🪫${percentage}%"
+                echo "󰁺${percentage}%"
             fi
             return
         fi
@@ -87,16 +87,16 @@ get_battery_linux() {
         if [[ $status == *"charging"* ]]; then
             echo "⚡${percentage}%"
         elif [ "$percentage" -gt 75 ]; then
-            echo "🔋${percentage}%"
+            echo "󰁹${percentage}%"
         elif [ "$percentage" -gt 50 ]; then
-            echo "🔋${percentage}%"
+            echo "󰂀${percentage}%"
         elif [ "$percentage" -gt 25 ]; then
-            echo "🪫${percentage}%"
+            echo "󰁼${percentage}%"
         else
-            echo "🪫${percentage}%"
+            echo "󰁺${percentage}%"
         fi
     else
-        echo "🔌 Desktop"
+        echo "󰚥"
     fi
 }
 
@@ -109,6 +109,6 @@ case $OS in
         get_battery_linux | tee "$CACHE_FILE"
         ;;
     *)
-        echo "⚡ N/A" | tee "$CACHE_FILE"
+        echo "󰚥" | tee "$CACHE_FILE"
         ;;
 esac

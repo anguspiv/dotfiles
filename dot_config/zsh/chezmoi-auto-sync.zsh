@@ -294,6 +294,26 @@ _chezmoi_start_periodic_check() {
     ) &
 
     export CHEZMOI_CHECK_PID=$!
+    disown  # Disown the most recent background job (prevent "you have running jobs" warning)
+}
+
+# Stop periodic checking (cleanup)
+_chezmoi_stop_periodic_check() {
+    if [[ -n "$CHEZMOI_CHECK_PID" ]]; then
+        kill $CHEZMOI_CHECK_PID 2>/dev/null
+        unset CHEZMOI_CHECK_PID
+    fi
+}
+
+# Set up cleanup on shell exit
+_chezmoi_setup_exit_hook() {
+    # Use ZSHEXIT hook to clean up background process
+    function _chezmoi_exit_handler() {
+        _chezmoi_stop_periodic_check
+    }
+
+    # Add to zshexit hook array
+    zshexit_functions+=(_chezmoi_exit_handler)
 }
 
 # =====================================================
@@ -320,6 +340,9 @@ alias cmcheck="_chezmoi_auto_check"
 # =====================================================
 # INITIALIZATION
 # =====================================================
+
+# Set up exit hook for cleanup
+_chezmoi_setup_exit_hook
 
 # Only run startup check in first shell of tmux session (or non-tmux shells)
 if [[ -z "$TMUX" ]] || [[ "$TMUX_PANE" == "%0" ]]; then

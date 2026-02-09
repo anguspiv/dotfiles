@@ -135,7 +135,30 @@ return {
         },
         sections = {
           lualine_a = { "mode" },
-          lualine_b = { "branch" },
+          lualine_b = {
+            {
+              "branch",
+              icon = "",
+            },
+            {
+              "diff",
+              symbols = {
+                added = icons.git.added,
+                modified = icons.git.modified,
+                removed = icons.git.removed,
+              },
+              source = function()
+                local gitsigns = vim.b.gitsigns_status_dict
+                if gitsigns then
+                  return {
+                    added = gitsigns.added,
+                    modified = gitsigns.changed,
+                    removed = gitsigns.removed,
+                  }
+                end
+              end,
+            },
+          },
 
           lualine_c = {
             {
@@ -175,22 +198,9 @@ return {
               color = "Debug",
             },
             {
-              "diff",
-              symbols = {
-                added = icons.git.added,
-                modified = icons.git.modified,
-                removed = icons.git.removed,
-              },
-              source = function()
-                local gitsigns = vim.b.gitsigns_status_dict
-                if gitsigns then
-                  return {
-                    added = gitsigns.added,
-                    modified = gitsigns.changed,
-                    removed = gitsigns.removed,
-                  }
-                end
-              end,
+              "filetype",
+              colored = true,
+              icon_only = false,
             },
           },
           lualine_y = {
@@ -319,9 +329,13 @@ return {
   },
 
   -- Noicer UI
+  -- Disabled in VSCode/Cursor as they use ext_messages which conflicts with Noice
   {
     "folke/noice.nvim",
     event = "VeryLazy",
+    cond = function()
+      return not vim.g.vscode
+    end,
     opts = {
       lsp = {
         override = {

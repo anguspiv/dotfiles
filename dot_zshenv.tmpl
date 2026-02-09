@@ -1,6 +1,6 @@
 # .zshenv - Environment variables for all shells (interactive and non-interactive)
-# Generated for: {{ .name }} <{{ .email }}>
-# Machine: {{ .machine.type }} ({{ .machine.performance }})
+# Generated for: Angus Perkerson <angus.perkerson@disney.com>
+# Machine: development (high)
 
 # Editor configuration
 export EDITOR=nvim
@@ -12,13 +12,11 @@ export GPG_TTY=$(tty)
 # PATH management - using typeset -U to keep unique entries
 typeset -U path
 path=(
-{{- if eq .chezmoi.os "darwin" }}
     # Homebrew paths (prioritize over system)
     /opt/homebrew/bin
     /opt/homebrew/sbin
     /usr/local/bin
     /usr/local/sbin
-{{- end }}
     # User paths
     $HOME/.local/bin
     $HOME/.bin
@@ -37,17 +35,11 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
-{{- if .features.ai_tools }}
+eval "$(fnm env --use-on-cd --shell zsh)"
+
 # AI tools integration
 export ANTHROPIC_API_KEY_FILE="$HOME/.config/secrets.sh"
-{{- end }}
-
-{{- if .features.development_tools }}
 # Development environment
 export DEV_MODE=true
-
-{{- if eq .machine.performance "high" }}
 # Enable corepack for high-performance machines
 export COREPACK_ENABLE_STRICT=1
-{{- end }}
-{{- end }}

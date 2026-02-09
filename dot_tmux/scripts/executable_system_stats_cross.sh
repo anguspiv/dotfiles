@@ -103,20 +103,19 @@ get_stats_linux() {
 format_output() {
     local cpu_usage=$1
     local mem_percent=$2
-    
-    # Default icons
+
+    # Choose CPU icon based on usage
     local cpu_icon="󰻠"
-    local mem_icon="󰍛"
-    
-    # Add warning indicators
     if [ "$cpu_usage" -gt 80 ]; then
-        cpu_icon="⚠"
+        cpu_icon="󰀪"  # Warning icon for high CPU
     fi
-    
+
+    # Choose memory icon based on usage
+    local mem_icon="󰍛"
     if [ "$mem_percent" -gt 80 ]; then
-        mem_icon="⚠"
+        mem_icon="󰀪"  # Warning icon for high memory
     fi
-    
+
     echo "${cpu_icon}${cpu_usage}% ${mem_icon}${mem_percent}%"
 }
 

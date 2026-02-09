@@ -50,17 +50,17 @@ get_network_macos() {
             local vpn_status=$(check_vpn)
             
             if [ -n "$ssid" ] && [[ "$ssid" != *"not associated"* ]]; then
-                echo "󰤨 ${vpn_status}${ssid}"
+                echo "󰤨${vpn_status}"
             else
-                echo "󰤨 WiFi-off"
+                echo "󰤭"
             fi
         else
             # Ethernet connection
             local vpn_status=$(check_vpn)
-            echo "󰈀 ${vpn_status}ethernet"
+            echo "󰈀${vpn_status}"
         fi
     else
-        echo "󰤨 connected"
+        echo "󰤨${vpn_status}"
     fi
 }
 
@@ -71,14 +71,14 @@ get_network_linux() {
     if command -v nmcli >/dev/null 2>&1; then
         local connection=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d: -f2)
         if [ -n "$connection" ]; then
-            echo "󰤨 ${vpn_status}${connection}"
+            echo "󰤨${vpn_status}"
             return
         fi
-        
+
         # Check for wired connection
         local wired=$(nmcli -t -f DEVICE,TYPE,STATE dev | grep ethernet | grep connected | head -1)
         if [ -n "$wired" ]; then
-            echo "󰈀 ${vpn_status}ethernet"
+            echo "󰈀${vpn_status}"
             return
         fi
     fi
@@ -89,33 +89,33 @@ get_network_linux() {
         if [ -n "$wifi_info" ]; then
             local ssid=$(echo "$wifi_info" | grep -o 'ESSID:"[^"]*"' | cut -d'"' -f2 | head -1)
             if [ -n "$ssid" ]; then
-                echo "󰤨 ${vpn_status}${ssid}"
+                echo "󰤨${vpn_status}"
                 return
             fi
         fi
     fi
-    
+
     # Method 3: Check /proc/net/route for default route
     if [ -f /proc/net/route ]; then
         local default_iface=$(awk '/^00000000/ {print $1}' /proc/net/route 2>/dev/null | head -1)
         if [ -n "$default_iface" ]; then
             # Determine if it's wireless or wired
             if [ -d "/sys/class/net/$default_iface/wireless" ]; then
-                echo "󰤨 ${vpn_status}WiFi"
+                echo "󰤨${vpn_status}"
             else
-                echo "󰈀 ${vpn_status}ethernet"
+                echo "󰈀${vpn_status}"
             fi
             return
         fi
     fi
-    
+
     # Fallback
-    echo "󰤨 ${vpn_status}connected"
+    echo "󰤨${vpn_status}"
 }
 
 # Main execution
 if ! check_connectivity; then
-    echo "󰤭 offline" | tee "$CACHE_FILE"
+    echo "󰤭" | tee "$CACHE_FILE"
     exit 0
 fi
 
@@ -127,6 +127,6 @@ case $OS in
         get_network_linux | tee "$CACHE_FILE"
         ;;
     *)
-        echo "󰤨 connected" | tee "$CACHE_FILE"
+        echo "󰤨" | tee "$CACHE_FILE"
         ;;
 esac

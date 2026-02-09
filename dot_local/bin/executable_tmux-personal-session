@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Create predefined personal tmux sessions
+
+set -euo pipefail
+
+SESSION_TYPE="${1:-dev}"
+
+case "$SESSION_TYPE" in
+    dev)
+        SESSION_NAME="dev"
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            tmux new-session -d -s "$SESSION_NAME" -n "editor" -c "$HOME/projects"
+            tmux new-window -t "$SESSION_NAME" -n "terminal" -c "$HOME/projects"
+            tmux new-window -t "$SESSION_NAME" -n "playground" -c "$HOME/playground"
+            tmux select-window -t "$SESSION_NAME:1"
+        fi
+        tmux attach-session -t "$SESSION_NAME"
+        ;;
+
+    project)
+        SESSION_NAME="project"
+        # Use fzf to select project if available
+        if command -v fzf >/dev/null 2>&1 && [[ -d "$HOME/projects" ]]; then
+            PROJECT=$(ls -1 "$HOME/projects" | fzf --prompt="Select project: " || echo "")
+            if [[ -n "$PROJECT" ]]; then
+                SESSION_NAME="project-$PROJECT"
+                PROJECT_DIR="$HOME/projects/$PROJECT"
+
+                if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+                    tmux new-session -d -s "$SESSION_NAME" -n "editor" -c "$PROJECT_DIR"
+                    tmux new-window -t "$SESSION_NAME" -n "terminal" -c "$PROJECT_DIR"
+                    tmux new-window -t "$SESSION_NAME" -n "git" -c "$PROJECT_DIR"
+                    tmux select-window -t "$SESSION_NAME:1"
+                fi
+                tmux attach-session -t "$SESSION_NAME"
+            fi
+        else
+            echo "fzf not installed or projects directory not found"
+            exit 1
+        fi
+        ;;
+
+    learning)
+        SESSION_NAME="learning"
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            tmux new-session -d -s "$SESSION_NAME" -n "notes" -c "$HOME/learning"
+            tmux new-window -t "$SESSION_NAME" -n "terminal" -c "$HOME/learning"
+            tmux new-window -t "$SESSION_NAME" -n "browser" -c "$HOME/learning"
+            tmux select-window -t "$SESSION_NAME:1"
+        fi
+        tmux attach-session -t "$SESSION_NAME"
+        ;;
+
+    *)
+        echo "Unknown session type: $SESSION_TYPE"
+        echo "Available: dev, project, learning"
+        exit 1
+        ;;
+esac

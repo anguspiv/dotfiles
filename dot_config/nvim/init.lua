@@ -1,6 +1,6 @@
 -- Modern Neovim Configuration
--- Generated for: {{ .name }} <{{ .email }}>
--- Machine: {{ .machine.type }} ({{ .machine.performance }})
+-- Generated for: Angus Perkerson <angus.perkerson@disney.com>
+-- Machine: development (high)
 -- Optimized for TypeScript/JavaScript Frontend Development
 
 -- Detect if running in VSCode/Cursor (vscode-neovim extension)
@@ -64,7 +64,6 @@ require("lazy").setup({
   install = { colorscheme = { "tokyonight", "habamax" } },
   checker = { enabled = true }, -- automatically check for plugin updates
   performance = {
-{{- if eq .machine.performance "high" }}
     cache = {
       enabled = true,
     },
@@ -74,14 +73,6 @@ require("lazy").setup({
       paths = {}, -- add any custom paths here that you want to includes in the rtp
       disabled_plugins = disabled_built_ins,
     },
-{{- else }}
-    cache = {
-      enabled = true,
-    },
-    rtp = {
-      disabled_plugins = disabled_built_ins,
-    },
-{{- end }}
   },
 })
 
@@ -89,11 +80,10 @@ require("lazy").setup({
 require("config.options")
 require("config.keymaps")
 require("config.autocmds")
-
-{{- if .features.ai_tools }}
 -- AI tools integration
 require("config.ai")
-{{- end }}
+-- Claude Code integration enhancements
+require("config.claude-code").setup()
 
 -- Load colorscheme
 vim.cmd.colorscheme("tokyonight-night")
