@@ -4,6 +4,8 @@
 
 {{- $name := promptStringOnce . "name" "What is your full name" -}}
 {{- $email := promptStringOnce . "email" "What is your email address" -}}
+{{- $personalEmail := promptStringOnce . "personalEmail" "What is your personal email (leave empty if none)" -}}
+{{- $workEmail := promptStringOnce . "workEmail" "What is your work email (leave empty if none)" -}}
 {{- $signingkey := promptStringOnce . "signingkey" "What is your GPG signing key ID (leave empty if none)" -}}
 {{- $machineType := promptChoiceOnce . "machine.type" "What type of machine is this" (list "development" "server" "minimal" "steamos") -}}
 {{- $performance := promptChoiceOnce . "machine.performance" "What is the performance level of this machine" (list "high" "medium" "low" "handheld") -}}
@@ -32,6 +34,8 @@ data:
   configVersion: {{ $configVersion }}
   name: {{ $name | quote }}
   email: {{ $email | quote }}
+  personalEmail: {{ $personalEmail | quote }}
+  workEmail: {{ $workEmail | quote }}
   signingkey: {{ $signingkey | quote }}
   machine:
     type: {{ $machineType | quote }}
