@@ -39,11 +39,12 @@ config/vscode/CachedExtensions/
 .anthropic/
 .openai/
 
-# API keys and secrets (fallback - should be in secrets.sh)
+# API keys and secrets (machine-specific, not synced)
 .env.local
 .env.*.local
 *.key
 *.pem
+.config/secrets.sh
 
 # Mac-specific
 .DS_Store

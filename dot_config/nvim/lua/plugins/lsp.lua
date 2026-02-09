@@ -164,20 +164,16 @@ return {
     end,
   },
 
-  -- TypeScript utilities
+  -- TypeScript utilities (using typescript-tools.nvim instead of deprecated typescript.nvim)
   {
-    "jose-elias-alvarez/typescript.nvim",
-    enabled = not is_vscode, -- Disable TypeScript.nvim when in VSCode/Cursor
-    dependencies = { "nvim-lspconfig" },
+    "pmizio/typescript-tools.nvim",
+    enabled = not is_vscode, -- Disable when in VSCode/Cursor
+    dependencies = { "nvim-lua/plenary.nvim", "nvim-lspconfig" },
     opts = {
-      server = {
-        settings = {
-          typescript = {
-            preferences = {
-              importModuleSpecifier = "relative",
-              importModuleSpecifierEnding = "minimal",
-            },
-          },
+      settings = {
+        tsserver_file_preferences = {
+          importModuleSpecifierPreference = "relative",
+          importModuleSpecifierEnding = "minimal",
         },
       },
     },

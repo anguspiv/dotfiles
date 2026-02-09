@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Create predefined work tmux sessions
+
+set -euo pipefail
+
+SESSION_TYPE="${1:-main}"
+
+case "$SESSION_TYPE" in
+    main)
+        SESSION_NAME="work-main"
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            tmux new-session -d -s "$SESSION_NAME" -n "editor" -c "$HOME/work"
+            tmux new-window -t "$SESSION_NAME" -n "terminal" -c "$HOME/work"
+            tmux new-window -t "$SESSION_NAME" -n "git" -c "$HOME/work"
+            tmux select-window -t "$SESSION_NAME:1"
+        fi
+        tmux attach-session -t "$SESSION_NAME"
+        ;;
+
+    services)
+        SESSION_NAME="services"
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            tmux new-session -d -s "$SESSION_NAME" -n "backend" -c "$HOME/work"
+            tmux new-window -t "$SESSION_NAME" -n "frontend" -c "$HOME/work"
+            tmux new-window -t "$SESSION_NAME" -n "logs" -c "$HOME/work"
+            tmux select-window -t "$SESSION_NAME:1"
+        fi
+        tmux attach-session -t "$SESSION_NAME"
+        ;;
+
+    logs)
+        SESSION_NAME="work-logs"
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            tmux new-session -d -s "$SESSION_NAME" -n "app-logs" -c "$HOME/work"
+            tmux send-keys -t "$SESSION_NAME:1" "tail -f /var/log/app/*.log" C-m
+            tmux new-window -t "$SESSION_NAME" -n "docker-logs" -c "$HOME/work"
+            tmux send-keys -t "$SESSION_NAME:2" "docker-compose logs -f" C-m
+            tmux select-window -t "$SESSION_NAME:1"
+        fi
+        tmux attach-session -t "$SESSION_NAME"
+        ;;
+
+    *)
+        echo "Unknown session type: $SESSION_TYPE"
+        echo "Available: main, services, logs"
+        exit 1
+        ;;
+esac

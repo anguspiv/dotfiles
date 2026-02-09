@@ -129,6 +129,25 @@ fi
 # if [ -f '/usr/local/share/google-cloud-sdk/path.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/path.zsh.inc'; fi
 # if [ -f '/usr/local/share/google-cloud-sdk/completion.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/completion.zsh.inc'; fi
 
+# =====================================================
+# CHEZMOI AUTO-SYNC (Level 2: Prompted Sync)
+# =====================================================
+if [[ -f ~/.config/zsh/chezmoi-auto-sync.zsh ]]; then
+    # Load the auto-sync system
+    source ~/.config/zsh/chezmoi-auto-sync.zsh
+
+    # Configure for prompted sync
+    export CHEZMOI_SYNC_MODE="prompt"
+
+    # Check every hour
+    export CHEZMOI_CHECK_INTERVAL=3600
+
+    # Enable startup check
+    export CHEZMOI_STARTUP_CHECK=true
+
+    # Start background periodic checking
+    _chezmoi_start_periodic_check
+fi
 {{- if eq .chezmoi.hostname "FNVF299JMC" }}
 # Kiro CLI post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"

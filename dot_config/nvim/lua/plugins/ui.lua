@@ -42,10 +42,20 @@ return {
     opts = {
       sources = { "filesystem", "buffers", "git_status", "document_symbols" },
       open_files_do_not_replace_types = { "terminal", "Trouble", "qf", "Outline" },
+      source_selector = {
+        winbar = true,
+        statusline = false,
+        sources = {
+          { source = "filesystem", display_name = " 󰉋 Files " },
+          { source = "buffers", display_name = " 󰈚 Buffers " },
+          { source = "git_status", display_name = " 󰊢 Git " },
+        },
+      },
       filesystem = {
         bind_to_cwd = false,
         follow_current_file = { enabled = true },
         use_libuv_file_watcher = true,
+        scan_mode = "deep",
         filtered_items = {
           visible = false,
           hide_dotfiles = false,
