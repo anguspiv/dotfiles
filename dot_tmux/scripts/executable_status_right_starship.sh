@@ -18,15 +18,34 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     if ping -c 1 -W 1000 8.8.8.8 >/dev/null 2>&1; then
         PRIMARY_INTERFACE=$(route get default 2>/dev/null | awk '/interface:/ { print $2 }')
         if [[ "$PRIMARY_INTERFACE" == en* ]]; then
-            if [[ "$PRIMARY_INTERFACE" == "en0" ]] && system_profiler SPAirPortDataType 2>/dev/null | grep -q "Status: Connected"; then
-                SSID=$(networksetup -getairportnetwork "$PRIMARY_INTERFACE" 2>/dev/null | cut -d: -f2 | xargs)
-                if [ -n "$SSID" ] && [[ "$SSID" != *"not associated"* ]]; then
-                    NETWORK_OUTPUT="${SSID} 󰤨"
+            # Check if en0 has WiFi capability and is connected
+            if [[ "$PRIMARY_INTERFACE" == "en0" ]]; then
+                # Try system_profiler first (more reliable)
+                SSID=$(system_profiler SPAirPortDataType 2>/dev/null | grep -A 1 "Current Network Information:" | tail -n +2 | head -1 | cut -d: -f1 | xargs)
+                
+                # Fallback to networksetup if system_profiler fails
+                if [ -z "$SSID" ] || [[ "$SSID" == *"Network Type"* ]]; then
+                    SSID=$(networksetup -getairportnetwork "$PRIMARY_INTERFACE" 2>/dev/null | cut -d: -f2 | xargs)
+                fi
+                
+                if [ -n "$SSID" ] && [[ "$SSID" != *"not associated"* ]] && [[ "$SSID" != *"Network Type"* ]]; then
+                    # Handle redacted SSID
+                    if [[ "$SSID" == "<redacted>" ]]; then
+                        NETWORK_OUTPUT="WiFi 󰤨"
+                    else
+                        NETWORK_OUTPUT="${SSID} 󰤨"
+                    fi
                     NETWORK_COLOR="#a3be8c"
                 else
-                    NETWORK_OUTPUT="Down 󰤭"
-                    NETWORK_COLOR="#bf616a"
-                    NETWORK_BG="yes"
+                    # Check if en0 has IP (could be ethernet/USB-C adapter on en0)
+                    if ifconfig "$PRIMARY_INTERFACE" | grep -q "inet [0-9]"; then
+                        NETWORK_OUTPUT="Wired 󰈀"
+                        NETWORK_COLOR="#a3be8c"
+                    else
+                        NETWORK_OUTPUT="Down 󰤭"
+                        NETWORK_COLOR="#bf616a"
+                        NETWORK_BG="yes"
+                    fi
                 fi
             else
                 NETWORK_OUTPUT="Eth 󰈀"
