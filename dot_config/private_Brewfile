@@ -31,6 +31,7 @@ brew "grc"             # Colorize command output
 # Development tools
 brew "gh"              # GitHub CLI
 brew "git-extras"      # Git utilities
+brew "lazygit"         # Git TUI
 brew "gnupg"           # GPG encryption
 brew "pinentry-mac"    # GPG PIN entry
 brew "starship"        # Cross-shell prompt
