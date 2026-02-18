@@ -1,0 +1,45 @@
+#!/bin/bash
+# run_onchange_install-peon-ping.sh.tmpl
+# Ensures peon-ping is installed for Claude Code hooks
+
+set -euo pipefail
+
+PEON_DIR="{{ .chezmoi.homeDir }}/.claude/hooks/peon-ping"
+PEON_VERSION_FILE="$PEON_DIR/VERSION"
+INSTALL_URL="https://raw.githubusercontent.com/PeonPing/peon-ping/main/install.sh"
+
+echo "🔊 Checking peon-ping installation..."
+
+# Check if peon-ping is installed
+if [ -f "$PEON_VERSION_FILE" ]; then
+    INSTALLED_VERSION=$(cat "$PEON_VERSION_FILE" 2>/dev/null || echo "unknown")
+    echo "✓ peon-ping already installed (version: $INSTALLED_VERSION)"
+
+    # Optional: Check for updates (uncomment if you want auto-update checks)
+    # echo "  Use 'peon update' to check for new versions"
+else
+    echo "📦 Installing peon-ping..."
+
+    # Ensure Claude hooks directory exists
+    mkdir -p "{{ .chezmoi.homeDir }}/.claude/hooks"
+
+    # Install peon-ping
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$INSTALL_URL" | bash
+        echo "✓ peon-ping installed successfully!"
+    else
+        echo "❌ curl not found - cannot install peon-ping"
+        echo "   Please install curl or manually install from: https://github.com/PeonPing/peon-ping"
+        exit 1
+    fi
+fi
+
+# Verify installation
+if [ -f "$PEON_DIR/peon.sh" ]; then
+    echo "✓ peon-ping is ready to use"
+else
+    echo "⚠️  peon-ping installation may have failed"
+    echo "   Expected to find: $PEON_DIR/peon.sh"
+fi
+
+# Hash for change detection: {{ .chezmoi.hostname }}-peon-ping-v1.5.6-{{ now | date "2006-01-02" }}
