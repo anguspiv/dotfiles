@@ -4,7 +4,8 @@
 
 {{- if eq .chezmoi.hostname "FNVF299JMC" }}
 # Kiro CLI pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
+# Temporarily disabled to debug fnm messages
+# [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
 {{- end }}
 
 # Performance: Early return for non-interactive sessions
@@ -150,5 +151,10 @@ if [[ -f ~/.config/zsh/chezmoi-auto-sync.zsh ]]; then
 fi
 {{- if eq .chezmoi.hostname "FNVF299JMC" }}
 # Kiro CLI post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
+# Temporarily disabled to debug fnm messages
+# [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
 {{- end }}
+
+# peon-ping quick controls
+alias peon="bash {{ .chezmoi.homeDir }}/.claude/hooks/peon-ping/peon.sh"
+[ -f {{ .chezmoi.homeDir }}/.claude/hooks/peon-ping/completions.bash ] && source {{ .chezmoi.homeDir }}/.claude/hooks/peon-ping/completions.bash
