@@ -8,6 +8,22 @@ local keymap = vim.keymap.set
 
 -- Claude-specific mappings (if Claude CLI is available)
 if vim.fn.executable("claude") == 1 then
+  -- Create vim commands that call Claude CLI
+  vim.api.nvim_create_user_command("ClaudeChat", function()
+    vim.cmd("split | terminal claude")
+  end, { desc = "Open Claude Code in terminal" })
+
+  vim.api.nvim_create_user_command("ClaudeGenerate", function()
+    local selection = vim.fn.getreg('"')
+    vim.cmd("split | terminal claude --prompt 'Review and improve: " .. vim.fn.escape(selection, '"') .. "'")
+  end, { range = true, desc = "Send selection to Claude" })
+
+  vim.api.nvim_create_user_command("ClaudeExplain", function()
+    local line = vim.fn.getline(".")
+    vim.cmd("split | terminal claude --prompt 'Explain this code: " .. vim.fn.escape(line, '"') .. "'")
+  end, { desc = "Explain current line with Claude" })
+
+  -- Set up keymaps
   keymap("n", "<leader>ai", "<cmd>ClaudeChat<cr>", { desc = "Open Claude Chat" })
   keymap("v", "<leader>ar", "<cmd>ClaudeGenerate<cr>", { desc = "Claude Review Selection" })
   keymap("n", "<leader>ae", "<cmd>ClaudeExplain<cr>", { desc = "Claude Explain Code" })

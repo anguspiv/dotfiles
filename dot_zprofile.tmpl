@@ -1,13 +1,5 @@
 {{- if eq .chezmoi.hostname "FNVF299JMC" }}
-# Kiro CLI pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
-{{- end }}
-
-# Ensure zshrc is sourced for interactive shells
-if [[ -f ~/.zshrc ]]; then
-    source ~/.zshrc
-fi
-{{- if eq .chezmoi.hostname "FNVF299JMC" }}
-# Kiro CLI post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
+# Kiro CLI blocks temporarily disabled to debug fnm messages
+# [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
+# [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
 {{- end }}
