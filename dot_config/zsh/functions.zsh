@@ -23,15 +23,13 @@ lazy_load_tool() {
 # Setup true lazy loading for performance-heavy tools
 setup_lazy_loading() {
     # Cache command existence to avoid repeated checks
-    local has_fnm has_zoxide has_starship has_fzf
-    has_fnm=$(command -v fnm >/dev/null 2>&1 && echo 1 || echo 0)
+    local has_zoxide has_starship has_fzf
     has_zoxide=$(command -v zoxide >/dev/null 2>&1 && echo 1 || echo 0)
     has_starship=$(command -v starship >/dev/null 2>&1 && echo 1 || echo 0)
     has_fzf=$([[ -f ~/.fzf.zsh ]] || command -v fzf >/dev/null 2>&1 && echo 1 || echo 0)
 
-    # Initialize fnm immediately for proper Node version management
-    if [[ $has_fnm -eq 1 ]]; then
-        eval "$(fnm env --use-on-cd --shell zsh)"
+    # fnm is already initialized in .zshenv, just add completions here
+    if command -v fnm >/dev/null 2>&1; then
         eval "$(fnm completions --shell zsh)"
     fi
 
