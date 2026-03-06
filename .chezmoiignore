@@ -34,6 +34,10 @@ config/vscode/CachedExtensions/
 .bash_history
 .zsh_sessions/
 
+# Local shell customizations (modified by external tools)
+.zprofile.local
+.zshrc.local
+
 # Claude Code and AI tool data
 .claude/
 .anthropic/

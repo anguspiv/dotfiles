@@ -137,3 +137,45 @@ vim.api.nvim_create_autocmd("BufReadPre", {
     end
   end,
 })
+
+-- Terminal buffer visual distinction
+vim.api.nvim_create_autocmd("TermOpen", {
+  group = augroup("terminal_setup"),
+  callback = function()
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
+    vim.opt_local.signcolumn = "no"
+
+    -- Set window-local highlights for terminal buffers
+    vim.wo.winhighlight = "Normal:TerminalNormal,NormalNC:TerminalNormalNC"
+  end,
+})
+
+-- Auto enter insert mode when switching to terminal buffer
+vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
+  group = augroup("terminal_insert"),
+  pattern = "term://*",
+  callback = function()
+    vim.cmd("startinsert")
+  end,
+})
+
+-- Keep terminal in insert mode when leaving and re-entering
+vim.api.nvim_create_autocmd("BufLeave", {
+  group = augroup("terminal_leave"),
+  pattern = "term://*",
+  callback = function()
+    vim.cmd("stopinsert")
+  end,
+})
+
+-- Neo-tree visual distinction
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("neotree_setup"),
+  pattern = "neo-tree",
+  callback = function()
+    vim.opt_local.signcolumn = "no"
+    -- Set window-local highlights for neo-tree
+    vim.wo.winhighlight = "Normal:NeoTreeNormal,NormalNC:NeoTreeNormalNC,EndOfBuffer:NeoTreeEndOfBuffer"
+  end,
+})

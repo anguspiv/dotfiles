@@ -18,6 +18,8 @@
 	st = status -sb
 	logs = log --show-signature
 	cb = checkout -b
+	cleanup-branches = "!f() { TARGET=\"${1:-main}\"; echo \"Fetching and pruning...\"; git fetch --prune; echo \"Deleting gone branches...\"; git branch -vv | grep \": gone]\" | awk '{print $1}' | xargs -r git branch -D 2>/dev/null; echo \"Deleting merged branches...\"; git branch --merged \"$TARGET\" | grep -v \"^\\*\" | grep -v \"main\" | grep -v \"master\" | grep -v \"$TARGET\" | xargs -r git branch -d 2>/dev/null; echo \"Checking squashed/rebased...\"; git for-each-ref refs/heads/ \"--format=%(refname:short)\" | while read branch; do case \"$branch\" in main|master|$TARGET|$(git branch --show-current)) continue ;; esac; MERGE_BASE=$(git merge-base \"$TARGET\" \"$branch\" 2>/dev/null) || continue; BRANCH_PATCHES=$(git log --format=%H \"$MERGE_BASE..$branch\" 2>/dev/null | git patch-id --stable 2>/dev/null | cut -d' ' -f1 | sort); [ -z \"$BRANCH_PATCHES\" ] && continue; TARGET_PATCHES=$(git log --format=%H \"$MERGE_BASE..$TARGET\" 2>/dev/null | git patch-id --stable 2>/dev/null | cut -d' ' -f1 | sort); ALL_FOUND=true; for patch in $BRANCH_PATCHES; do echo \"$TARGET_PATCHES\" | grep -q \"^$patch$\" || { ALL_FOUND=false; break; }; done; [ \"$ALL_FOUND\" = true ] && echo \"Deleting squashed: $branch\" && git branch -D \"$branch\" 2>/dev/null; done; echo \"Cleanup complete!\"; }; f"
+	brc = !git cleanup-branches
 [gpg]
 	program = gpg
 [tag]

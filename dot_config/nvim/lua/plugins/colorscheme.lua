@@ -25,7 +25,7 @@ return {
       lualine_bold = false,
       cache = true,
       on_colors = function(colors) end,
-      on_highlights = function(highlights, colors) 
+      on_highlights = function(highlights, colors)
         highlights.DiagnosticVirtualTextError = {
           bg = colors.none,
           fg = colors.red1,
@@ -41,6 +41,48 @@ return {
         highlights.DiagnosticVirtualTextHint = {
           bg = colors.none,
           fg = colors.blue7,
+        }
+
+        -- Terminal buffer visual distinction
+        -- Give terminals a subtle darker background with a cyan/terminal tint
+        highlights.TerminalNormal = {
+          bg = "#14151c", -- Slightly darker than normal bg with subtle blue tint
+          fg = colors.fg,
+        }
+        highlights.TerminalNormalNC = {
+          bg = "#12131a", -- Even darker for inactive terminal windows
+          fg = colors.fg_dark,
+        }
+
+        -- Neo-tree file explorer visual distinction
+        -- Give neo-tree a warmer, slightly lighter background to distinguish from code
+        highlights.NeoTreeNormal = {
+          bg = "#1e2030", -- Warmer, slightly blue-purple tint
+          fg = colors.fg,
+        }
+        highlights.NeoTreeNormalNC = {
+          bg = "#1a1c28", -- Darker when not focused
+          fg = colors.fg_dark,
+        }
+        highlights.NeoTreeEndOfBuffer = {
+          bg = "#1e2030",
+          fg = "#1e2030",
+        }
+        -- Enhance the visual hierarchy in neo-tree
+        highlights.NeoTreeDirectoryIcon = {
+          fg = colors.blue,
+        }
+        highlights.NeoTreeDirectoryName = {
+          fg = colors.blue,
+        }
+        highlights.NeoTreeGitModified = {
+          fg = colors.orange,
+        }
+        highlights.NeoTreeGitAdded = {
+          fg = colors.green,
+        }
+        highlights.NeoTreeGitDeleted = {
+          fg = colors.red,
         }
       end,
     },
@@ -180,6 +222,14 @@ return {
               },
             },
             { "filename", path = 1, symbols = { modified = "  ", readonly = "", unnamed = "" } },
+            {
+              -- Terminal indicator
+              function()
+                return vim.bo.buftype == "terminal" and " TERMINAL" or ""
+              end,
+              color = { fg = "#7dcfff", bg = "#1f2335", gui = "bold" },
+              padding = { left = 1, right = 1 },
+            },
           },
           lualine_x = {
             {
