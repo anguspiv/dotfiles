@@ -1,8 +1,8 @@
-# Added by Obsidian
-export PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
-
 {{- if eq .chezmoi.hostname "FNVF299JMC" }}
 # Kiro CLI blocks temporarily disabled to debug fnm messages
 # [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
 # [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
 {{- end }}
+
+# Source local unmanaged additions (for Obsidian, etc.)
+[[ -f "$HOME/.zprofile.local" ]] && source "$HOME/.zprofile.local"
