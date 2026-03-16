@@ -1,0 +1,130 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+
+# Claude Code Skills Sync Script
+# Installs all skills defined in claude_skills.yml
+# Hash: {{ include ".chezmoidata/claude_skills.yml" | sha256sum }}
+
+set -euo pipefail
+
+echo "🔄 Syncing Claude Code skills..."
+
+# Check if Claude Code is installed
+if ! command -v claude &> /dev/null; then
+    echo "⚠️  Claude Code CLI not found. Skipping skill sync."
+    exit 0
+fi
+
+# Check if jq is installed (needed for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "⚠️  jq not found. Installing via homebrew..."
+    brew install jq || {
+        echo "❌ Failed to install jq. Please install manually: brew install jq"
+        exit 1
+    }
+fi
+
+SKILL_LOCK="$HOME/.agents/.skill-lock.json"
+
+# Ensure .agents directory exists
+mkdir -p "$HOME/.agents"
+
+# Function to check if skill is installed AND has a valid hash
+skill_installed() {
+    local skill_name=$1
+    if [[ ! -f "$SKILL_LOCK" ]]; then
+        return 1
+    fi
+
+    # Check if skill exists and has non-empty hash
+    local hash=$(jq -r ".skills.\"$skill_name\".skillFolderHash // \"\"" "$SKILL_LOCK" 2>/dev/null)
+    [[ -n "$hash" ]]
+}
+
+# Function to install skill
+install_skill() {
+    local skill_name=$1
+
+    if skill_installed "$skill_name"; then
+        echo "  ✓ $skill_name"
+        return 0
+    fi
+
+    echo "  → Installing $skill_name..."
+    if claude plugin install "$skill_name" > /tmp/claude-install-$skill_name.log 2>&1; then
+        echo "  ✅ $skill_name installed"
+    else
+        echo "  ❌ Failed to install $skill_name"
+        echo "     Log: /tmp/claude-install-$skill_name.log"
+    fi
+}
+
+# Install all base skills (107 total)
+echo "📦 Installing base skills..."
+echo ""
+
+TOTAL_SKILLS=0
+INSTALLED_SKILLS=0
+FAILED_SKILLS=0
+
+{{- range .claude_skills.base_skills }}
+TOTAL_SKILLS=$((TOTAL_SKILLS + 1))
+if skill_installed "{{ . }}"; then
+    echo "  ✓ {{ . }}"
+    INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
+else
+    install_skill "{{ . }}"
+    if skill_installed "{{ . }}"; then
+        INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
+    else
+        FAILED_SKILLS=$((FAILED_SKILLS + 1))
+    fi
+fi
+{{- end }}
+
+# Install work-specific skills (if any defined)
+{{- if .claude_skills.work_specific_skills }}
+echo ""
+echo "💼 Installing work-specific skills..."
+{{- range .claude_skills.work_specific_skills }}
+TOTAL_SKILLS=$((TOTAL_SKILLS + 1))
+if skill_installed "{{ . }}"; then
+    echo "  ✓ {{ . }}"
+    INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
+else
+    install_skill "{{ . }}"
+    if skill_installed "{{ . }}"; then
+        INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
+    else
+        FAILED_SKILLS=$((FAILED_SKILLS + 1))
+    fi
+fi
+{{- end }}
+{{- end }}
+
+echo ""
+echo "✨ Claude Code skills sync complete!"
+echo ""
+echo "📊 Statistics:"
+echo "   Total skills in manifest: $TOTAL_SKILLS"
+echo "   Successfully installed: $INSTALLED_SKILLS"
+if [[ $FAILED_SKILLS -gt 0 ]]; then
+    echo "   ⚠️  Failed installations: $FAILED_SKILLS"
+    echo "   Check logs in /tmp/claude-install-*.log for details"
+fi
+
+# Report skills with empty hashes
+if [[ -f "$SKILL_LOCK" ]]; then
+    EMPTY_HASH_COUNT=$(jq '[.skills | to_entries[] | select(.value.skillFolderHash == "")] | length' "$SKILL_LOCK")
+    if [[ $EMPTY_HASH_COUNT -gt 0 ]]; then
+        echo ""
+        echo "⚠️  Warning: $EMPTY_HASH_COUNT skills still have empty hashes"
+        echo "   List of broken skills:"
+        jq -r '.skills | to_entries[] | select(.value.skillFolderHash == "") | "     - " + .key' "$SKILL_LOCK"
+        echo ""
+        echo "   These skills may be from repositories that no longer exist or have moved."
+        echo "   You can manually uninstall them with: claude plugin uninstall <skill-name>"
+    fi
+fi
+
+{{- end }}

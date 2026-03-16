@@ -1,0 +1,134 @@
+# Claude Code Skills - Synced via Chezmoi
+# All currently installed skills (107 total)
+# Organized by source repository for clarity
+
+claude_skills:
+  base_skills:
+    # obra/superpowers (14 skills) - Development workflow
+    - systematic-debugging
+    - writing-plans
+    - test-driven-development
+    - executing-plans
+    - using-superpowers
+    - using-git-worktrees
+    - requesting-code-review
+    - brainstorming
+    - dispatching-parallel-agents
+    - finishing-a-development-branch
+    - receiving-code-review
+    - subagent-driven-development
+    - verification-before-completion
+    - writing-skills
+
+    # anthropics/skills (13 skills) - Official skills
+    - frontend-design
+    - skill-creator
+    - mcp-builder
+    - pdf
+    - pptx
+    - webapp-testing
+    - xlsx
+    - docx
+    - internal-comms
+    - doc-coauthoring
+    - canvas-design
+    - slack-gif-creator
+
+    # github/awesome-copilot (23 skills) - Comprehensive tooling
+    - breakdown-epic-arch
+    - breakdown-epic-pm
+    - breakdown-feature-implementation
+    - breakdown-feature-prd
+    - breakdown-plan
+    - breakdown-test
+    - chrome-devtools
+    - conventional-commit
+    - create-agentsmd
+    - create-implementation-plan
+    - create-readme
+    - excalidraw-diagram-generator
+    - git-commit
+    - gh-cli
+    - penpot-uiux-design
+    - playwright-generate-test
+    - playwright-explore-website
+    - playwright-automation-fill-in-form
+    - polyglot-test-agent
+    - refactor
+    - refactor-method-complexity-reduce
+    - refactor-plan
+    - write-coding-standards-from-file
+
+    # antfu/skills (7 skills) - Vite ecosystem
+    - turborepo
+    - pnpm
+    - vitest
+    - vite
+    - vitepress
+    - web-design-guidelines
+    - slidev
+
+    # kepano/obsidian-skills (5 skills) - Obsidian integration
+    - defuddle
+    - obsidian-markdown
+    - obsidian-cli
+    - obsidian-bases
+    - json-canvas
+
+    # wshobson/agents (43 skills) - Comprehensive patterns
+    # NOTE: Many of these have empty hashes and may need reinstallation
+    - api-design-principles
+    - architecture-patterns
+    - microservices-patterns
+    - react-state-management
+    - prompt-engineering-patterns
+    - helm-chart-scaffolding
+    - k8s-manifest-generator
+    - k8s-security-policies
+    - hybrid-cloud-networking
+    - istio-traffic-management
+    - multi-cloud-architecture
+    - terraform-module-library
+    - deployment-pipeline-design
+    - github-actions-templates
+    - gitlab-ci-patterns
+    - secrets-management
+    - dependency-upgrade
+    - react-modernization
+    - postgresql-table-design
+    - data-storytelling
+    - kpi-dashboard-design
+    - javascript-testing-patterns
+    - modern-javascript-patterns
+    - nodejs-backend-patterns
+    - typescript-advanced-types
+    - rust-async-patterns
+    - bash-defensive-patterns
+    - auth-implementation-patterns
+    - e2e-testing-patterns
+    - git-advanced-workflows
+    - monorepo-management
+    - turborepo-caching
+    - design-system-patterns
+    - accessibility-compliance
+    - interaction-design
+    - mobile-ios-design
+    - mobile-android-design
+    - react-native-design
+    - responsive-design
+    - visual-design-foundations
+    - web-component-design
+
+    # Other sources (5 skills)
+    - jira-cli              # code-and-sorts/awesome-copilot-agents
+    - find-skills           # vercel-labs/skills
+    - browser-use           # browser-use/browser-use
+    - mermaid-diagrams      # softaworks/agent-toolkit
+    - glab                  # henricook/claude-glab-skill
+
+  # Future work-specific skills (add here as needed)
+  work_specific_skills: []
+    # Example:
+    # - gitlab-mr-review
+    # - code-review
+    # - simplify
