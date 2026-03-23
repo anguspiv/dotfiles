@@ -14,6 +14,16 @@ end
 map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { expr = true })
 map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { expr = true })
 
+-- Centered scrolling and search
+map("n", "<C-d>", "<C-d>zz", { desc = "Half-page down (centered)" })
+map("n", "<C-u>", "<C-u>zz", { desc = "Half-page up (centered)" })
+map("n", "n", "nzzzv", { desc = "Next search result (centered)" })
+map("n", "N", "Nzzzv", { desc = "Prev search result (centered)" })
+map("n", "J", "mzJ`z", { desc = "Join lines (keep cursor)" })
+
+-- Better paste (don't overwrite register)
+map("x", "<leader>p", '"_dP', { desc = "Paste without overwriting register" })
+
 -- Move to window using the <ctrl> hjkl keys
 map("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
 map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
@@ -88,6 +98,20 @@ map("n", "<leader><tab><tab>", "<cmd>tabnew<cr>", { desc = "New Tab" })
 map("n", "<leader><tab>]", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "<leader><tab>d", "<cmd>tabclose<cr>", { desc = "Close Tab" })
 map("n", "<leader><tab>[", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
+
+-- Centered diagnostic navigation
+map("n", "]d", function()
+  vim.diagnostic.goto_next()
+  vim.cmd("normal! zz")
+end, { desc = "Next diagnostic (centered)" })
+map("n", "[d", function()
+  vim.diagnostic.goto_prev()
+  vim.cmd("normal! zz")
+end, { desc = "Prev diagnostic (centered)" })
+
+-- Testing
+map("n", "<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", { desc = "Run nearest test" })
+map("n", "<leader>tT", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", { desc = "Run file tests" })
 
 -- Development-specific keymaps
 -- Only set LSP keymaps when not in VSCode/Cursor (editor handles LSP)

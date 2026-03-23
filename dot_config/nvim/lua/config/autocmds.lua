@@ -93,6 +93,17 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
+-- Remove trailing whitespace on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = augroup("trim_whitespace"),
+  pattern = "*",
+  callback = function()
+    local save_cursor = vim.fn.getpos(".")
+    vim.cmd([[%s/\s\+$//e]])
+    vim.fn.setpos(".", save_cursor)
+  end,
+})
+
 -- TypeScript/JavaScript specific autocmds
 -- Skip format-on-save when in VSCode/Cursor (let the editor handle it)
 local is_vscode = vim.g.vscode == 1

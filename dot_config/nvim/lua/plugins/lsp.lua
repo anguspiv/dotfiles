@@ -15,6 +15,23 @@ return {
       "b0o/schemastore.nvim", -- JSON schemas for LSP
     },
     opts = {
+      -- Diagnostics display
+      diagnostics = {
+        underline = true,
+        virtual_text = {
+          prefix = "●",
+          spacing = 4,
+        },
+        severity_sort = true,
+        float = {
+          border = "rounded",
+          source = true,
+        },
+      },
+      -- Enable inlay hints globally
+      inlay_hints = {
+        enabled = true,
+      },
       -- Global capabilities
       capabilities = {},
       -- Global server settings

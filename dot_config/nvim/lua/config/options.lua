@@ -17,6 +17,10 @@ opt.timeoutlen = 300 -- Time to wait for a mapped sequence
 opt.autowrite = true -- Enable auto write
 opt.confirm = true -- Confirm to save changes before exiting modified buffer
 
+-- Scrolling
+opt.scrolloff = 8 -- Keep 8 lines visible above/below cursor
+opt.sidescrolloff = 8 -- Keep 8 columns visible left/right
+
 -- UI
 opt.number = true -- Print line number
 opt.relativenumber = not is_vscode -- Disable relative numbers in VSCode (handled by editor)
@@ -25,6 +29,8 @@ opt.cursorline = true -- Enable highlighting of the current line
 opt.termguicolors = true -- True color support
 opt.winminwidth = 5 -- Minimum window width
 opt.pumheight = 10 -- Maximum number of entries in a popup
+opt.pumblend = 10 -- Popup menu transparency
+opt.winblend = 10 -- Floating window transparency
 opt.showmode = false -- Don't show mode since we have a statusline
 opt.conceallevel = 2 -- Hide concealed text
 
@@ -61,6 +67,7 @@ opt.shiftround = true -- Round indent
 -- Search
 opt.ignorecase = true -- Ignore case
 opt.smartcase = true -- Don't ignore case with capitals
+opt.inccommand = "split" -- Live preview substitutions in split
 opt.grepformat = "%f:%l:%c:%m"
 opt.grepprg = "rg --vimgrep"
 
