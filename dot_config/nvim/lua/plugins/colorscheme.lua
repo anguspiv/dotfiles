@@ -248,6 +248,22 @@ return {
               color = "Debug",
             },
             {
+              function()
+                local clients = vim.lsp.get_clients({ bufnr = 0 })
+                if #clients == 0 then
+                  return ""
+                end
+                local names = {}
+                for _, client in ipairs(clients) do
+                  table.insert(names, client.name)
+                end
+                return " " .. table.concat(names, ", ")
+              end,
+              cond = function()
+                return #vim.lsp.get_clients({ bufnr = 0 }) > 0
+              end,
+            },
+            {
               "filetype",
               colored = true,
               icon_only = false,
@@ -412,7 +428,7 @@ return {
         command_palette = true,
         long_message_to_split = true,
         inc_rename = false,
-        lsp_doc_border = false,
+        lsp_doc_border = true,
       },
     },
     keys = {
