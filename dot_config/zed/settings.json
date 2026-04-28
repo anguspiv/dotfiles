@@ -1,83 +1,127 @@
 // Zed settings - Managed by Chezmoi
 // Generated for: Angus Perkerson <angus.perkerson@disney.com>
 // Terminal: wezterm
-//
-// For information on how to configure Zed, see the Zed
-// documentation: https://zed.dev/docs/configuring-zed
-//
-// To see all of Zed's default settings without changing your
-// custom settings, run the `open default settings` command
-// from the command palette or from `Zed` application menu.
 {
-  // Assistant and AI configuration - Enhanced for Claude Code
+  // Node.js - explicit paths to avoid fnm multishell issues with GUI apps
+  "node": {
+    "path": "/Users/angus.perkerson/.local/share/fnm/aliases/default/bin/node",
+    "npm_path": "/Users/angus.perkerson/.local/share/fnm/aliases/default/bin/npm"
+  },
+
+  // AI configuration
+  "telemetry": {
+    "diagnostics": true,
+    "metrics": false
+  },
+  "edit_predictions": {
+    "provider": "zed"
+  },
+  "language_models": {
+    "amazon-bedrock": {
+      "region": "us-east-1",
+      "profile": "default"
+    }
+  },
+  "agent_servers": {
+    "claude-acp": {
+      "type": "custom",
+      "command": "/Users/angus.perkerson/.local/share/fnm/aliases/default/bin/npx",
+      "args": ["--yes", "@agentclientprotocol/claude-agent-acp@0.31.3"],
+      "env": {
+        "CLAUDE_CODE_USE_BEDROCK": "1",
+        "AWS_PROFILE": "default",
+        "AWS_REGION": "us-east-1",
+        "NPM_CONFIG_CACHE": "/Users/angus.perkerson/Library/Application Support/Zed/node/cache"
+      }
+    }
+  },
+  "agent": {
+    "tool_permissions": {
+      "default": "allow"
+    },
+    "dock": "left",
+    "inline_assistant_model": {
+      "provider": "amazon-bedrock",
+      "model": "us.anthropic.claude-opus-4-6-v1",
+      "enable_thinking": false
+    },
+    "single_file_review": true,
+    "use_modifier_to_send": false,
+    "play_sound_when_agent_done": "always",
+    "notify_when_agent_waiting": "all_screens",
+    "default_model": {
+      "provider": "amazon-bedrock",
+      "model": "us.anthropic.claude-opus-4-6-v1"
+    }
+  },
+
+  // Editor behavior
+  "sticky_scroll": {
+    "enabled": true
+  },
+  "multi_cursor_modifier": "cmd_or_ctrl",
+  "restore_on_startup": "launchpad",
+  "redact_private_values": false,
+  "document_symbols": "on",
+  "document_folding_ranges": "on",
+  "semantic_tokens": "combined",
   "always_treat_brackets_as_autoclosed": true,
   "colorize_brackets": true,
+  "autoscroll_on_clicks": true,
+  "auto_signature_help": true,
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 1000
+    }
+  },
+  "current_line_highlight": "all",
+  "format_on_save": "on",
+  "formatter": "auto",
+  "prettier": {
+    "allowed": true
+  },
+
+  // Git
   "git_panel": {
+    "tree_view": true,
     "sort_by_path": true,
     "dock": "right"
   },
+  "git": {
+    "inline_blame": {
+      "enabled": true,
+      "delay_ms": 500,
+      "show_commit_summary": true
+    }
+  },
+
+  // Diagnostics
   "diagnostics": {
     "inline": {
       "enabled": true
     }
   },
-  "prettier": {
-    "allowed": true
-  },
-  "agent_ui_font_size": 12.0,
+
+  // Font configuration
+  "ui_font_size": 14.0,
   "ui_font_weight": 500.0,
+  "ui_font_family": "VictorMono Nerd Font Propo",
+  "ui_font_features": {
+    "liga": true,
+    "calt": true
+  },
+  "agent_ui_font_size": 14.0,
+  "buffer_font_size": 14.0,
   "buffer_font_weight": 500.0,
-  
-  "agent": {
-    "use_modifier_to_send": true,
-    "play_sound_when_agent_done": true,
-    "always_allow_tool_actions": false,
-    "notify_when_agent_waiting": "all_screens",
-    "default_model": {
-      "provider": "copilot_chat",
-      "model": "gpt-4o"
-    }
+  "buffer_line_height": "standard",
+  "buffer_font_family": "VictorMono Nerd Font Propo",
+  "buffer_font_features": {
+    "liga": true,
+    "calt": true
   },
-  "audio": {
-    "experimental.auto_microphone_volume": true,
-    "experimental.rodio_audio": true
-  },
-  // Auto-updates and extensions
+
+  // UI and theme
   "auto_update": true,
-  "auto_install_extensions": {
-    // Core extensions
-    "git_firefly": true,
-    "vim": true,
-
-    // Language support
-    "astro": true,
-    "deno": true,
-    "graphql": true,
-    "html": true,
-    "prisma": true,
-    "sql": true,
-    "scss": true,
-    "toml": true,
-    "xml": true,
-
-    // Utilities
-    "env": true,
-    "ini": true,
-    "log": true,
-    "markdown-oxide": true,
-    "nginx": true,
-    "rainbow-csv": true,
-    "tmux": true,
-    "vitest": true,
-
-    // Themes and icons
-    "github-dark-default": true,
-    "vscode-dark-modern": true,
-    "vscode-great-icons": true,
-    "vscode-icons": true
-  },
-
-  // UI and theme configuration
   "icon_theme": {
     "mode": "system",
     "light": "VSCode Icons for Zed (Light Official Icons)",
@@ -95,6 +139,12 @@
     "current_line_highlight": "line",
     "show": "auto"
   },
+  "audio": {
+    "experimental.auto_microphone_volume": true,
+    "experimental.rodio_audio": true
+  },
+
+  // Vim
   "vim_mode": true,
   "relative_line_numbers": "enabled",
   "vim": {
@@ -103,35 +153,23 @@
 
   // Panel layout
   "project_panel": {
-    "dock": "left",
+    "hide_hidden": false,
+    "diagnostic_badges": true,
+    "bold_folder_labels": true,
+    "dock": "right",
     "default_width": 240
   },
   "outline_panel": {
     "dock": "right"
   },
   "collaboration_panel": {
-    "dock": "left"
+    "dock": "right"
   },
   "notification_panel": {
     "dock": "bottom"
   },
 
-  // Font configuration - keeping MonaspiceNe as primary
-  "ui_font_size": 13.0,
-  "buffer_font_size": 12.0,
-  "buffer_line_height": "standard",
-  "buffer_font_family": "VictorMono Nerd Font Propo",
-  "buffer_font_features": {
-    "liga": true,
-    "calt": true
-  },
-  "ui_font_family": "VictorMono Nerd Font Propo",
-  "ui_font_features": {
-    "liga": true,
-    "calt": true
-  },
-
-  // Tab and guide configuration
+  // Tabs and guides
   "tabs": {
     "git_status": true,
     "file_icons": true
@@ -142,33 +180,13 @@
     "background_coloring": "indent_aware"
   },
 
-  // Terminal configuration with smart tmux integration
+  // Terminal
   "terminal": {
-    "toolbar": {
-      "breadcrumbs": false
-    },
-    "font_weight": 500.0,
-    "dock": "right",
-    "font_size": 12,
-    "font_family": "VictorMono Nerd Font Propo",
-    "font_features": {
-      "liga": true,
-      "calt": true
-    },
-    "line_height": {
-      "custom": 1.25
-    },
-    "copy_on_select": true,
-    "env": {
-      "GIT_EDITOR": "zed --wait"
-    },
     "shell": {
-      "with_arguments": {
-        "program": "sh",
-        "args": [],
-        "title_override": null
-      }
-    }
+      "program": "/bin/zsh"
+    },
+    "button": true,
+    "dock": "bottom"
   },
 
   // File manager
@@ -176,26 +194,14 @@
     "show_hidden_files": true
   },
 
-  // Call settings
+  // Calls
   "calls": {
     "mute_on_join": true,
     "mute_on_leave": true,
     "share_on_join": false
   },
 
-  // Editor behavior
-  "autoscroll_on_clicks": true,
-  "auto_signature_help": true,
-  "autosave": {
-    "after_delay": {
-      "milliseconds": 1000
-    }
-  },
-  "current_line_highlight": "all",
-  "format_on_save": "on",
-  "formatter": "auto",
-
-  // Language-specific settings - Enhanced
+  // Language-specific settings
   "languages": {
     "JavaScript": {
       "code_actions_on_format": {
@@ -223,16 +229,7 @@
     }
   },
 
-  // Git integration
-  "git": {
-    "inline_blame": {
-      "enabled": true,
-      "delay_ms": 500,
-      "show_commit_summary": true
-    }
-  },
-
-  // Code guidelines and hints
+  // Code guidelines
   "preferred_line_length": 80,
   "show_wrap_guides": true,
   "show_whitespaces": "boundary",
@@ -245,10 +242,37 @@
     "show_other_hints": true
   },
 
-  // Search configuration
+  // Search
   "search": {
     "whole_word": false,
     "case_sensitive": false,
     "include_ignored": false
+  },
+
+  // Extensions
+  "auto_install_extensions": {
+    "git_firefly": true,
+    "vim": true,
+    "astro": true,
+    "deno": true,
+    "graphql": true,
+    "html": true,
+    "prisma": true,
+    "sql": true,
+    "scss": true,
+    "toml": true,
+    "xml": true,
+    "env": true,
+    "ini": true,
+    "log": true,
+    "markdown-oxide": true,
+    "nginx": true,
+    "rainbow-csv": true,
+    "tmux": true,
+    "vitest": true,
+    "github-dark-default": true,
+    "vscode-dark-modern": true,
+    "vscode-great-icons": true,
+    "vscode-icons": true
   }
 }
