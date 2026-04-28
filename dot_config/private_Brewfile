@@ -101,7 +101,7 @@ cask "slack"
 cask "zoom"
 
 # Personal/Creative
-cask "obsidian"
+# Note: Obsidian installed via official installer from obsidian.md (not supported via Homebrew)
 
 # Fonts
 cask "font-monaspice-nerd-font"
