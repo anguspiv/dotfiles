@@ -981,7 +981,7 @@ x11-instance-name =
 #   * `home` - The home directory of the executing user.
 #
 #   * `inherit` - The working directory of the launching process.
-working-directory =
+working-directory = "inherit"
 
 # Key bindings. The format is `trigger=action`. Duplicate triggers will
 # overwrite previously set values. The list of actions is available in
@@ -1663,7 +1663,7 @@ initial-window = false
 #   * `center` - Terminal appears at the center of the screen.
 #
 # Changing this configuration requires restarting Ghostty completely.
-quick-terminal-position = top
+quick-terminal-position = center
 
 # The screen where the quick terminal should show up.
 #
@@ -1683,7 +1683,7 @@ quick-terminal-position = top
 #
 # The default value is `main` because this is the recommended screen
 # by the operating system.
-quick-terminal-screen = mouse
+quick-terminal-screen = main
 
 # Duration (in seconds) of the quick terminal enter and exit animation.
 # Set it to 0 to disable animation completely. This can be changed at

@@ -1,5 +1,6 @@
+-- Editor plugin customizations on top of LazyVim defaults
 return {
-  -- Better fzf-lua config
+  -- fzf-lua: vertical preview layout
   {
     "ibhagwan/fzf-lua",
     opts = {
@@ -9,7 +10,7 @@ return {
     },
   },
 
-  -- Trouble.nvim: diagnostics with better defaults
+  -- Trouble: auto-focus and preview
   {
     "folke/trouble.nvim",
     opts = {
@@ -18,7 +19,7 @@ return {
     },
   },
 
-  -- which-key: group labels for custom keymaps
+  -- which-key: extra group labels
   {
     "folke/which-key.nvim",
     opts = function(_, opts)
@@ -29,7 +30,7 @@ return {
     end,
   },
 
-  -- Gitsigns: add blame line and better diff
+  -- Gitsigns: enable inline blame
   {
     "lewis6991/gitsigns.nvim",
     opts = {
