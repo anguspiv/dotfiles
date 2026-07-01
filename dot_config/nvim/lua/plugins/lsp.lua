@@ -1,21 +1,13 @@
--- LSP Configuration for TypeScript/JavaScript Development
--- Skip LSP setup when running in VSCode/Cursor (let the editor handle LSP)
+-- LSP Configuration overrides for LazyVim
+-- Most servers are handled by LazyVim extras (typescript, eslint, json, tailwind, prisma, etc.)
 local is_vscode = vim.g.vscode == 1
 
 return {
-  -- LSP Configuration
+  -- Custom server settings (merged with LazyVim defaults)
   {
     "neovim/nvim-lspconfig",
-    enabled = not is_vscode, -- Disable Neovim LSP when in VSCode/Cursor
-    event = { "BufReadPre", "BufNewFile" },
-    dependencies = {
-      "mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
-      "hrsh7th/cmp-nvim-lsp",
-      "b0o/schemastore.nvim", -- JSON schemas for LSP
-    },
+    enabled = not is_vscode,
     opts = {
-      -- Diagnostics display
       diagnostics = {
         underline = true,
         virtual_text = {
@@ -28,15 +20,10 @@ return {
           source = true,
         },
       },
-      -- Enable inlay hints globally
       inlay_hints = {
         enabled = true,
       },
-      -- Global capabilities
-      capabilities = {},
-      -- Global server settings
       servers = {
-        -- TypeScript/JavaScript
         ts_ls = {
           settings = {
             typescript = {
@@ -63,7 +50,6 @@ return {
             },
           },
         },
-        -- ESLint
         eslint = {
           settings = {
             workingDirectory = { mode = "auto" },
@@ -72,119 +58,33 @@ return {
             },
           },
         },
-        -- CSS
-        cssls = {},
-        -- HTML
-        html = {},
-        -- JSON
-        jsonls = function()
-          local has_schemastore, schemastore = pcall(require, "schemastore")
-          local schemas = has_schemastore and schemastore.json.schemas() or {}
-          
-          return {
-            settings = {
-              json = {
-                schemas = schemas,
-                validate = { enable = true },
-              },
-            },
-          }
-        end,
-        -- Tailwind CSS
         tailwindcss = {
           filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact" },
         },
-        -- GraphQL
+        cssls = {},
+        html = {},
         graphql = {},
-        -- Prisma
-        prismals = {},
       },
     },
-    config = function(_, opts)
-      local servers = opts.servers
-      local capabilities = vim.tbl_deep_extend(
-        "force",
-        {},
-        vim.lsp.protocol.make_client_capabilities(),
-        require("cmp_nvim_lsp").default_capabilities(),
-        opts.capabilities or {}
-      )
-
-      local function setup(server)
-        local server_opts = vim.tbl_deep_extend("force", {
-          capabilities = vim.deepcopy(capabilities),
-        }, servers[server] or {})
-
-        require("lspconfig")[server].setup(server_opts)
-      end
-
-      -- Get all servers that should be automatically installed
-      local ensure_installed = {}
-      for server, _ in pairs(servers) do
-        ensure_installed[#ensure_installed + 1] = server
-      end
-
-      require("mason-lspconfig").setup({
-        ensure_installed = ensure_installed,
-        handlers = { setup },
-      })
-    end,
   },
 
-  -- Mason: LSP installer
+  -- Extra Mason tools not covered by LazyVim extras
   {
-    "williamboman/mason.nvim",
-    enabled = not is_vscode, -- Disable Mason when in VSCode/Cursor
-    cmd = "Mason",
-    build = ":MasonUpdate",
+    "mason-org/mason.nvim",
+    enabled = not is_vscode,
     opts = {
       ensure_installed = {
-        -- Language servers
-        "typescript-language-server",
-        "eslint-lsp",
-        "css-lsp",
-        "html-lsp",
-        "json-lsp",
-        "tailwindcss-language-server",
-        "graphql-language-service-cli",
-        "prisma-language-server",
-        
-        -- Formatters
-        "prettier",
-        "eslint_d",
         "stylelint",
-        
-        -- Linters
-        "eslint_d",
-        
-        -- Debuggers
         "js-debug-adapter",
         "node-debug2-adapter",
       },
     },
-    config = function(_, opts)
-      require("mason").setup(opts)
-      local mr = require("mason-registry")
-      local function ensure_installed()
-        for _, tool in ipairs(opts.ensure_installed) do
-          local p = mr.get_package(tool)
-          if not p:is_installed() then
-            p:install()
-          end
-        end
-      end
-      if mr.refresh then
-        mr.refresh(ensure_installed)
-      else
-        ensure_installed()
-      end
-    end,
   },
 
-  -- TypeScript utilities (using typescript-tools.nvim instead of deprecated typescript.nvim)
+  -- TypeScript utilities
   {
     "pmizio/typescript-tools.nvim",
-    enabled = not is_vscode, -- Disable when in VSCode/Cursor
+    enabled = not is_vscode,
     dependencies = { "nvim-lua/plenary.nvim", "nvim-lspconfig" },
     opts = {
       settings = {
@@ -195,5 +95,4 @@ return {
       },
     },
   },
-
 }

@@ -137,8 +137,9 @@ if [[ -f ~/.config/zsh/chezmoi-auto-sync.zsh ]]; then
     # Load the auto-sync system
     source ~/.config/zsh/chezmoi-auto-sync.zsh
 
-    # Configure for prompted sync
-    export CHEZMOI_SYNC_MODE="prompt"
+    # Notify only — surfaces changes via native macOS notifications instead of
+    # printing/prompting on the terminal (safe for the background periodic check).
+    export CHEZMOI_SYNC_MODE="notify"
 
     # Check every hour
     export CHEZMOI_CHECK_INTERVAL=3600
@@ -220,3 +221,21 @@ git-cleanup() {
   
   echo "\n✨ Branch cleanup complete!"
 }
+
+{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+
+# This work machine only — reconciled from installer appends (aix, Claude Access,
+# Docker Desktop) so they survive `chezmoi apply` but never sync to other machines.
+export PATH="$HOME/.aix/bin:$PATH"
+fpath=("$HOME/.aix/completions" "$HOME/.claude-access/completions" "$HOME/.docker/completions" $fpath)
+autoload -Uz compinit && compinit
+{{- end }}
+
+# Keep glab's token in sync with pat-manager (single source of truth).
+# No-op on machines without pat-manager (e.g. CI / fresh hosts): glab then
+# falls back to its own stored token. Guard avoids exporting an empty token.
+if command -v pat-manager >/dev/null 2>&1; then
+  _gl_tok="$(pat-manager token gitlab 2>/dev/null)"
+  [ -n "$_gl_tok" ] && export GITLAB_TOKEN="$_gl_tok"
+  unset _gl_tok
+fi

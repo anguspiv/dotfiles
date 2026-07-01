@@ -29,8 +29,8 @@ opt.cursorline = true -- Enable highlighting of the current line
 opt.termguicolors = true -- True color support
 opt.winminwidth = 5 -- Minimum window width
 opt.pumheight = 10 -- Maximum number of entries in a popup
-opt.pumblend = 10 -- Popup menu transparency
-opt.winblend = 10 -- Floating window transparency
+opt.pumblend = 0 -- Popup menu transparency (0 = opaque)
+opt.winblend = 0 -- Floating window transparency (0 = opaque)
 opt.showmode = false -- Don't show mode since we have a statusline
 opt.conceallevel = 2 -- Hide concealed text
 
@@ -80,7 +80,7 @@ opt.splitright = true -- Put new windows right of current
 opt.splitbelow = true -- Put new windows below current
 
 -- Performance
--- opt.lazyredraw = true -- Don't redraw while executing macros (disabled for Noice compatibility)
+opt.lazyredraw = false -- Explicitly disable for Noice compatibility
 opt.ttyfast = true -- Send more characters for redraws
 opt.synmaxcol = 300 -- Don't syntax highlight long lines
 

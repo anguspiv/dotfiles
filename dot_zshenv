@@ -35,7 +35,9 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
-eval "$(fnm env --use-on-cd --shell zsh)"
+# Strip stale fnm multishell entries from inherited PATH before fnm adds its own
+path=("${(@)path:#*fnm_multishells*}")
+eval "$(fnm env --use-on-cd --resolve-engines --corepack-enabled --shell zsh)"
 
 # AI tools integration
 export ANTHROPIC_API_KEY_FILE="$HOME/.config/secrets.sh"

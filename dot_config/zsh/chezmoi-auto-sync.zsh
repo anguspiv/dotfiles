@@ -72,8 +72,11 @@ _chezmoi_notify() {
     local title="$1"
     local message="$2"
 
-    # Terminal notification
-    echo "📦 $title: $message"
+    # Terminal notification — skip when running from the background periodic
+    # check, where printing would corrupt the active prompt/formatting.
+    if [[ "$_CHEZMOI_BACKGROUND" != true ]]; then
+        echo "📦 $title: $message"
+    fi
 
     # macOS notification (if available)
     if command -v osascript >/dev/null 2>&1; then
@@ -152,7 +155,7 @@ chezmoi_full_sync() {
 
         # Prompt to apply
         if [[ -n "$(chezmoi diff 2>/dev/null)" ]]; then
-            read -p "Apply changes? (y/N): " -n 1 -r
+            read -k 1 "REPLY?Apply changes? (y/N): "
             echo
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 chezmoi apply
@@ -165,12 +168,12 @@ chezmoi_full_sync() {
         echo "\n📝 Local changes detected:"
         chezmoi status
 
-        read -p "Commit and push changes? (y/N): " -n 1 -r
+        read -k 1 "REPLY?Commit and push changes? (y/N): "
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             chezmoi cd
 
-            read -p "Commit message: " commit_msg
+            read "commit_msg?Commit message: "
             if [[ -n "$commit_msg" ]]; then
                 git add .
                 git commit -m "$commit_msg"
@@ -229,7 +232,7 @@ _chezmoi_auto_check() {
         prompt)
             if [[ "$has_remote" == true ]]; then
                 echo "\n📦 Chezmoi: Remote updates available"
-                read -p "Pull updates now? (y/N): " -n 1 -r
+                read -k 1 "REPLY?Pull updates now? (y/N): "
                 echo
                 if [[ $REPLY =~ ^[Yy]$ ]]; then
                     chezmoi_pull
@@ -238,7 +241,7 @@ _chezmoi_auto_check() {
 
             if [[ "$has_local" == true ]]; then
                 echo "\n📦 Chezmoi: Local changes detected"
-                read -p "Sync changes now? (y/N): " -n 1 -r
+                read -k 1 "REPLY?Sync changes now? (y/N): "
                 echo
                 if [[ $REPLY =~ ^[Yy]$ ]]; then
                     chezmoi_full_sync
@@ -286,10 +289,13 @@ _chezmoi_start_periodic_check() {
     # Don't run if already running
     [[ -n "$CHEZMOI_CHECK_PID" ]] && return 0
 
+    # The background job cannot interactively prompt, and printing to the
+    # terminal would corrupt the active prompt. Force notify mode (native
+    # macOS/Linux notifications only) regardless of the configured mode.
     (
         while true; do
             sleep "$CHEZMOI_CHECK_INTERVAL"
-            _chezmoi_auto_check
+            CHEZMOI_SYNC_MODE=notify _CHEZMOI_BACKGROUND=true _chezmoi_auto_check
         done
     ) &
 
