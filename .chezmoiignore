@@ -50,6 +50,11 @@ config/vscode/CachedExtensions/
 *.pem
 .config/secrets.sh
 
+# GitHub CLI auth state — gh owns this file (login records; tokens live in the
+# OS keychain). Managing it here caused drift on every gh login/logout and would
+# push logged-in records to machines without the matching keyring token.
+.config/gh/hosts.yml
+
 # Mac-specific
 .DS_Store
 .localized
