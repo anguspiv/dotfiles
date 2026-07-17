@@ -6,3 +6,8 @@
 
 # Source local unmanaged additions (for Obsidian, etc.)
 [[ -f "$HOME/.zprofile.local" ]] && source "$HOME/.zprofile.local"
+{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+
+# Added by aix setup
+export PATH="$HOME/.aix/bin:$PATH"
+{{- end }}
