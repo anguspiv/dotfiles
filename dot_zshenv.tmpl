@@ -12,6 +12,14 @@ export GPG_TTY=$(tty)
 # PATH management - using typeset -U to keep unique entries
 typeset -U path
 path=(
+{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+    # AIX enterprise CLIs (jira, glab, pat-manager, etc.) — first so they win,
+    # and in .zshenv (not .zshrc) so GUI-launched apps (nvim, Neovide) see them too
+    $HOME/.aix/bin
+{{- end }}
+    # Rust toolchain — rustup shims must beat Homebrew's cargo so rust-toolchain.toml
+    # pins (e.g. platform-system-prime's nightly) are honored on manual builds
+    $HOME/.cargo/bin
     # Homebrew paths (prioritize over system)
     /opt/homebrew/bin
     /opt/homebrew/sbin
@@ -37,7 +45,9 @@ esac
 
 # Strip stale fnm multishell entries from inherited PATH before fnm adds its own
 path=("${(@)path:#*fnm_multishells*}")
-eval "$(fnm env --use-on-cd --resolve-engines --corepack-enabled --shell zsh)"
+# --log-level error silences fnm's "Using Node vX" chatter (info) on every cd into
+# a repo with .nvmrc/package.json, while still surfacing genuine fnm errors.
+eval "$(fnm --log-level error env --use-on-cd --resolve-engines --corepack-enabled --shell zsh)"
 
 # AI tools integration
 export ANTHROPIC_API_KEY_FILE="$HOME/.config/secrets.sh"
@@ -47,3 +57,6 @@ export ZED_AWS_REGION="us-east-1"
 export DEV_MODE=true
 # Enable corepack for high-performance machines
 export COREPACK_ENABLE_STRICT=1
+{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+. "$HOME/.cargo/env"
+{{- end }}
