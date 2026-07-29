@@ -286,18 +286,29 @@ _chezmoi_start_periodic_check() {
     # Only run in interactive shells
     [[ -o interactive ]] || return 0
 
-    # Don't run if already running
-    [[ -n "$CHEZMOI_CHECK_PID" ]] && return 0
+    # Only run when stdout is a real terminal. Tools that capture the shell
+    # environment (Zed's `zed --printenv`, Claude Code's env probes) invoke
+    # `zsh -l -i -c '... env'` with stdout on a pipe; a long-lived background
+    # child there holds the write end open and the caller hangs forever waiting
+    # for EOF.
+    [[ -t 1 ]] || return 0
+
+    # Don't run if already running. Verify the PID is actually alive: a stale
+    # exported value inherited from a parent shell would otherwise permanently
+    # disable the check in every child.
+    [[ -n "$CHEZMOI_CHECK_PID" ]] && kill -0 "$CHEZMOI_CHECK_PID" 2>/dev/null && return 0
 
     # The background job cannot interactively prompt, and printing to the
     # terminal would corrupt the active prompt. Force notify mode (native
     # macOS/Linux notifications only) regardless of the configured mode.
+    # stdio goes to /dev/null so this child can never hold a caller's
+    # descriptors open (belt-and-braces with the -t 1 guard above).
     (
         while true; do
             sleep "$CHEZMOI_CHECK_INTERVAL"
             CHEZMOI_SYNC_MODE=notify _CHEZMOI_BACKGROUND=true _chezmoi_auto_check
         done
-    ) &
+    ) </dev/null >/dev/null 2>&1 &
 
     export CHEZMOI_CHECK_PID=$!
     disown  # Disown the most recent background job (prevent "you have running jobs" warning)

@@ -147,8 +147,14 @@ if [[ -f ~/.config/zsh/chezmoi-auto-sync.zsh ]]; then
     # Enable startup check
     export CHEZMOI_STARTUP_CHECK=true
 
-    # Start background periodic checking
-    _chezmoi_start_periodic_check
+    # NO background periodic check. The loop it starts inherits the shell's
+    # stdout and never closes it, so any tool that captures the environment by
+    # running `zsh -l -i -c '... env'` never sees EOF and hangs forever. That
+    # wedged Zed's `zed --printenv` (agent threads stuck "loading") and Claude
+    # Code's env probes, leaking ~78 `sleep 3600` processes over several days.
+    # The startup check above is enough: CHEZMOI_STARTUP_CHECK=true runs it per
+    # shell, throttled to once per CHEZMOI_CHECK_INTERVAL by _chezmoi_auto_check.
+    # _chezmoi_start_periodic_check
 fi
 {{- if eq .chezmoi.hostname "FNVF299JMC" }}
 # Kiro CLI post block. Keep at the bottom of this file.
