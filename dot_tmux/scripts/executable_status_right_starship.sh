@@ -21,10 +21,11 @@ cache_ttl() {
         cat "$f"
         return
     fi
-    if "$@" > "$f.tmp" 2>/dev/null; then
-        mv "$f.tmp" "$f"
+    local tmp="$f.tmp.$$"
+    if "$@" > "$tmp" 2>/dev/null; then
+        mv -f "$tmp" "$f"
     else
-        rm -f "$f.tmp"
+        rm -f "$tmp"
     fi
     cat "$f" 2>/dev/null
 }
@@ -45,6 +46,7 @@ network_probe() {
     fi
     if [[ "$iface" == en* ]]; then
         ssid=$(ipconfig getsummary "$iface" 2>/dev/null | sed -n 's/^ *SSID : //p' | head -1)
+        [[ "$ssid" == "<redacted>" ]] && ssid="WiFi"
         if [[ -n "$ssid" ]]; then
             echo "wifi ${ssid}"
         elif ifconfig "$iface" 2>/dev/null | grep -q "inet [0-9]"; then
