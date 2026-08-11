@@ -7,59 +7,66 @@ OUTPUT=""
 FILLED_ARROW=$(printf '\xee\x82\xb2')
 THIN_ARROW=$(printf '\xee\x82\xb3')
 
+# --- TTL cache: avoids re-running slow probes on every 10s status refresh ---
+CACHE_DIR="$HOME/.cache/tmux-status"
+mkdir -p "$CACHE_DIR"
+
+# cache_ttl <name> <ttl_seconds> <command...>
+# Prints the cached value if fresher than ttl; otherwise runs the command,
+# stores its output, and prints it. On command failure, serves the stale value.
+cache_ttl() {
+    local name="$1" ttl="$2"; shift 2
+    local f="$CACHE_DIR/$name"
+    if [[ -f "$f" ]] && (( $(date +%s) - $(stat -f %m "$f") < ttl )); then
+        cat "$f"
+        return
+    fi
+    if "$@" > "$f.tmp" 2>/dev/null; then
+        mv "$f.tmp" "$f"
+    else
+        rm -f "$f.tmp"
+    fi
+    cat "$f" 2>/dev/null
+}
+
 # Start with padding
 OUTPUT+="   "
 
 # Determine network status and color first
-NETWORK_OUTPUT=""
-NETWORK_COLOR="#a3be8c"  # default green
-NETWORK_BG=""
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    if ping -c 1 -W 1000 8.8.8.8 >/dev/null 2>&1; then
-        PRIMARY_INTERFACE=$(route get default 2>/dev/null | awk '/interface:/ { print $2 }')
-        if [[ "$PRIMARY_INTERFACE" == en* ]]; then
-            # Check if en0 has WiFi capability and is connected
-            if [[ "$PRIMARY_INTERFACE" == "en0" ]]; then
-                # Try system_profiler first (more reliable)
-                SSID=$(system_profiler SPAirPortDataType 2>/dev/null | grep -A 1 "Current Network Information:" | tail -n +2 | head -1 | cut -d: -f1 | xargs)
-                
-                # Fallback to networksetup if system_profiler fails
-                if [ -z "$SSID" ] || [[ "$SSID" == *"Network Type"* ]]; then
-                    SSID=$(networksetup -getairportnetwork "$PRIMARY_INTERFACE" 2>/dev/null | cut -d: -f2 | xargs)
-                fi
-                
-                if [ -n "$SSID" ] && [[ "$SSID" != *"not associated"* ]] && [[ "$SSID" != *"Network Type"* ]]; then
-                    # Handle redacted SSID
-                    if [[ "$SSID" == "<redacted>" ]]; then
-                        NETWORK_OUTPUT="WiFi 󰤨"
-                    else
-                        NETWORK_OUTPUT="${SSID} 󰤨"
-                    fi
-                    NETWORK_COLOR="#a3be8c"
-                else
-                    # Check if en0 has IP (could be ethernet/USB-C adapter on en0)
-                    if ifconfig "$PRIMARY_INTERFACE" | grep -q "inet [0-9]"; then
-                        NETWORK_OUTPUT="Wired 󰈀"
-                        NETWORK_COLOR="#a3be8c"
-                    else
-                        NETWORK_OUTPUT="Down 󰤭"
-                        NETWORK_COLOR="#bf616a"
-                        NETWORK_BG="yes"
-                    fi
-                fi
-            else
-                NETWORK_OUTPUT="Eth 󰈀"
-                NETWORK_COLOR="#a3be8c"
-            fi
+# Network state, cached 30s. ipconfig getsummary replaces system_profiler
+# (1-3s -> ~10ms); the whole probe incl. ping runs at most once per 30s.
+network_probe() {
+    local iface ssid
+    iface=$(route -n get default 2>/dev/null | awk '/interface:/ {print $2}')
+    if [[ -z "$iface" ]] || ! ping -c 1 -t 1 8.8.8.8 >/dev/null 2>&1; then
+        echo "down"
+        return
+    fi
+    if [[ "$iface" == en* ]]; then
+        ssid=$(ipconfig getsummary "$iface" 2>/dev/null | sed -n 's/^ *SSID : //p' | head -1)
+        if [[ -n "$ssid" ]]; then
+            echo "wifi ${ssid}"
+        elif ifconfig "$iface" 2>/dev/null | grep -q "inet [0-9]"; then
+            echo "wired"
         else
-            NETWORK_OUTPUT="Up 󰤨"
-            NETWORK_COLOR="#a3be8c"
+            echo "down"
         fi
     else
-        NETWORK_OUTPUT="Down 󰤭"
-        NETWORK_COLOR="#bf616a"
-        NETWORK_BG="yes"
+        echo "eth"
     fi
+}
+
+NETWORK_OUTPUT=""
+NETWORK_COLOR="#a3be8c"
+NETWORK_BG=""
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    NET_STATE=$(cache_ttl network 30 network_probe)
+    case "$NET_STATE" in
+        wifi\ *)  NETWORK_OUTPUT="${NET_STATE#wifi } 󰤨" ;;
+        wired)    NETWORK_OUTPUT="Wired 󰈀" ;;
+        eth)      NETWORK_OUTPUT="Eth 󰈀" ;;
+        *)        NETWORK_OUTPUT="Down 󰤭"; NETWORK_COLOR="#bf616a"; NETWORK_BG="yes" ;;
+    esac
 fi
 
 # Arrow before network
@@ -72,7 +79,8 @@ fi
 # Determine chezmoi status and color
 CHEZMOI_BG=""
 if command -v chezmoi >/dev/null 2>&1; then
-    LOCAL_CHANGES=$(chezmoi status 2>/dev/null | wc -l | tr -d ' ')
+    LOCAL_CHANGES=$(cache_ttl chezmoi 300 sh -c 'chezmoi status 2>/dev/null | wc -l | tr -d " "')
+    LOCAL_CHANGES=${LOCAL_CHANGES:-0}
     if [[ "$LOCAL_CHANGES" -gt 0 ]]; then
         CHEZMOI_COLOR="#ebcb8b"
         CHEZMOI_OUTPUT="${LOCAL_CHANGES} 󰆓"
@@ -143,7 +151,7 @@ fi
 # Determine CPU status and color
 CPU_BG=""
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    CPU=$(ps -A -o %cpu | awk '{s+=$1} END {printf "%.0f", s}')
+    read -r CPU MEM <<< "$(ps -A -o %cpu,%mem | awk 'NR>1 {c+=$1; m+=$2} END {printf "%.0f %.0f", c, m}')"
 else
     CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 | cut -d'.' -f1)
 fi
@@ -176,7 +184,7 @@ fi
 # Determine memory status and color
 MEM_BG=""
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    MEM=$(ps -A -o %mem | awk '{s+=$1} END {printf "%.0f", s}')
+    : # MEM already computed alongside CPU above
 else
     MEM=$(free | grep Mem | awk '{printf "%.0f", $3/$2 * 100.0}')
 fi
