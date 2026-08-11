@@ -33,6 +33,31 @@ cache_ttl() {
 # Start with padding
 OUTPUT+="   "
 
+# Claude Code sessions: count / max context % / total cost, from snapshots the
+# statusline wrapper drops in ~/.cache/claude-status (fresh = touched <2 min ago).
+CLAUDE_N=""; CLAUDE_CTX=0; CLAUDE_COST="0"
+CLAUDE_DIR="$HOME/.cache/claude-status"
+if [[ -d "$CLAUDE_DIR" ]]; then
+    CLAUDE_DATA=$(find "$CLAUDE_DIR" -name '*.json' -mmin -2 -print0 2>/dev/null \
+        | xargs -0 cat 2>/dev/null \
+        | jq -s -r 'map(select(type == "object"))
+            | if length == 0 then "" else
+                "\(length)\t\(map(.context_window.used_percentage // 0) | max | floor)\t\(map(.cost.total_cost_usd // 0) | add)"
+              end' 2>/dev/null)
+    if [[ -n "$CLAUDE_DATA" ]]; then
+        IFS=$'\t' read -r CLAUDE_N CLAUDE_CTX CLAUDE_COST <<< "$CLAUDE_DATA"
+    fi
+fi
+
+if [[ -n "$CLAUDE_N" ]]; then
+    if   (( CLAUDE_CTX >= 85 )); then CLAUDE_COLOR="#bf616a"
+    elif (( CLAUDE_CTX >= 60 )); then CLAUDE_COLOR="#ebcb8b"
+    else                              CLAUDE_COLOR="#a3be8c"
+    fi
+    CLAUDE_SEG=$(printf '%s 󰚩 %s%%ctx $%.2f' "$CLAUDE_N" "$CLAUDE_CTX" "$CLAUDE_COST")
+    OUTPUT+="#[fg=${CLAUDE_COLOR}]${THIN_ARROW} #[fg=${CLAUDE_COLOR}]${CLAUDE_SEG}"
+fi
+
 # Determine network status and color first
 # Network state, cached 30s. ipconfig getsummary replaces the old airport
 # profiler probe (1-3s -> ~10ms); the whole probe incl. ping runs at most
