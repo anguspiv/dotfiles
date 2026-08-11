@@ -33,8 +33,9 @@ cache_ttl() {
 OUTPUT+="   "
 
 # Determine network status and color first
-# Network state, cached 30s. ipconfig getsummary replaces system_profiler
-# (1-3s -> ~10ms); the whole probe incl. ping runs at most once per 30s.
+# Network state, cached 30s. ipconfig getsummary replaces the old airport
+# profiler probe (1-3s -> ~10ms); the whole probe incl. ping runs at most
+# once per 30s.
 network_probe() {
     local iface ssid
     iface=$(route -n get default 2>/dev/null | awk '/interface:/ {print $2}')
