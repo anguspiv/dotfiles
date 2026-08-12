@@ -55,6 +55,50 @@ if [[ -n "$CLAUDE_N" ]]; then
     else                              CLAUDE_COLOR="#a3be8c"
     fi
     CLAUDE_SEG=$(printf '%s 󰚩 %s%%ctx $%.2f' "$CLAUDE_N" "$CLAUDE_CTX" "$CLAUDE_COST")
+
+    # Seat allowance (5h/7d rolling windows) from ccstatusline's usage cache,
+    # if its usage widgets are enabled and the cache is <15 min old.
+    # CLAUDE_USAGE_FILE overrides the path (used by tests).
+    USAGE_FILE="${CLAUDE_USAGE_FILE:-$HOME/.cache/ccstatusline/usage.json}"
+    if [[ -f "$USAGE_FILE" ]] && (( $(date +%s) - $(stat -f %m "$USAGE_FILE" 2>/dev/null || echo 0) < 900 )); then
+        USAGE_DATA=$(jq -r '
+            # Tolerates the legacy flat shape ({"five_hour":{...}}), the modern
+            # {"limits":[{"window":...}]} shape, and a {"usage":{...}} wrapper.
+            # Every step is error-suppressed and only numeric percentages pass,
+            # so garbage input yields "-" placeholders (and then "" below).
+            def pct(w):
+                first(
+                    (
+                        (.[w]? | objects | .used_percentage?),
+                        (.limits[]? | objects | select(.window == w) | .used_percentage?),
+                        (.usage? | objects | .[w]? | objects | .used_percentage?)
+                    )
+                    | numbers
+                ) // "-";
+            [pct("five_hour"), pct("seven_day")]
+            | if all(. == "-") then "" else "\(.[0])\t\(.[1])" end
+        ' "$USAGE_FILE" 2>/dev/null)
+        if [[ -n "$USAGE_DATA" ]]; then
+            IFS=$'\t' read -r USE_5H USE_7D <<< "$USAGE_DATA"
+            [[ -n "$USE_5H" ]] || USE_5H="-"
+            [[ -n "$USE_7D" ]] || USE_7D="-"
+            USAGE_TXT=""
+            [[ "$USE_5H" != "-" ]] && USAGE_TXT+="5h$(printf '%.0f' "$USE_5H")%"
+            [[ "$USE_7D" != "-" ]] && USAGE_TXT+="${USAGE_TXT:+ }wk$(printf '%.0f' "$USE_7D")%"
+            if [[ -n "$USAGE_TXT" ]]; then
+                USAGE_MAX=$(printf '%.0f\n%.0f\n' "${USE_5H/#-/0}" "${USE_7D/#-/0}" | sort -n | tail -1)
+                if   (( USAGE_MAX >= 85 )); then USAGE_COLOR="#bf616a"
+                elif (( USAGE_MAX >= 60 )); then USAGE_COLOR="#ebcb8b"
+                else                             USAGE_COLOR="#a3be8c"
+                fi
+                CLAUDE_SEG+=" $(printf '\xf3\xb0\x8a\x9a') ${USAGE_TXT}"
+                # allowance pressure overrides ctx color when it is the hotter signal
+                if (( USAGE_MAX >= 60 )) && [[ "$CLAUDE_COLOR" == "#a3be8c" ]]; then
+                    CLAUDE_COLOR="$USAGE_COLOR"
+                fi
+            fi
+        fi
+    fi
     OUTPUT+="#[fg=${CLAUDE_COLOR}]${THIN_ARROW} #[fg=${CLAUDE_COLOR}]${CLAUDE_SEG} "
 fi
 
