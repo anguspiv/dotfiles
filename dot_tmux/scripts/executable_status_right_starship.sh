@@ -55,7 +55,7 @@ if [[ -n "$CLAUDE_N" ]]; then
     else                              CLAUDE_COLOR="#a3be8c"
     fi
     CLAUDE_SEG=$(printf '%s 󰚩 %s%%ctx $%.2f' "$CLAUDE_N" "$CLAUDE_CTX" "$CLAUDE_COST")
-    OUTPUT+="#[fg=${CLAUDE_COLOR}]${THIN_ARROW} #[fg=${CLAUDE_COLOR}]${CLAUDE_SEG} "
+    OUTPUT+="#[fg=${CLAUDE_COLOR}]${THIN_ARROW} #[fg=${CLAUDE_COLOR}]${CLAUDE_SEG}"
 fi
 
 # Determine network status and color first
