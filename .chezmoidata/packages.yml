@@ -6,11 +6,13 @@ packages:
     brews:
       - autoenv
       - awscli
+      - bat
       - chezmoi
       - chroma
       - curl
       - diff-so-fancy
       - eza
+      - fd
       - fnm
       - fzf
       - gh
@@ -24,6 +26,7 @@ packages:
       - jq
       - kubernetes-cli
       - k9s
+      - lazygit
       - mas
       - neovim
       - node
@@ -33,6 +36,7 @@ packages:
       - postgresql@16
       - reattach-to-user-namespace
       - redis
+      - ripgrep
       - ruby
       - rust
       - starship
@@ -47,8 +51,9 @@ packages:
       - glab
       - jira-cli
     casks:
-      - docker
-      - font-monaspace-nerd-font
+      - claude-code
+      - docker-desktop
+      - font-monaspice-nerd-font
       - font-victor-mono-nerd-font
       - visual-studio-code
       - wezterm
@@ -90,7 +95,6 @@ packages:
       - davidanson.vscode-markdownlint
       - dbaeumer.vscode-eslint
       - dcortes92.freemarker
-      - devantler.gitlab-extension-pack
       - dotjoshjohnson.xml
       - dsznajder.es7-react-js-snippets
       - dweizhe.docthis-customize-tags
@@ -106,8 +110,6 @@ packages:
       - formulahendry.github-actions
       - fudd.toggle-zen-mode
       - github.codespaces
-      - github.copilot
-      - github.copilot-chat
       - github.remotehub
       - github.vscode-github-actions
       - github.vscode-pull-request-github
