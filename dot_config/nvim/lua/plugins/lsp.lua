@@ -76,7 +76,6 @@ return {
       ensure_installed = {
         "stylelint",
         "js-debug-adapter",
-        "node-debug2-adapter",
       },
     },
   },
