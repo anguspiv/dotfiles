@@ -19,7 +19,6 @@ packages:
       - git
       - git-extras
       - glow
-      - gnupg
       - python@3.13
       - grc
       - helm
@@ -29,7 +28,6 @@ packages:
       - lazygit
       - mas
       - neovim
-      - node
       - pgcli
       - pinentry-mac
       - pnpm
