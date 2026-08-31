@@ -1,6 +1,25 @@
 {{- if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 
+# Homebrew refuses to load formulae from untrusted third-party taps. Trust has
+# to be granted before `brew bundle` runs, and it is local machine state that
+# chezmoi does not manage — so without this, a fresh machine fails here.
+#
+# Taps are added first so `brew trust` can resolve them. Trust is granted per
+# formula (owner/tap/formula) rather than per tap, so a tap adding new formulae
+# later does not inherit trust silently.
+if brew trust --help >/dev/null 2>&1; then
+  for tap in {{ range .packages.darwin.taps }}{{ . | quote }} {{ end }}; do
+    brew tap "$tap" >/dev/null 2>&1 || true
+  done
+
+  for formula in {{ range .packages.darwin.brews }}{{ . | quote }} {{ end }}; do
+    case "$formula" in
+      */*/*) brew trust --formula "$formula" >/dev/null 2>&1 || true ;;
+    esac
+  done
+fi
+
 brew bundle --file=/dev/stdin <<EOF
 {{ range .packages.darwin.taps -}}
 tap {{ . | quote }}
