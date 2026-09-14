@@ -2,12 +2,6 @@
 # Generated for: {{ .name }} <{{ .email }}>
 # Machine: {{ .machine.type }} ({{ .machine.performance }}) | Terminal: {{ .terminal }}
 
-{{- if eq .chezmoi.hostname "FNVF299JMC" }}
-# Kiro CLI pre block. Keep at the top of this file.
-# Temporarily disabled to debug fnm messages
-# [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
-{{- end }}
-
 # Performance: Early return for non-interactive sessions
 [[ $- != *i* ]] && return
 
@@ -156,11 +150,6 @@ if [[ -f ~/.config/zsh/chezmoi-auto-sync.zsh ]]; then
     # shell, throttled to once per CHEZMOI_CHECK_INTERVAL by _chezmoi_auto_check.
     # _chezmoi_start_periodic_check
 fi
-{{- if eq .chezmoi.hostname "FNVF299JMC" }}
-# Kiro CLI post block. Keep at the bottom of this file.
-# Temporarily disabled to debug fnm messages
-# [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
-{{- end }}
 
 # peon-ping quick controls
 alias peon="bash {{ .chezmoi.homeDir }}/.claude/hooks/peon-ping/peon.sh"
@@ -228,21 +217,29 @@ git-cleanup() {
   echo "\n✨ Branch cleanup complete!"
 }
 
-{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+{{- if stat (joinPath .chezmoi.homeDir ".aix" "bin") }}
 
-# This work machine only — reconciled from installer appends (aix, Claude Access,
-# Docker Desktop) so they survive `chezmoi apply` but never sync to other machines.
-export PATH="$HOME/.aix/bin:$PATH"
+# Work-machine completions, reconciled from installer appends (aix, Claude
+# Access, Docker Desktop) so they survive `chezmoi apply`. Path-gated, not
+# hostname-gated -- see the note in .zshenv for why the machine-name gate broke.
+# PATH itself is NOT set here: .zshenv already prepends ~/.aix/bin, and doing it
+# in both files is what put the directory on PATH twice.
 fpath=("$HOME/.aix/completions" "$HOME/.claude-access/completions" "$HOME/.docker/completions" $fpath)
 autoload -Uz compinit && compinit
+
+# Employer-specific helpers (identifiers, internal hostnames) live in an
+# UNMANAGED ~/.zshrc.local, because this repo is public. Same pattern as
+# ~/.zprofile.local and ~/.config/secrets.sh. Absent on other machines = no-op.
+source_if_exists "${HOME}/.zshrc.local"
 {{- end }}
 
-# Keep glab's token in sync with pat-manager (single source of truth).
-# No-op on machines without pat-manager (e.g. CI / fresh hosts): glab then
-# falls back to its own stored token. Guard avoids exporting an empty token.
-if command -v pat-manager >/dev/null 2>&1; then
-  _gl_tok="$(pat-manager token gitlab 2>/dev/null)"
-  [ -n "$_gl_tok" ] && export GITLAB_TOKEN="$_gl_tok"
-  unset _gl_tok
-fi
+{{- /*
+  The pat-manager -> GITLAB_TOKEN export that used to live here was removed
+  2026-09-14. It existed because glab's token sat as plaintext in
+  ~/.config/glab-cli/config.yml and went stale on every PAT rotation. glab
+  stores credentials in the macOS Keychain by default, so
+  `pat-manager token gitlab | glab auth login --hostname <host> --stdin`
+  fixes it at the source. The export was also interactive-only (.zshrc), so it
+  never reached tool/agent shells -- which is the failure it was meant to fix.
+*/}}
 export HOMEBREW_PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
