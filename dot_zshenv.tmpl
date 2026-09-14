@@ -9,10 +9,27 @@ export VISUAL="$EDITOR"
 # GPG configuration
 export GPG_TTY=$(tty)
 
+# sudo password prompt for TTY-less contexts (agent shells, LaunchAgents, `!` runners):
+# a GUI dialog via osascript. Only consulted when sudo is called with -A.
+# For a tool that shells out to sudo itself, wrap the whole call in a pty so one
+# authentication covers every inner sudo (macOS keys the ticket to the TTY):
+#   script -q /dev/null bash -c 'sudo -A -v && <command>'
+export SUDO_ASKPASS="$HOME/.local/bin/sudo-askpass.sh"
+
 # PATH management - using typeset -U to keep unique entries
 typeset -U path
 path=(
-{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+{{- /*
+  Gated on the DIRECTORY, not the machine name. The former gate was
+  a machine-NAME test, which silently went false when a local dev environment
+  added a `127.0.0.1 <some-internal-fqdn>` line to /etc/hosts: chezmoi resolves
+  the host rather than reading scutil, so .chezmoi.hostname became that other
+  name while scutil's ComputerName, LocalHostName and HostName were unchanged.
+  Nothing errored --
+  the next `chezmoi apply` would just have dropped ~/.aix/bin from PATH.
+  A path test says what the gate actually meant: AIX is on PATH iff installed.
+*/}}
+{{- if stat (joinPath .chezmoi.homeDir ".aix" "bin") }}
     # AIX enterprise CLIs (jira, glab, pat-manager, etc.) — first so they win,
     # and in .zshenv (not .zshrc) so GUI-launched apps (nvim, Neovide) see them too
     $HOME/.aix/bin
@@ -57,6 +74,6 @@ export ZED_AWS_REGION="us-east-1"
 export DEV_MODE=true
 # Enable corepack for high-performance machines
 export COREPACK_ENABLE_STRICT=1
-{{- if eq .chezmoi.hostname "FNVF299JMC" }}
+{{- if stat (joinPath .chezmoi.homeDir ".cargo" "env") }}
 . "$HOME/.cargo/env"
 {{- end }}
