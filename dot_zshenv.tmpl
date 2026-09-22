@@ -4,7 +4,13 @@
 
 # Editor configuration
 export EDITOR=nvim
+{{- if lookPath "zed" }}
+# GUI editor for tools that check VISUAL first (e.g. Claude Code ctrl+g plan edit);
+# --wait blocks until the file closes so the caller sees the edits
+export VISUAL="zed --wait"
+{{- else }}
 export VISUAL="$EDITOR"
+{{- end }}
 
 # GPG configuration
 export GPG_TTY=$(tty)
