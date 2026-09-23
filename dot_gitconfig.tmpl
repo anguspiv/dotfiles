@@ -71,8 +71,10 @@
 	defaultBranch = main
 [mergetool "nvimdiff"]
   layout = "LOCAL,BASE,REMOTE / MERGED"
+{{- if .work.bulkworkspace }}
 [bulkworkspaces]
-	disney = /Users/REDACTED/workspace/disney
+	work = {{ .work.bulkworkspace }}
+{{- end }}
 [credential "https://github.com"]
 	helper = 
 {{- if eq .chezmoi.arch "arm64" }}
@@ -87,5 +89,7 @@
 {{- else }}
 	helper = !/usr/local/bin/gh auth git-credential
 {{- end }}
-[credential "https://gitlab.example.com"]
+{{- if .secrets.gitlab_host }}
+[credential "https://{{ .secrets.gitlab_host }}"]
 	helper = osxkeychain
+{{- end }}
