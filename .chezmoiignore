@@ -97,3 +97,18 @@ Desktop.ini
 Library/Application Support/Code/User/settings.json
 Library/Application\ Support/Code/User/settings.json
 Documents
+
+# Repository's own documentation and tooling - must never deploy to $HOME.
+# Everything in the chezmoi source tree is managed by default, so without
+# these entries chezmoi deploys ~/README.md, ~/docs/ and ~/scripts/ (plus the
+# guides and cleanup-chezmoi.sh listed below) straight into the home directory.
+README.md
+QUICK_START.md
+MULTI_MACHINE_GUIDE.md
+OPTIMIZATION_SUMMARY.md
+AUTOMATION_QUICKSTART.md
+CHEZMOI_AUTOMATION_GUIDE.md
+TMUX_STATUSLINE_GUIDE.md
+cleanup-chezmoi.sh
+docs/
+scripts/
