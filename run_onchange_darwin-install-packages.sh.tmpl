@@ -33,8 +33,5 @@ cask {{ . | quote }}
 {{ range .packages.darwin.mas -}}
 mas {{ .name | quote }}, id: {{ .id }}
 {{ end -}}
-{{ range .packages.darwin.vscode -}}
-vscode {{ . | quote }}
-{{ end -}}
 EOF
 {{ end -}}
