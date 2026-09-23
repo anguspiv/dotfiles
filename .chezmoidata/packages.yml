@@ -51,20 +51,13 @@ packages:
       - docker-desktop
       - font-monaspice-nerd-font
       - font-victor-mono-nerd-font
-      - wezterm
       - zed
       - google-chrome
       - slack
       - zoom
       - obsidian
       - setapp
-      - firefox
       - brave-browser
-      - github
     mas:
-      - name: "Xcode"
-        id: 497799835
-      - name: "Fantastical"
-        id: 975937182
       - name: "In Your Face"
         id: 1476964367
