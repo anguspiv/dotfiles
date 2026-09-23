@@ -21,11 +21,12 @@
 {{- $jiraToken := promptStringOnce . "secrets.jira_token" "JIRA token (leave empty if none)" -}}
 {{- $figmaToken := promptStringOnce . "secrets.figma_token" "Figma token (leave empty if none)" -}}
 {{- $confluenceToken := promptStringOnce . "secrets.confluence_token" "Confluence token (leave empty if none)" -}}
-{{- $confluenceHost := promptStringOnce . "secrets.confluence_host" "Confluence host URL" "https://confluence.disney.com" -}}
+{{- $confluenceHost := promptStringOnce . "secrets.confluence_host" "Confluence host URL" "" -}}
 {{- $confluenceUsername := promptStringOnce . "secrets.confluence_username" "Confluence username" -}}
-{{- $gitlabHost := promptStringOnce . "secrets.gitlab_host" "GitLab host" "gitlab.disney.com" -}}
+{{- $gitlabHost := promptStringOnce . "secrets.gitlab_host" "GitLab host" "" -}}
 
 {{- /* Work-specific secrets prompts */ -}}
+{{- $workBulkWorkspace := promptStringOnce . "work.bulkworkspace" "Path to your work bulk workspace (leave empty if none)" -}}
 {{- $workApiKey := promptStringOnce . "secrets.work_api_key" "Work API key (leave empty if none)" -}}
 {{- $workDbUrl := promptStringOnce . "secrets.work_db_url" "Work database URL (leave empty if none)" -}}
 {{- $workSlackToken := promptStringOnce . "secrets.work_slack_token" "Work Slack token (leave empty if none)" -}}
@@ -55,6 +56,8 @@ data:
     confluence_host: {{ $confluenceHost | quote }}
     confluence_username: {{ $confluenceUsername | quote }}
     gitlab_host: {{ $gitlabHost | quote }}
+  work:
+    bulkworkspace: {{ $workBulkWorkspace | quote }}
   editor: "zed"
   visual: "zed"
   shell: "zsh"
