@@ -1,1 +1,5 @@
 dot_config/nvim/autoload
+
+# Project specs and plans - contain machine security assessments and internal
+# hostnames. This repo is PUBLIC; these must never be committed.
+docs/superpowers/
