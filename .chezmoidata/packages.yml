@@ -1,63 +1,107 @@
 packages:
   darwin:
-    taps:
-      - dbcli/tap
-      - int128/kubelogin
-    brews:
-      - autoenv
-      - awscli
-      - bat
-      - chezmoi
-      - chroma
-      - curl
-      - eza
-      - fd
-      - fnm
-      - fzf
-      - git-delta
-      - gh
-      - git
-      - git-extras
-      - glow
-      - helm
-      - jq
-      - kubernetes-cli
-      - k9s
-      - lazygit
-      - mas
-      - neovim
-      - pgcli
-      - pinentry-mac
-      - pnpm
-      - reattach-to-user-namespace
-      - ripgrep
-      - ruby
-      - rust
-      - starship
-      - tmux
-      - tmuxinator
-      - tpm
-      - uv
-      - wget
-      - zoxide
-      - zplug
-      - zsh-syntax-highlighting
-      - int128/kubelogin/kubelogin
-      - glab
-      - jira-cli
-    casks:
-      - claude-code
-      - ghostty
-      - docker-desktop
-      - font-monaspice-nerd-font
-      - font-victor-mono-nerd-font
-      - zed
-      - google-chrome
-      - slack
-      - zoom
-      - obsidian
-      - setapp
-      - brave-browser
-    mas:
-      - name: "In Your Face"
-        id: 1476964367
+    core:
+      taps: []
+      brews:
+        - bat
+        - chezmoi
+        - curl
+        - eza
+        - fd
+        - fnm
+        - fzf
+        - gh
+        - git
+        - git-delta
+        - git-extras
+        - glow
+        - jq
+        - lazygit
+        - mas
+        - neovim
+        - pinentry-mac
+        - pnpm
+        - reattach-to-user-namespace
+        - ripgrep
+        - starship
+        - tmux
+        - tmuxinator
+        - tpm
+        - uv
+        - wget
+        - zoxide
+        - zplug
+        - zsh-syntax-highlighting
+      casks:
+        - claude-code
+        - font-monaspice-nerd-font
+        - font-victor-mono-nerd-font
+        - ghostty
+        - google-chrome
+        - obsidian
+        - zed
+      mas:
+        - name: "In Your Face"
+          id: 1476964367
+
+    light:
+      taps: []
+      brews: []
+      casks:
+        - brave-browser
+        - slack
+        - zoom
+      mas: []
+
+    personal:
+      taps:
+        - dbcli/tap
+        - int128/kubelogin
+        - qmk/qmk
+        - osx-cross/avr
+        - osx-cross/arm
+      brews:
+        - autoenv
+        - awscli
+        - chroma
+        - helm
+        - k9s
+        - kubernetes-cli
+        - int128/kubelogin/kubelogin
+        - pgcli
+        - qmk
+        - ruby
+        - rust
+      casks:
+        - brave-browser
+        - docker-desktop
+        - figma
+        - obs
+        - slack
+        - zoom
+      mas: []
+
+    work:
+      taps:
+        - dbcli/tap
+        - int128/kubelogin
+      brews:
+        - autoenv
+        - awscli
+        - chroma
+        - glab
+        - helm
+        - jira-cli
+        - k9s
+        - kubernetes-cli
+        - int128/kubelogin/kubelogin
+        - openshift-cli
+        - docker-credential-helper-ecr
+        - pgcli
+        - ruby
+        - rust
+      casks:
+        - docker-desktop
+        - figma
+        - obs
+      mas: []
