@@ -10,17 +10,15 @@ packages:
       - chezmoi
       - chroma
       - curl
-      - diff-so-fancy
       - eza
       - fd
       - fnm
       - fzf
+      - git-delta
       - gh
       - git
       - git-extras
       - glow
-      - python@3.13
-      - grc
       - helm
       - jq
       - kubernetes-cli
@@ -31,9 +29,7 @@ packages:
       - pgcli
       - pinentry-mac
       - pnpm
-      - postgresql@16
       - reattach-to-user-namespace
-      - redis
       - ripgrep
       - ruby
       - rust
@@ -41,6 +37,7 @@ packages:
       - tmux
       - tmuxinator
       - tpm
+      - uv
       - wget
       - zoxide
       - zplug
@@ -50,6 +47,7 @@ packages:
       - jira-cli
     casks:
       - claude-code
+      - ghostty
       - docker-desktop
       - font-monaspice-nerd-font
       - font-victor-mono-nerd-font
