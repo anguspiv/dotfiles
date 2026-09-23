@@ -57,9 +57,6 @@ source_if_exists "${HOME}/.local/bin/env"
 {{- if eq .terminal "ghostty" }}
 # Ghostty-specific configuration
 # Add any Ghostty-specific settings here
-{{- else if eq .terminal "wezterm" }}
-# WezTerm-specific configuration  
-# Add any WezTerm-specific settings here
 {{- end }}
 
 # Shell options
@@ -103,14 +100,6 @@ export PATH="/opt/company-tools/bin:$PATH"
 {{- else if eq .chezmoi.os "linux" }}
 # Linux specific settings
 {{- end }}
-
-# Terminal integration (conditionally load if files exist)
-{{- if eq .terminal "wezterm" }}
-source_if_exists "${HOME}/.config/wezterm/wezterm.sh"
-{{- end }}
-
-# iTerm2 integration (if present)
-# source_if_exists "${HOME}/.iterm2_shell_integration.zsh"
 
 # Claude Code CLI alias (if installed)
 if [[ -x "${HOME}/.claude/local/claude" ]]; then
