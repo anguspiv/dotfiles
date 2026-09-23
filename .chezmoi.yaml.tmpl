@@ -7,7 +7,17 @@
 {{- $personalEmail := promptStringOnce . "personalEmail" "What is your personal email (leave empty if none)" -}}
 {{- $workEmail := promptStringOnce . "workEmail" "What is your work email (leave empty if none)" -}}
 {{- $signingkey := promptStringOnce . "signingkey" "What is your GPG signing key ID (leave empty if none)" -}}
-{{- $machineType := promptChoiceOnce . "machine.type" "What type of machine is this" (list "development" "server" "minimal" "steamos") -}}
+{{- /*
+   machine.type selects which package sets and config blocks apply.
+     work     - employer laptop: full dev toolchain, work CLIs, Teams
+     personal - Mac Mini M4: full dev toolchain, creative and hobby apps
+     light    - MacBook Pro 16": email, web, streaming, audio recording, and a
+                remote client for the Mini. No Docker, k8s, databases or Xcode.
+   Set once per machine, stored in ~/.config/chezmoi/chezmoi.yaml (gitignored).
+   Never gate on .chezmoi.hostname: it resolves through /etc/hosts and has
+   silently broken before.
+*/ -}}
+{{- $machineType := promptChoiceOnce . "machine.type" "What type of machine is this" (list "work" "personal" "light") -}}
 {{- $performance := promptChoiceOnce . "machine.performance" "What is the performance level of this machine" (list "high" "medium" "low" "handheld") -}}
 {{- $aiTools := promptBoolOnce . "features.ai_tools" "Enable AI tools integration" -}}
 {{- $devTools := promptBoolOnce . "features.development_tools" "Enable development tools" -}}
@@ -61,7 +71,7 @@ data:
   editor: "zed"
   visual: "zed"
   shell: "zsh"
-  terminal: "wezterm"
+  terminal: "ghostty"
   development:
     languages:
       - "javascript"
