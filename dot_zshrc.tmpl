@@ -65,13 +65,15 @@ unsetopt correct_all  # Disable autocorrect
 {{- if .features.development_tools }}
 # Development-specific configurations (DEV_MODE set in .zshenv)
 
-# Development aliases
-alias dc="docker-compose"
-alias dcu="docker-compose up -d"
-alias dcd="docker-compose down"
-alias dcl="docker-compose logs -f"
+{{- if ne .machine.type "light" }}
+# Development aliases (docker is not installed on the light profile)
+alias dc="docker compose"
+alias dcu="docker compose up -d"
+alias dcd="docker compose down"
+alias dcl="docker compose logs -f"
+{{- end }}
 
-{{- if .features.kubernetes }}
+{{- if and .features.kubernetes (ne .machine.type "light") }}
 # Kubernetes aliases
 alias k="kubectl"
 alias kgp="kubectl get pods"
