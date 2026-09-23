@@ -18,14 +18,6 @@ check_gpg_installed() {
             echo "⚠️  Please install Homebrew first or install GPG manually"
             exit 1
         fi
-        {{- else if eq .machine.type "steamos" }}
-        # Install GPG on SteamOS
-        if command -v pacman >/dev/null 2>&1; then
-            sudo pacman -S --noconfirm gnupg
-        else
-            echo "⚠️  Cannot install GPG automatically on this system"
-            exit 1
-        fi
         {{- else }}
         echo "⚠️  Please install GPG for your system first"
         exit 1
