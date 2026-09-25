@@ -29,7 +29,17 @@ if brew trust --help >/dev/null 2>&1; then
   done
 fi
 
-brew bundle --file=/dev/stdin <<BUNDLE
+# --no-upgrade is deliberate. chezmoi's job here is to ensure declared packages
+# are PRESENT, not to decide when they get upgraded. Without it, `brew bundle`
+# upgrades every outdated dependency as a side effect of `chezmoi apply`, and a
+# single failure aborts the script - which in turn stops every run_* script
+# chezmoi had queued after it. That happened in practice: an upgrade of the
+# google-chrome cask failed because Chrome was running (a running app cannot be
+# replaced), and it silently blocked the Command Line Tools check, peon-ping,
+# the health check and the Claude skills sync.
+#
+# Upgrades stay a deliberate `brew upgrade`, on the user's schedule.
+brew bundle --no-upgrade --file=/dev/stdin <<BUNDLE
 {{ range $taps -}}
 tap {{ . | quote }}
 {{ end -}}
