@@ -60,7 +60,8 @@ source_if_exists "${HOME}/.local/bin/env"
 {{- end }}
 
 # Shell options
-unsetopt correct_all  # Disable autocorrect
+unsetopt correct_all      # Disable autocorrect
+setopt interactivecomments  # Allow # comments when typing at the prompt
 
 {{- if .features.development_tools }}
 # Development-specific configurations (DEV_MODE set in .zshenv)
