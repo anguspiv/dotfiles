@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+#
+# Global pre-commit secret scanner.
+#
+# chezmoi deploys this to ~/.config/git/hooks/pre-commit, which is the path
+# core.hooksPath already points at (see dot_gitconfig.tmpl). hooksPath is set
+# globally, so this hook runs for EVERY commit in EVERY repository on this
+# machine. That fact drives the design decisions below.
+#
+# Why this exists: this dotfiles repo is public, and a GitHub OAuth token sat
+# in dot_config/gh/private_hosts.yml from 2025-01-14 until a gitleaks history
+# scan found it roughly twenty months later. An SSH private key had been
+# committed and BFG-purged before that. A pre-commit hook was already in place
+# both times and stopped neither, because it:
+#   1. grepped staged *filenames* for "secrets|.env" - neither leak had a
+#      matching name, and the token was file *content*, not a filename; and
+#   2. called `read` to ask for confirmation, which cannot work in any
+#      non-interactive context (GUI clients, scripts, agents, CI).
+# This replacement scans staged content and never touches stdin.
+
+set -u
+
+warn() {
+  printf '%s\n' "$*" >&2
+}
+
+# Fast path: nothing staged (an empty `git commit --amend`, a merge commit with
+# no index changes) means there is nothing to scan. `git diff --cached --quiet`
+# exits 0 when the index matches HEAD. --no-ext-diff keeps a configured
+# external difftool out of the hot path.
+if git diff --cached --quiet --no-ext-diff 2>/dev/null; then
+  exit 0
+fi
+
+# Fail OPEN when the scanner is missing, but loudly. This hook is global: a
+# hard failure here would block every commit in every repo on the machine the
+# moment gitleaks were uninstalled, upgraded badly, or absent on a freshly
+# rebuilt box before `brew bundle` has run. A commit that is merely unscanned
+# is recoverable; a developer who cannot commit at all reaches for
+# `--no-verify` reflexively and then keeps using it. gitleaks is in the core
+# package manifest precisely so this branch stays rare.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  warn ''
+  warn 'pre-commit: WARNING - gitleaks is not on PATH.'
+  warn '            Staged content was NOT scanned for secrets; this commit is'
+  warn '            proceeding unscanned.'
+  warn '            Install it (it is in the chezmoi core package manifest):'
+  warn '                brew install gitleaks'
+  warn ''
+  exit 0
+fi
+
+# `gitleaks git --staged` is gitleaks 8.30.1's pre-commit mode: it scans the
+# staged diff, i.e. exactly the content about to be committed. Chosen over
+# `gitleaks dir` (scans the working tree, so it both misses staged-only content
+# and flags unstaged noise) and over `gitleaks protect --staged` (that verb was
+# removed before 8.30.1 - `gitleaks --help` lists only dir/git/stdin).
+#
+# --redact keeps matched secret values out of the terminal and out of any log
+# that captures it. -v is required, not cosmetic: without it gitleaks prints
+# only a "leaks found: N" count and no indication of which file or rule
+# matched, so the blocked developer has nothing to act on. (Do not "quiet" this
+# with --log-level error - that suppresses the findings too and leaves the hook
+# blocking with an empty report.) --no-color keeps ANSI escapes out of output
+# that may be piped or logged. Output is discarded entirely on a clean scan, so
+# verbosity costs nothing in the common case.
+#
+# --exit-code 2 remaps "leaks found" to 2 so it is distinguishable from
+# gitleaks' own failure exit of 1. Without it a broken or misconfigured
+# scanner looks identical to a real leak, and we would have to choose between
+# blocking on scanner bugs or ignoring real findings.
+scan_output=$(gitleaks git --staged --redact --no-banner --no-color -v --exit-code 2 2>&1)
+scan_status=$?
+
+case "$scan_status" in
+  0)
+    exit 0
+    ;;
+  2)
+    warn ''
+    warn 'pre-commit: COMMIT BLOCKED - gitleaks found secret(s) in staged content.'
+    warn ''
+    printf '%s\n' "$scan_output" >&2
+    warn ''
+    warn 'Secret values above are redacted by design. Remove or scrub the content,'
+    warn 'then re-stage. If this is a genuine false positive, annotate the line with'
+    warn 'a `gitleaks:allow` comment or add its fingerprint to .gitleaksignore.'
+    warn 'To bypass this hook deliberately:  git commit --no-verify'
+    warn ''
+    exit 1
+    ;;
+  *)
+    # gitleaks failed rather than reporting findings. Fail open for the same
+    # reason as the missing-binary branch, and say so in as many words.
+    warn ''
+    warn "pre-commit: WARNING - gitleaks exited $scan_status without completing a scan."
+    warn '            Staged content may NOT have been scanned for secrets; this'
+    warn '            commit is proceeding unscanned. gitleaks said:'
+    printf '%s\n' "$scan_output" | sed 's/^/                /' >&2
+    warn '            Re-check this commit by hand once gitleaks works:'
+    warn '                gitleaks git --staged --redact --no-banner -v'
+    warn ''
+    exit 0
+    ;;
+esac
