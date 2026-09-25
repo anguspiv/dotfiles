@@ -1,3 +1,12 @@
+{{- $sshSigningKey := dig "signing" "sshPublicKey" "" . -}}
+{{- /*
+   Skipped on SSH-signing machines. This installs gnupg, and a second GPG
+   alongside an existing one is exactly what caused 9ce912d: Homebrew gnupg
+   2.5 could not read secret keys held by the MacGPG2 2.2 agent, so every
+   commit failed with "No secret key". Renders empty when SSH signing is
+   configured; chezmoi does not run an empty script.
+*/ -}}
+{{- if not $sshSigningKey -}}
 #!/bin/bash
 
 # GPG Key Setup Script
@@ -16,14 +25,6 @@ check_gpg_installed() {
             brew install gnupg
         else
             echo "⚠️  Please install Homebrew first or install GPG manually"
-            exit 1
-        fi
-        {{- else if eq .machine.type "steamos" }}
-        # Install GPG on SteamOS
-        if command -v pacman >/dev/null 2>&1; then
-            sudo pacman -S --noconfirm gnupg
-        else
-            echo "⚠️  Cannot install GPG automatically on this system"
             exit 1
         fi
         {{- else }}
@@ -306,3 +307,4 @@ main() {
 
 # Run main function
 main "$@"
+{{- end -}}

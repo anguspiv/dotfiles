@@ -1,0 +1,19 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+# Xcode Command Line Tools provide git, clang and the headers most build
+# tooling needs. Full Xcode is only required for iOS/Swift development and
+# simulator work, so it is not installed by default.
+
+set -euo pipefail
+
+if xcode-select -p >/dev/null 2>&1; then
+    echo "✅ Command Line Tools already installed at $(xcode-select -p)"
+    exit 0
+fi
+
+echo "📦 Requesting Command Line Tools installation..."
+# Triggers the GUI installer; it cannot be completed unattended.
+xcode-select --install 2>/dev/null || true
+
+echo "ℹ️  Complete the installer dialog, then re-run 'chezmoi apply'."
+{{ end -}}

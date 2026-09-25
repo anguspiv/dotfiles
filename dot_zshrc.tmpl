@@ -57,24 +57,24 @@ source_if_exists "${HOME}/.local/bin/env"
 {{- if eq .terminal "ghostty" }}
 # Ghostty-specific configuration
 # Add any Ghostty-specific settings here
-{{- else if eq .terminal "wezterm" }}
-# WezTerm-specific configuration  
-# Add any WezTerm-specific settings here
 {{- end }}
 
 # Shell options
-unsetopt correct_all  # Disable autocorrect
+unsetopt correct_all      # Disable autocorrect
+setopt interactivecomments  # Allow # comments when typing at the prompt
 
 {{- if .features.development_tools }}
 # Development-specific configurations (DEV_MODE set in .zshenv)
 
-# Development aliases
-alias dc="docker-compose"
-alias dcu="docker-compose up -d"
-alias dcd="docker-compose down"
-alias dcl="docker-compose logs -f"
+{{- if ne .machine.type "light" }}
+# Development aliases (docker is not installed on the light profile)
+alias dc="docker compose"
+alias dcu="docker compose up -d"
+alias dcd="docker compose down"
+alias dcl="docker compose logs -f"
+{{- end }}
 
-{{- if .features.kubernetes }}
+{{- if and .features.kubernetes (ne .machine.type "light") }}
 # Kubernetes aliases
 alias k="kubectl"
 alias kgp="kubectl get pods"
@@ -103,14 +103,6 @@ export PATH="/opt/company-tools/bin:$PATH"
 {{- else if eq .chezmoi.os "linux" }}
 # Linux specific settings
 {{- end }}
-
-# Terminal integration (conditionally load if files exist)
-{{- if eq .terminal "wezterm" }}
-source_if_exists "${HOME}/.config/wezterm/wezterm.sh"
-{{- end }}
-
-# iTerm2 integration (if present)
-# source_if_exists "${HOME}/.iterm2_shell_integration.zsh"
 
 # Claude Code CLI alias (if installed)
 if [[ -x "${HOME}/.claude/local/claude" ]]; then

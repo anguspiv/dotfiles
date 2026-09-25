@@ -1,0 +1,15 @@
+{{- /*
+   ssh-keygen's allowed_signers list, consumed by gpg.ssh.allowedSignersFile so
+   `git log --show-signature` can verify our own SSH-signed commits locally.
+   GitHub verifies server-side from the Signing Keys on the account and never
+   reads this file.
+
+   `dig` rather than .signing.sshPublicKey: machines whose chezmoi.yaml predates
+   the signing block have no such key, and a direct lookup would abort apply.
+   With no key configured this renders to nothing, and since the source file is
+   not prefixed `empty_`, chezmoi creates no file at all on those machines -
+   which is right, because they never set gpg.ssh.allowedSignersFile either.
+*/ -}}
+{{- $sshSigningKey := dig "signing" "sshPublicKey" "" . -}}
+{{- if $sshSigningKey }}{{ .email }} {{ $sshSigningKey }}
+{{ end -}}

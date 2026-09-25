@@ -53,13 +53,14 @@ install_skill() {
     echo "  → Installing $skill_name..."
     if claude plugin install "$skill_name" > /tmp/claude-install-$skill_name.log 2>&1; then
         echo "  ✅ $skill_name installed"
-    else
-        echo "  ❌ Failed to install $skill_name"
-        echo "     Log: /tmp/claude-install-$skill_name.log"
+        return 0
     fi
+
+    echo "     Log: /tmp/claude-install-$skill_name.log"
+    return 1
 }
 
-# Install all base skills (107 total)
+# Install all base skills
 echo "📦 Installing base skills..."
 echo ""
 
@@ -73,10 +74,10 @@ if skill_installed "{{ . }}"; then
     echo "  ✓ {{ . }}"
     INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
 else
-    install_skill "{{ . }}"
-    if skill_installed "{{ . }}"; then
+    if install_skill "{{ . }}" && skill_installed "{{ . }}"; then
         INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
     else
+        echo "  ❌ Failed to install skill: {{ . }}"
         FAILED_SKILLS=$((FAILED_SKILLS + 1))
     fi
 fi
@@ -92,10 +93,10 @@ if skill_installed "{{ . }}"; then
     echo "  ✓ {{ . }}"
     INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
 else
-    install_skill "{{ . }}"
-    if skill_installed "{{ . }}"; then
+    if install_skill "{{ . }}" && skill_installed "{{ . }}"; then
         INSTALLED_SKILLS=$((INSTALLED_SKILLS + 1))
     else
+        echo "  ❌ Failed to install skill: {{ . }}"
         FAILED_SKILLS=$((FAILED_SKILLS + 1))
     fi
 fi
@@ -109,7 +110,7 @@ echo "📊 Statistics:"
 echo "   Total skills in manifest: $TOTAL_SKILLS"
 echo "   Successfully installed: $INSTALLED_SKILLS"
 if [[ $FAILED_SKILLS -gt 0 ]]; then
-    echo "   ⚠️  Failed installations: $FAILED_SKILLS"
+    echo "   ❌ Failed installations: $FAILED_SKILLS"
     echo "   Check logs in /tmp/claude-install-*.log for details"
 fi
 
@@ -125,6 +126,12 @@ if [[ -f "$SKILL_LOCK" ]]; then
         echo "   These skills may be from repositories that no longer exist or have moved."
         echo "   You can manually uninstall them with: claude plugin uninstall <skill-name>"
     fi
+fi
+
+if [ "$FAILED_SKILLS" -gt 0 ]; then
+    echo ""
+    echo "❌ $FAILED_SKILLS skill(s) failed to install"
+    exit 1
 fi
 
 {{- end }}

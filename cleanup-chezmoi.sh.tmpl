@@ -13,9 +13,6 @@ echo "   • Remove all chezmoi-managed dotfiles"
 echo "   • Revert to system default configurations"
 echo "   • Remove chezmoi source directory"
 echo "   • Remove chezmoi binary and cache"
-{{- if eq .machine.type "steamos" }}
-echo "   • Remove Distrobox containers and configuration"
-{{- end }}
 echo ""
 
 # Interactive confirmation
@@ -85,10 +82,6 @@ else
     safe_remove "$HOME/.config/nvim"
     safe_remove "$HOME/.config/starship.toml"
     safe_remove "$HOME/.config/zsh"
-{{- if eq .machine.type "steamos" }}
-    safe_remove "$HOME/.config/konsole/Victor Mono.profile"
-    safe_remove "$HOME/.config/steamos"
-{{- end }}
 fi
 
 # Remove chezmoi directories and cache
@@ -124,37 +117,6 @@ if command -v chezmoi >/dev/null 2>&1; then
             ;;
     esac
 fi
-
-{{- if eq .machine.type "steamos" }}
-# SteamOS specific cleanup
-echo ""
-echo "🐧 SteamOS specific cleanup..."
-
-# Remove Distrobox containers
-if command -v distrobox >/dev/null 2>&1; then
-    echo "🐳 Removing Distrobox containers..."
-    distrobox list --no-header | while read -r container_info; do
-        if [ -n "$container_info" ]; then
-            container_name=$(echo "$container_info" | awk '{print $2}')
-            echo "🗑️  Removing container: $container_name"
-            distrobox rm -f "$container_name" || true
-        fi
-    done
-fi
-
-# Remove Distrobox if installed in user space
-safe_remove "$HOME/.local/bin/distrobox"
-safe_remove "$HOME/.local/bin/distrobox-*"
-
-# Remove development shortcuts
-safe_remove "$HOME/.local/share/applications/terminal-dev.desktop"
-safe_remove "$HOME/.local/share/applications/dev-terminal.desktop"
-
-# Remove Victor Mono fonts
-echo "🔤 Removing custom fonts..."
-find "$HOME/.local/share/fonts" -name "*VictorMono*" -delete 2>/dev/null || true
-fc-cache -fv >/dev/null 2>&1 || true
-{{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
 # macOS specific cleanup
@@ -216,10 +178,6 @@ echo "📋 Summary:"
 echo "   • Dotfiles removed and backed up"
 echo "   • Chezmoi source directory removed"
 echo "   • Cache and configuration cleaned"
-{{- if eq .machine.type "steamos" }}
-echo "   • Distrobox containers removed"
-echo "   • Custom fonts and shortcuts removed"
-{{- end }}
 echo "   • Shell configuration cleaned"
 echo ""
 echo "💾 Backup location: ~/.chezmoi-cleanup-backup-*"
