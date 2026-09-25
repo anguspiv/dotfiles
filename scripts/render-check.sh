@@ -38,6 +38,18 @@ shell_checked=0
 
 for profile in "${PROFILES[@]}"; do
   cfg="$TMPDIR_/$profile.yaml"
+
+  # signing.sshPublicKey is per-machine: non-empty selects SSH commit signing,
+  # empty keeps GPG. Set it for exactly one profile so a single run renders both
+  # branches of the signing conditionals in dot_gitconfig.tmpl and
+  # dot_config/git/allowed_signers.tmpl. The key below is a throwaway generated
+  # for this fixture; nothing signs with it.
+  if [ "$profile" = "light" ]; then
+    ssh_signing_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIITUufBHZ7i3PitPpA5BsOHA8XdEuxnpY3mDA53mnqij render-check@example.invalid"
+  else
+    ssh_signing_key=""
+  fi
+
   cat > "$cfg" <<YAML
 data:
   configVersion: 1
@@ -69,6 +81,8 @@ data:
     work_slack_token: ""
   work:
     bulkworkspace: "/tmp/workspace"
+  signing:
+    sshPublicKey: "$ssh_signing_key"
   editor: "zed"
   visual: "zed"
   shell: "zsh"

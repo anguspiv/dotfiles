@@ -8,6 +8,16 @@
 {{- $workEmail := promptStringOnce . "workEmail" "What is your work email (leave empty if none)" -}}
 {{- $signingkey := promptStringOnce . "signingkey" "What is your GPG signing key ID (leave empty if none)" -}}
 {{- /*
+   signing.sshPublicKey selects the commit-signing mechanism for this machine.
+     non-empty - sign with this SSH public key (private half lives in the
+                 Proton Pass SSH agent, never on disk)
+     empty     - keep signing with GPG and .signingkey above
+   Paste the full public key line, e.g.
+     ssh-ed25519 AAAAC3Nza... angusp@macbookpro16-light
+   Per-machine on purpose: a machine that has not migrated must keep GPG.
+*/ -}}
+{{- $sshPublicKey := promptStringOnce . "signing.sshPublicKey" "Paste your SSH commit-signing public key (leave empty to keep using GPG)" "" -}}
+{{- /*
    machine.type selects which package sets and config blocks apply.
      work     - employer laptop: full dev toolchain, work CLIs, Teams
      personal - Mac Mini M4: full dev toolchain, creative and hobby apps
@@ -68,6 +78,8 @@ data:
     gitlab_host: {{ $gitlabHost | quote }}
   work:
     bulkworkspace: {{ $workBulkWorkspace | quote }}
+  signing:
+    sshPublicKey: {{ $sshPublicKey | quote }}
   editor: "zed"
   visual: "zed"
   shell: "zsh"
