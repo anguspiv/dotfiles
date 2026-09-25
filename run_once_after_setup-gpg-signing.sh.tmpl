@@ -1,4 +1,13 @@
-{{- if and (eq .chezmoi.os "darwin") (.features.git_tools) -}}
+{{- $sshSigningKey := dig "signing" "sshPublicKey" "" . -}}
+{{- /*
+   Skipped entirely on SSH-signing machines. This script writes
+   user.signingkey with `git config --global`, i.e. straight into
+   ~/.gitconfig - a file chezmoi owns. On an SSH-signing machine
+   user.signingkey is `key::ssh-ed25519 ...`, which `gpg --list-secret-keys`
+   cannot validate, so the guard below would fall through and clobber the
+   managed SSH key with a GPG one.
+*/ -}}
+{{- if and (eq .chezmoi.os "darwin") (.features.git_tools) (not $sshSigningKey) -}}
 #!/bin/bash
 
 echo "🔐 Setting up GPG signing key for git commits..."
