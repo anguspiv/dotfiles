@@ -59,9 +59,6 @@ packages:
       taps:
         - dbcli/tap
         - int128/kubelogin
-        - qmk/qmk
-        - osx-cross/avr
-        - osx-cross/arm
       brews:
         - autoenv
         - awscli
@@ -71,7 +68,6 @@ packages:
         - kubernetes-cli
         - int128/kubelogin/kubelogin
         - pgcli
-        - qmk
         - ruby
         - rust
       casks:

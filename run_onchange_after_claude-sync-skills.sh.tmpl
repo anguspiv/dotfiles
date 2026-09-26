@@ -29,16 +29,35 @@ SKILL_LOCK="$HOME/.agents/.skill-lock.json"
 # Ensure .agents directory exists
 mkdir -p "$HOME/.agents"
 
-# Function to check if skill is installed AND has a valid hash
+# Function to check whether a skill is already present.
+#
+# Two mechanisms, because skills arrive by two different routes:
+#   1. skill-lock  - skills installed AS skills record a skillFolderHash there.
+#   2. plugin list - `claude plugin install`, which is what install_skill below
+#      actually calls, does NOT write the skill lock. Checking only the lock
+#      made every plugin-provided skill print "✅ installed" and "❌ Failed" on
+#      the same run, and reinstall itself on every single apply.
 skill_installed() {
     local skill_name=$1
-    if [[ ! -f "$SKILL_LOCK" ]]; then
-        return 1
+
+    if [[ -f "$SKILL_LOCK" ]]; then
+        local hash
+        hash=$(jq -r ".skills.\"$skill_name\".skillFolderHash // \"\"" "$SKILL_LOCK" 2>/dev/null || echo "")
+        if [[ -n "$hash" ]]; then
+            return 0
+        fi
     fi
 
-    # Check if skill exists and has non-empty hash
-    local hash=$(jq -r ".skills.\"$skill_name\".skillFolderHash // \"\"" "$SKILL_LOCK" 2>/dev/null)
-    [[ -n "$hash" ]]
+    # Written as if/then, not `... && return 0`: under `set -e` a trailing
+    # failed && is the function's exit status and would kill the script on the
+    # entirely normal "skill not installed yet" path.
+    if claude plugin list --json 2>/dev/null \
+        | jq -e --arg n "$skill_name" \
+            'any(.[]; (.id | split("@")[0]) == $n and .enabled)' >/dev/null 2>&1; then
+        return 0
+    fi
+
+    return 1
 }
 
 # Function to install skill

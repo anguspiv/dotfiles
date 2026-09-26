@@ -39,7 +39,15 @@ fi
 # the health check and the Claude skills sync.
 #
 # Upgrades stay a deliberate `brew upgrade`, on the user's schedule.
-brew bundle --no-upgrade --file=/dev/stdin <<BUNDLE
+# Exit status is captured rather than allowed to propagate. chezmoi aborts the
+# whole run_* queue when a script exits non-zero, so ANY brew failure here
+# silently cancels the Command Line Tools check, peon-ping, the health check
+# and the skills sync. --no-upgrade above removed one cause of that (upgrades);
+# it did not remove the others - an untrusted third-party tap did it again.
+# A package that failed to install is recoverable and visible in the output;
+# a cancelled queue is neither. So: warn loudly, never abort.
+brew_bundle_status=0
+brew bundle --no-upgrade --file=/dev/stdin <<BUNDLE || brew_bundle_status=$?
 {{ range $taps -}}
 tap {{ . | quote }}
 {{ end -}}
@@ -53,4 +61,13 @@ cask {{ . | quote }}
 mas {{ .name | quote }}, id: {{ .id }}
 {{ end -}}
 BUNDLE
+
+if [ "$brew_bundle_status" -ne 0 ]; then
+  echo "" >&2
+  echo "⚠️  brew bundle exited $brew_bundle_status - one or more packages did not install." >&2
+  echo "   Continuing so the remaining chezmoi scripts still run." >&2
+  echo "   See the brew output above for the failing package, then re-run: chezmoi apply" >&2
+fi
+
+exit 0
 {{ end -}}

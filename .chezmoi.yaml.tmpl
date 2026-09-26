@@ -76,6 +76,9 @@ data:
     confluence_host: {{ $confluenceHost | quote }}
     confluence_username: {{ $confluenceUsername | quote }}
     gitlab_host: {{ $gitlabHost | quote }}
+    work_api_key: {{ $workApiKey | quote }}
+    work_db_url: {{ $workDbUrl | quote }}
+    work_slack_token: {{ $workSlackToken | quote }}
   work:
     bulkworkspace: {{ $workBulkWorkspace | quote }}
   signing:
