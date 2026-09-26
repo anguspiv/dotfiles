@@ -91,7 +91,32 @@ list_existing_keys() {
 # Function to prompt for key import
 prompt_key_import() {
     local key_id="{{ .signingkey }}"
-    
+
+    # This branch is reached only when the expected signing key is absent -
+    # which is precisely a NEW machine, the case this script exists for. So it
+    # has to behave when nobody is watching. `chezmoi apply` runs from CI, from
+    # agents and from setup scripts, none of which have a TTY; `read` there
+    # returns non-zero immediately, `set -e` turns that into a failed script,
+    # and chezmoi then cancels every run_* script queued behind this one -
+    # peon-ping, the health check and the Claude plugin sync all silently
+    # skipped because a key could not be imported.
+    #
+    # This repo has already paid for this lesson once. The pre-commit hook that
+    # failed to stop a leaked OAuth token called `read` to ask for confirmation
+    # and was inert in every non-interactive context. Same mistake, different
+    # file. Degrade to instructions instead of blocking.
+    if [ ! -t 0 ]; then
+        echo "ℹ️  No TTY - skipping interactive GPG key setup."
+        echo "   Commit signing is configured but no secret key is present here."
+        echo "   Finish it from an interactive terminal:"
+        echo "       gpg --import /path/to/private-key.asc   # then re-run chezmoi apply"
+        if [ -n "$key_id" ]; then
+            echo "   Expected key: $key_id"
+        fi
+        echo "   Signing will fail until then; nothing else in this apply is affected."
+        return 0
+    fi
+
     echo "🔑 GPG signing key setup required"
     echo ""
     echo "Your chezmoi configuration expects signing key: $key_id"
