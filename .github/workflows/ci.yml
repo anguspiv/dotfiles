@@ -143,10 +143,14 @@ jobs:
       # success while leaving work pending shows up here and nowhere else.
       - name: apply is idempotent
         run: |
-          chezmoi apply --force
-          if [ -n "$(chezmoi status)" ]; then
+          # --source is required here too. The init step passed it explicitly,
+          # but a bare `chezmoi apply` falls back to ~/.local/share/chezmoi,
+          # which does not exist on a runner that checked the repo out
+          # somewhere else.
+          chezmoi apply --force --source "$PWD"
+          if [ -n "$(chezmoi status --source "$PWD")" ]; then
             echo "FAILED: chezmoi status is not empty after two applies:"
-            chezmoi status
+            chezmoi status --source "$PWD"
             exit 1
           fi
           echo "OK: converged"
