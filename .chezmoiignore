@@ -106,3 +106,15 @@ README.md
 cleanup-chezmoi.sh
 docs/
 scripts/
+
+# SSH authentication pin - opt-in per machine via auth.sshPublicKey.
+# When unset, do NOT manage ~/.ssh/config at all: a host that has never had a
+# managed ssh config would otherwise have its local one overwritten on apply.
+{{ if not .auth.sshPublicKey }}
+.ssh/config
+.ssh/github-auth.pub
+{{ end }}
+# The agent LaunchAgent additionally needs pass-cli present to be worth writing.
+{{ if or (not .auth.sshPublicKey) (not (lookPath "pass-cli")) }}
+Library/LaunchAgents/com.protonpass.ssh-agent.plist
+{{ end }}

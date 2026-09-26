@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Serves this machine's SSH keys from Proton Pass on a fixed socket.
+
+  Without this, `pass-cli ssh-agent load` has to be re-run by hand after every
+  reboot, because the keys live only in agent memory.
+
+  Runs `ssh-agent start` (foreground) rather than `daemon start`: the daemon
+  form self-backgrounds, which launchd would read as a crash and restart in a
+  loop. KeepAlive lets launchd own the lifecycle instead.
+
+  The binary path is resolved by chezmoi at apply time via lookPath, not
+  hardcoded - a LaunchAgent gets a minimal PATH and cannot resolve `pass-cli`
+  itself, but hardcoding /opt/homebrew would break on Intel hosts.
+
+  Vault is "Personal"; change here if a host keeps its key elsewhere.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.protonpass.ssh-agent</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{ lookPath "pass-cli" }}</string>
+        <string>ssh-agent</string>
+        <string>start</string>
+        <string>--socket-path</string>
+        <string>{{ .chezmoi.homeDir }}/.ssh/proton-pass-agent.sock</string>
+        <string>--vault-name</string>
+        <string>Personal</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.ssh/proton-pass-agent.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.ssh/proton-pass-agent.log</string>
+</dict>
+</plist>

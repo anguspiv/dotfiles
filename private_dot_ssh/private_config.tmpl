@@ -1,0 +1,27 @@
+# ~/.ssh/config - managed by chezmoi (private_dot_ssh/config.tmpl)
+#
+# ssh takes the FIRST value it finds for most keywords, so the includes come
+# first on purpose: anything in ~/.ssh/config.d/ overrides the defaults below.
+# config.d is excluded by .chezmoiignore so it stays machine-local. A glob that
+# matches nothing is silently ignored, so this is safe when the dir is absent.
+Include ~/.ssh/config.d/*
+{{ if stat (joinPath .chezmoi.homeDir ".ssh" "config.kindle") }}
+Include ~/.ssh/config.kindle
+{{ end }}
+{{- if .auth.sshPublicKey }}
+# Pin GitHub to THIS machine's authentication key.
+#
+# IdentityAgent: the Proton Pass agent, started by the com.protonpass.ssh-agent
+# LaunchAgent on a fixed socket path. Fixed on purpose - Proton's own socket
+# under ~/.ssh/agent/ has a randomised name, and an earlier stale one there
+# accepted connections but never answered, hanging every github.com operation.
+#
+# IdentityFile + IdentitiesOnly: the vault holds a key per machine and the agent
+# serves ALL of them, so without this ssh offers whichever sorts first and the
+# wrong machine's identity authenticates. The file is the PUBLIC half only, used
+# purely as a selector; the private half never leaves Proton Pass.
+Host github.com
+    IdentityAgent ~/.ssh/proton-pass-agent.sock
+    IdentityFile ~/.ssh/github-auth.pub
+    IdentitiesOnly yes
+{{- end }}

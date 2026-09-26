@@ -51,6 +51,19 @@
 {{- $workDbUrl := promptStringOnce . "secrets.work_db_url" "Work database URL (leave empty if none)" -}}
 {{- $workSlackToken := promptStringOnce . "secrets.work_slack_token" "Work Slack token (leave empty if none)" -}}
 
+{{- /*
+   auth.sshPublicKey is this machine's SSH *authentication* key: the public half
+   of the key that proves this host's identity to GitHub. The private half lives
+   in Proton Pass and is served by the ssh-agent daemon; it is never written to
+   disk. Distinct from signing.sshPublicKey above, which selects the COMMIT
+   SIGNING mechanism. The two are independent - this machine authenticates over
+   SSH while still signing with GPG.
+   Per-machine on purpose: each host gets its own key so any one can be revoked
+   without breaking the others. Empty = no github.com pin and no SSH agent
+   LaunchAgent on this host.
+*/ -}}
+{{- $authSshPublicKey := promptStringOnce . "auth.sshPublicKey" "Paste this machine's SSH authentication public key (leave empty if none)" "" -}}
+
 data:
   configVersion: {{ $configVersion }}
   name: {{ $name | quote }}
@@ -81,6 +94,8 @@ data:
     work_slack_token: {{ $workSlackToken | quote }}
   work:
     bulkworkspace: {{ $workBulkWorkspace | quote }}
+  auth:
+    sshPublicKey: {{ $authSshPublicKey | quote }}
   signing:
     sshPublicKey: {{ $sshPublicKey | quote }}
   editor: "zed"
