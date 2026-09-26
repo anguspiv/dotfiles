@@ -50,6 +50,17 @@ for profile in "${PROFILES[@]}"; do
     ssh_signing_key=""
   fi
 
+  # auth.sshPublicKey is the separate per-machine key that pins github.com to
+  # this host's identity (see private_dot_ssh/). Independent of the signing key
+  # above, so set it on a DIFFERENT profile: that way one run renders every
+  # combination of (signing set/unset) x (auth set/unset) rather than only the
+  # two diagonal cases. Throwaway fixture key; nothing authenticates with it.
+  if [ "$profile" = "personal" ]; then
+    ssh_auth_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHCUYFvgFe1B/xWnIngZydGEILzI4iTj1dfnTEwHaCpf render-check@example.invalid"
+  else
+    ssh_auth_key=""
+  fi
+
   cat > "$cfg" <<YAML
 data:
   configVersion: 1
@@ -83,6 +94,8 @@ data:
     bulkworkspace: "/tmp/workspace"
   signing:
     sshPublicKey: "$ssh_signing_key"
+  auth:
+    sshPublicKey: "$ssh_auth_key"
   editor: "zed"
   visual: "zed"
   shell: "zsh"
