@@ -15,13 +15,6 @@ export VISUAL="$EDITOR"
 # GPG configuration
 export GPG_TTY=$(tty)
 
-# sudo password prompt for TTY-less contexts (agent shells, LaunchAgents, `!` runners):
-# a GUI dialog via osascript. Only consulted when sudo is called with -A.
-# For a tool that shells out to sudo itself, wrap the whole call in a pty so one
-# authentication covers every inner sudo (macOS keys the ticket to the TTY):
-#   script -q /dev/null bash -c 'sudo -A -v && <command>'
-export SUDO_ASKPASS="$HOME/.local/bin/sudo-askpass.sh"
-
 # PATH management - using typeset -U to keep unique entries
 typeset -U path
 path=(
