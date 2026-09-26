@@ -52,10 +52,9 @@ packages:
       casks:
         - brave-browser
         - slack
+        - tailscale-app
         - zoom
-      mas:
-        - name: "Tailscale"
-          id: 1475387142
+      mas: []
 
     personal:
       taps:
