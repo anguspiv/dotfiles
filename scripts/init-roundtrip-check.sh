@@ -41,6 +41,10 @@ CONFIG_TMPL="$SRC/.chezmoi.yaml.tmpl"
 # silently passes every prompt it should have been testing. Copy the source too
 # (minus .git, so chezmoi does not touch the real repo), because init operates
 # on the source directory.
+# XDG_CONFIG_HOME must be pinned as well as HOME. chezmoi resolves its config
+# through XDG on Linux, and a CI runner sets XDG_CONFIG_HOME independently of
+# HOME - so overriding HOME alone left the config outside the sandbox and the
+# check reported "wrote no config" on Linux while passing on macOS.
 FAKE_HOME="$TMPDIR_/home"
 SRC_COPY="$TMPDIR_/src"
 mkdir -p "$FAKE_HOME" "$SRC_COPY"
@@ -80,7 +84,7 @@ done < <(grep -oE 'promptChoiceOnce[^)]*\)' "$CONFIG_TMPL" | sort -u)
 echo "supplying ${#args[@]} prompt flag token(s) to the first init"
 
 # Pass 1: answer everything. This must succeed.
-if ! "${RUN[@]}" env HOME="$FAKE_HOME" chezmoi init --no-tty --source "$SRC_COPY" "${args[@]}" \
+if ! "${RUN[@]}" env HOME="$FAKE_HOME" XDG_CONFIG_HOME="$FAKE_HOME/.config" chezmoi init --no-tty --source "$SRC_COPY" "${args[@]}" \
       < /dev/null > "$TMPDIR_/init1.out" 2>&1; then
   echo "FAILED: first init errored even with every prompt supplied"
   sed 's/^/     /' "$TMPDIR_/init1.out"
@@ -90,7 +94,7 @@ fi
 
 # Pass 2: answer NOTHING. Every prompt must be satisfied from the config
 # written by pass 1. Any prompt reached here is one that was never persisted.
-if ! "${RUN[@]}" env HOME="$FAKE_HOME" chezmoi init --no-tty --source "$SRC_COPY" \
+if ! "${RUN[@]}" env HOME="$FAKE_HOME" XDG_CONFIG_HOME="$FAKE_HOME/.config" chezmoi init --no-tty --source "$SRC_COPY" \
       < /dev/null > "$TMPDIR_/init2.out" 2>&1; then
   echo "FAILED: second init re-prompted, so at least one answer was not persisted"
   echo "        (chezmoi init would ask this question again on every run)"
