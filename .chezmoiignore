@@ -39,7 +39,13 @@ config/vscode/CachedExtensions/
 .zshrc.local
 
 # Claude Code and AI tool data
-.claude/
+.claude/*
+# ...except settings.json, which is config rather than data. Managed by a
+# modify_ script that merges only extraKnownMarketplaces and enabledPlugins
+# and leaves every other key (model, theme, hooks) exactly as Claude Code
+# wrote it. Everything else under .claude/ - the skills library, plugin
+# caches, history, todos - stays unmanaged.
+!.claude/settings.json
 .anthropic/
 .openai/
 

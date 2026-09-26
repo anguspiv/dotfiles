@@ -32,7 +32,7 @@ would happily write `~/README.md` and `~/docs/` into the home directory.
 Two directories are data rather than content:
 
 - `.chezmoidata/` — YAML consumed by templates (`packages.yml`,
-  `claude_skills.yml`). Anything here is available as template data.
+  `claude_plugins.yml`). Anything here is available as template data.
 - `.githooks/` — this repo's git hooks, wired up via `core.hooksPath`.
 
 ## 2. Bootstrapping a new machine

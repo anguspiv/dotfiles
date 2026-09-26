@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# Merge chezmoi-declared plugin config into ~/.claude/settings.json.
+#
+# modify_ rather than a managed file because Claude Code WRITES this file at
+# runtime: model, theme, and `claude plugin marketplace add` all land here. A
+# fully managed settings.json would fight the app on every apply. modify_ gets
+# the live file on stdin and emits the merged result, so anything chezmoi does
+# not declare survives untouched.
+#
+# Merge, never prune: declared entries win, undeclared ones are left alone.
+# Same rule as brew bundle in this repo - ensure what is declared is PRESENT,
+# do not remove what someone added by hand. Removing a plugin is therefore a
+# deliberate `claude plugin uninstall`, not a silent side effect of an edit.
+
+set -euo pipefail
+
+current="$(cat)"
+[ -n "${current//[[:space:]]/}" ] || current='{}'
+
+# jq preserves input key order, so re-running this does not churn the file.
+printf '%s' "$current" | jq \
+  --argjson marketplaces '{{ .claude_plugins.marketplaces | toJson }}' \
+  --argjson enabled '{{ .claude_plugins.enabled | toJson }}' \
+  '.extraKnownMarketplaces = ((.extraKnownMarketplaces // {}) * $marketplaces)
+   | .enabledPlugins      = ((.enabledPlugins      // {}) * $enabled)'

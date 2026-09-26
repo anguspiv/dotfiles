@@ -1,0 +1,33 @@
+# Claude Code plugins and marketplaces, declared for every machine.
+#
+# This replaces the old claude_skills.yml + claude-sync-skills.sh pair. Claude
+# Code reads these two keys from settings.json natively: on a machine where a
+# declared marketplace is not on disk it clones it, then downloads the enabled
+# plugins that are not cached yet, at session start. No installer script needed.
+#
+# claude-plugins-official is deliberately absent: Claude Code adds it itself on
+# first interactive start.
+#
+# Plugins are the unit, not skills. There is no per-skill install here; a plugin
+# brings everything it bundles, and every auto-invocable skill it brings costs
+# context on EVERY turn, not just when used. Prefer a narrow plugin over a broad
+# one, and a standalone skill in ~/.claude/skills/ over a bundle you want one
+# skill from.
+claude_plugins:
+  marketplaces:
+    addy-agent-skills:
+      source:
+        source: github
+        repo: addyosmani/agent-skills
+    anthropic-agent-skills:
+      source:
+        source: github
+        repo: anthropics/skills
+  enabled:
+    # document-skills = docx, pdf, pptx, xlsx. All four wanted, no extras.
+    # example-skills is deliberately NOT here: it bundles 12 skills to deliver
+    # the 5 that were wanted, and the other 7 would cost context every turn.
+    "document-skills@anthropic-agent-skills": true
+    "agent-skills@addy-agent-skills": true
+    "frontend-design@claude-plugins-official": true
+    "browser-use@claude-plugins-official": true
