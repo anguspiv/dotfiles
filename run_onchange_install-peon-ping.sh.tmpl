@@ -1,6 +1,19 @@
 #!/bin/bash
 # run_onchange_install-peon-ping.sh.tmpl
-# Ensures peon-ping is installed for Claude Code hooks
+# Ensures peon-ping is INSTALLED. Deliberately does not keep it CURRENT.
+#
+# Same policy as brew here: apply guarantees a declared thing is present, and
+# never upgrades as a side effect. An upgrade that runs unattended during
+# `chezmoi apply` can change behaviour on a machine you were not thinking about,
+# and a failure mid-upgrade blocks the scripts queued behind it.
+#
+# The cost of that policy is silent staleness: this hook sat at 2.7.0 while
+# 2.37.0 was available, thirty minor versions behind, because the guard below
+# only ever asked "is it present?". So the guard now also REPORTS drift, loudly,
+# while still leaving the upgrade to a deliberate `peon.sh update`.
+#
+# Presence without currency is a choice. It is only a defensible one if the
+# staleness is visible.
 
 set -euo pipefail
 
@@ -15,8 +28,20 @@ if [ -f "$PEON_VERSION_FILE" ]; then
     INSTALLED_VERSION=$(cat "$PEON_VERSION_FILE" 2>/dev/null || echo "unknown")
     echo "✓ peon-ping already installed (version: $INSTALLED_VERSION)"
 
-    # Optional: Check for updates (uncomment if you want auto-update checks)
-    # echo "  Use 'peon update' to check for new versions"
+    # peon-ping writes .update_available itself when its own check finds a
+    # newer release. Read that rather than hitting the network here: apply
+    # should not depend on GitHub being reachable to tell you a version number.
+    # The marker can lag behind an update, so compare it to what is installed
+    # instead of trusting its mere existence.
+    UPDATE_MARKER="$PEON_DIR/.update_available"
+    if [ -f "$UPDATE_MARKER" ]; then
+        AVAILABLE_VERSION=$(cat "$UPDATE_MARKER" 2>/dev/null || echo "")
+        if [ -n "$AVAILABLE_VERSION" ] && [ "$AVAILABLE_VERSION" != "$INSTALLED_VERSION" ]; then
+            echo "  ⚠️  peon-ping $AVAILABLE_VERSION is available (installed: $INSTALLED_VERSION)"
+            echo "      Upgrades are deliberate here, as with brew. To take it:"
+            echo "          $PEON_DIR/peon.sh update"
+        fi
+    fi
 else
     echo "📦 Installing peon-ping..."
 

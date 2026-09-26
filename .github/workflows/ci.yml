@@ -56,6 +56,17 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      # fail-fast off on purpose: if `work` breaks, we still want to know
+      # whether `light` and `personal` are healthy. Cancelling siblings would
+      # turn three answers into one.
+      fail-fast: false
+      matrix:
+        # Every profile, not just the one this repo's author happens to be
+        # sitting at. The work profile declares glab, jira-cli, openshift-cli
+        # and docker-credential-helper-ecr, none of which any machine had
+        # exercised against the restructured manifest.
+        profile: [light, personal, work]
     steps:
       - uses: actions/checkout@v4
 
@@ -67,9 +78,7 @@ jobs:
 
       # Answers are keyed by PROMPT TEXT, not by variable path - chezmoi's
       # --promptString looks the value up by the question it would have asked.
-      # machine.type=personal is the profile with the widest package set, so it
-      # exercises the most of the manifest.
-      - name: chezmoi init --apply from scratch
+      - name: chezmoi init --apply from scratch (${{ matrix.profile }})
         run: |
           chezmoi init --apply --no-tty --source "$PWD" \
             --promptString "What is your full name=CI Runner" \
@@ -91,7 +100,7 @@ jobs:
             --promptString "Work API key (leave empty if none)=" \
             --promptString "Work database URL (leave empty if none)=" \
             --promptString "Work Slack token (leave empty if none)=" \
-            --promptChoice "What type of machine is this=personal" \
+            --promptChoice "What type of machine is this=${{ matrix.profile }}" \
             --promptChoice "What is the performance level of this machine=high" \
             --promptBool "Enable AI tools integration=true" \
             --promptBool "Enable development tools=true" \
