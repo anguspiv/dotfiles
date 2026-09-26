@@ -224,3 +224,31 @@ git config core.hooksPath .githooks
 - Templating reference — <https://chezmoi.io/user-guide/templating/>
 - `chezmoi data` — dump the template data available on this machine
 - `chezmoi execute-template < file.tmpl` — render a single template ad hoc
+
+## Checks
+
+`.github/workflows/ci.yml` runs three scripts on every push, plus a slow
+fresh-machine job nightly. Each check exists because a real defect reached a
+machine; none is speculative.
+
+| Script | Proves | Caught in the wild |
+| --- | --- | --- |
+| `scripts/render-check.sh` | every template renders for every profile, and rendered shell parses | a stray `fi` that rendered fine and broke `apply` |
+| `scripts/manifest-check.sh` | declarations agree with their consumers | `qmk` declared bare so the brew-trust loop never matched it; a tap nothing used; skills declared where plugins were required |
+| `scripts/init-roundtrip-check.sh` | `chezmoi init` converges — a second init asks nothing | three prompts collected and never written to `data:`, so init re-prompted forever |
+
+Run them locally before pushing; they need only `chezmoi`, `jq` and `bash`.
+
+The nightly `fresh-machine` job does a real `chezmoi init --apply` on a clean
+macOS runner, then applies a second time and requires `chezmoi status` to be
+empty. That is the only check that exercises Homebrew, the `run_*` queue and
+plugin installation together.
+
+**What none of them catch.** Every defect found when this repo was first cloned
+onto a machine with no pre-existing state was invisible on a machine that
+already had the packages, skills and hooks. A clean runner reproduces most of
+that, but not all: a re-clone can carry an existing chezmoi state DB across,
+which makes `run_once_` scripts skip at exactly the moment they are needed. A
+fresh runner has no state DB, so it cannot see that class at all. Prefer
+`run_onchange_` keyed on live state over `run_once_` for anything that repairs
+configuration.

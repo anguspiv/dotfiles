@@ -1,0 +1,112 @@
+name: ci
+
+# Every check here exists because a real defect reached a machine. The repo had
+# no CI until a re-clone onto a host with no pre-existing state surfaced six
+# latent bugs at once - none of which could fail on a machine that already had
+# the packages, skills and hooks in place.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # 09:17 UTC daily, off the hour to dodge peak runner queueing. Only the
+    # fresh-machine job gates on this; the fast checks run on every push.
+    - cron: "17 9 * * *"
+
+jobs:
+  # Fast, deterministic, no network beyond installing chezmoi. Runs on every
+  # push. Catches template/render errors, shell syntax errors, declarations that
+  # disagree with their consumer, and a config template that cannot converge.
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+
+      - name: Add chezmoi to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Templates render for every profile, and rendered shell parses.
+      - name: render-check
+        run: ./scripts/render-check.sh
+
+      # Declarations agree with their consumers: taps vs qualified formulae,
+      # prompts vs the data: block, plugins vs declared marketplaces.
+      - name: manifest-check
+        run: ./scripts/manifest-check.sh
+
+      # `chezmoi init` twice: the second must ask nothing.
+      - name: init-roundtrip-check
+        run: ./scripts/init-roundtrip-check.sh
+
+  # The only job that reproduces a genuinely new machine: real Homebrew, real
+  # script queue, real plugin installs. Slow and occasionally flaky because it
+  # depends on Homebrew and upstream marketplaces, so it is scheduled rather
+  # than gating pushes. macOS runners are free on public repositories.
+  #
+  # Caveat worth remembering: a clean runner is not quite a re-clone. This
+  # machine kept its chezmoi state DB across the re-clone, which is why a
+  # run_once_ script was skipped exactly when it was needed. A fresh runner has
+  # no state DB and would not have caught that.
+  fresh-machine:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+
+      - name: Add chezmoi to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Answers are keyed by PROMPT TEXT, not by variable path - chezmoi's
+      # --promptString looks the value up by the question it would have asked.
+      # machine.type=personal is the profile with the widest package set, so it
+      # exercises the most of the manifest.
+      - name: chezmoi init --apply from scratch
+        run: |
+          chezmoi init --apply --no-tty --source "$PWD" \
+            --promptString "What is your full name=CI Runner" \
+            --promptString "What is your email address=ci@example.invalid" \
+            --promptString "What is your personal email (leave empty if none)=" \
+            --promptString "What is your work email (leave empty if none)=" \
+            --promptString "What is your GPG signing key ID (leave empty if none)=" \
+            --promptString "Paste your SSH commit-signing public key (leave empty to keep using GPG)=" \
+            --promptString "Paste this machine's SSH authentication public key (leave empty if none)=" \
+            --promptString "WRITE_TOKEN (leave empty if none)=" \
+            --promptString "GitLab token (leave empty if none)=" \
+            --promptString "JIRA token (leave empty if none)=" \
+            --promptString "Figma token (leave empty if none)=" \
+            --promptString "Confluence token (leave empty if none)=" \
+            --promptString "Confluence host URL=" \
+            --promptString "Confluence username=" \
+            --promptString "GitLab host=" \
+            --promptString "Path to your work bulk workspace (leave empty if none)=" \
+            --promptString "Work API key (leave empty if none)=" \
+            --promptString "Work database URL (leave empty if none)=" \
+            --promptString "Work Slack token (leave empty if none)=" \
+            --promptChoice "What type of machine is this=personal" \
+            --promptChoice "What is the performance level of this machine=high" \
+            --promptBool "Enable AI tools integration=true" \
+            --promptBool "Enable development tools=true" \
+            --promptBool "Enable git tools=true" \
+            --promptBool "Enable kubernetes tools=true" \
+            --promptBool "Enable docker tools=true"
+
+      # apply must not merely exit 0, it must converge. A script that reports
+      # success while leaving work pending shows up here and nowhere else.
+      - name: apply is idempotent
+        run: |
+          chezmoi apply --force
+          if [ -n "$(chezmoi status)" ]; then
+            echo "FAILED: chezmoi status is not empty after two applies:"
+            chezmoi status
+            exit 1
+          fi
+          echo "OK: converged"
