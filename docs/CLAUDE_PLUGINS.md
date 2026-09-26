@@ -69,3 +69,30 @@ A plugin's skills are invoked as `/<plugin>:<skill>`, using the plugin's
 skill from standalone to plugin therefore changes how it is called —
 `/brainstorming` becomes `/superpowers:brainstorming`. Check that before
 swapping one for the other.
+
+## Why superpowers is standalone and not a plugin
+
+`superpowers@claude-plugins-official` exists and bundles exactly the fourteen
+skills this repo used to name individually. It is deliberately **not** enabled,
+and is uninstalled. The fourteen live as plain skills in `~/.claude/skills/`,
+installed with `npx skills add obra/superpowers`.
+
+Two reasons, either sufficient:
+
+- **Invocation would change.** The plugin's manifest name is `superpowers`, so
+  its skills load as `/superpowers:brainstorming`. As plain skills they are
+  `/brainstorming`. Swapping breaks every bare-name habit and reference.
+- **The content is not the same.** `diff` between the standalone copies and the
+  plugin's 6.4.1 files shows they differ, `SKILL.md` included. This is not a
+  repackaging of the same bytes; it is a different version.
+
+Do not "fix" this by enabling the plugin. If it is ever worth doing, it is a
+deliberate migration: check what the namespace change breaks first, and diff the
+skill content rather than assuming the names matching means the files do.
+
+## What is NOT managed here
+
+`~/.claude/skills/` holds ~269 skills from assorted sources. None are managed by
+chezmoi, and the old manifest only ever named 16 of them, so it was never the
+source of truth it looked like. Nothing here pretends otherwise: this file
+manages plugins, and plugins only.
