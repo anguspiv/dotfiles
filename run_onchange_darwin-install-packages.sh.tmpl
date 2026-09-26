@@ -39,6 +39,47 @@ fi
 # the health check and the Claude skills sync.
 #
 # Upgrades stay a deliberate `brew upgrade`, on the user's schedule.
+# Resolve-only mode, for CI. Installing the full profile on a cold runner took
+# over 25 minutes and bought no signal this does not: every package failure
+# that actually shipped was a RESOLUTION failure - `qmk` declared bare so the
+# trust loop never matched it, and brew then refused to load the formula - not
+# a broken download. `brew info` loads the formula exactly as an install would,
+# hits the same untrusted-tap refusal including transitive dependencies, and
+# exits 1 for a formula that does not exist. Same signal, seconds not tens of
+# minutes.
+#
+# Failures are written to a report file rather than exiting non-zero, so this
+# keeps the never-abort-the-queue property that the rest of this script has.
+# CI asserts on the report; the remaining run_* scripts still get to run and be
+# checked in the same build.
+if [ "${CHEZMOI_BREW_RESOLVE_ONLY:-0}" = "1" ]; then
+  report="${CHEZMOI_BREW_RESOLVE_REPORT:-$HOME/.cache/chezmoi/brew-resolve-failures}"
+  mkdir -p "$(dirname "$report")"
+  : > "$report"
+
+  echo "🔎 resolve-only: checking every declared package loads (not installing)"
+  for formula in {{ range $brews }}{{ . | quote }} {{ end }}; do
+    if ! err=$(brew info --formula "$formula" 2>&1); then
+      echo "formula: $formula" >> "$report"
+      printf '%s\n' "$err" | grep -E 'Error|Refusing' | sed 's/^/    /' >> "$report"
+    fi
+  done
+  for cask in {{ range $casks }}{{ . | quote }} {{ end }}; do
+    if ! err=$(brew info --cask "$cask" 2>&1); then
+      echo "cask: $cask" >> "$report"
+      printf '%s\n' "$err" | grep -E 'Error|Refusing' | sed 's/^/    /' >> "$report"
+    fi
+  done
+
+  if [ -s "$report" ]; then
+    echo "⚠️  some declared packages do not resolve; see $report" >&2
+    cat "$report" >&2
+  else
+    echo "✓ every declared package resolves"
+  fi
+  exit 0
+fi
+
 # Exit status is captured rather than allowed to propagate. chezmoi aborts the
 # whole run_* queue when a script exits non-zero, so ANY brew failure here
 # silently cancels the Command Line Tools check, peon-ping, the health check

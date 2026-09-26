@@ -43,10 +43,18 @@ jobs:
       - name: init-roundtrip-check
         run: ./scripts/init-roundtrip-check.sh
 
-  # The only job that reproduces a genuinely new machine: real Homebrew, real
-  # script queue, real plugin installs. Slow and occasionally flaky because it
-  # depends on Homebrew and upstream marketplaces, so it is scheduled rather
-  # than gating pushes. macOS runners are free on public repositories.
+  # Reproduces a genuinely new machine: real script queue, real ordering, real
+  # plugin installs, real file placement - but resolves packages instead of
+  # installing them. Installing a full profile on a cold runner took over 25
+  # minutes and bought no signal that resolution does not, because every
+  # package failure that actually shipped was a resolution failure.
+  #
+  # What this therefore does NOT cover: a package that resolves but fails to
+  # build or install, and post-install steps. That is a deliberate trade - it
+  # buys three profiles nightly for less than the cost of one full install.
+  #
+  # Scheduled rather than gating, because it depends on Homebrew and upstream
+  # marketplaces. macOS runners are free on public repositories.
   #
   # Caveat worth remembering: a clean runner is not quite a re-clone. This
   # machine kept its chezmoi state DB across the re-clone, which is why a
@@ -54,8 +62,15 @@ jobs:
   # no state DB and would not have caught that.
   fresh-machine:
     runs-on: macos-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    env:
+      # Makes run_onchange_darwin-install-packages.sh check that every declared
+      # package LOADS rather than installing it. It writes failures to a report
+      # and still exits 0, preserving the never-abort-the-queue property, so the
+      # scripts behind it still run and get checked in the same build.
+      CHEZMOI_BREW_RESOLVE_ONLY: "1"
+      CHEZMOI_BREW_RESOLVE_REPORT: /tmp/brew-resolve-failures
     strategy:
       # fail-fast off on purpose: if `work` breaks, we still want to know
       # whether `light` and `personal` are healthy. Cancelling siblings would
@@ -107,6 +122,22 @@ jobs:
             --promptBool "Enable git tools=true" \
             --promptBool "Enable kubernetes tools=true" \
             --promptBool "Enable docker tools=true"
+
+      # Asserted as its own step, not by the script's exit code, because that
+      # script must never abort the queue - see its header.
+      - name: every declared package resolves (${{ matrix.profile }})
+        run: |
+          report=/tmp/brew-resolve-failures
+          if [ ! -f "$report" ]; then
+            echo "FAILED: resolve report missing - did the package script run?"
+            exit 1
+          fi
+          if [ -s "$report" ]; then
+            echo "FAILED: declared packages do not resolve:"
+            cat "$report"
+            exit 1
+          fi
+          echo "OK: every declared package for '${{ matrix.profile }}' resolves"
 
       # apply must not merely exit 0, it must converge. A script that reports
       # success while leaving work pending shows up here and nowhere else.
