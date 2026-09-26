@@ -53,7 +53,9 @@ packages:
         - brave-browser
         - slack
         - zoom
-      mas: []
+      mas:
+        - name: "Tailscale"
+          id: 1475387142
 
     personal:
       taps:
@@ -75,6 +77,7 @@ packages:
         - figma
         - obs
         - slack
+        - tailscale-app
         - zoom
       mas: []
 
