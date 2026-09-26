@@ -13,9 +13,17 @@
 # scanner, so this does not bypass secret scanning; it keeps one scanner with
 # one set of rules while letting the repo add post-commit auto-push.
 #
-# Deliberately run_after_ (every apply) rather than run_once_: a re-clone
-# recreates the repo without local config, and a chezmoi state DB carried
-# across that re-clone would make run_once skip precisely when it is needed.
+# run_onchange_ keyed on the CURRENT value below, not run_once_ and not a
+# plain every-apply run_. run_once_ would be skipped after a re-clone if the
+# chezmoi state DB is carried across - precisely when the local config is
+# missing. A plain run_ would re-run forever and leave `chezmoi status`
+# permanently dirty, destroying it as a health signal. Hashing the live value
+# means this runs exactly when the setting is absent or wrong, then goes quiet.
+# Note: recovery takes two applies. The first runs with the hash of the BROKEN
+# state and repairs it; the second records the hash of the repaired state. It
+# converges there and stays quiet - it does not oscillate.
+#
+# hooksPath state: {{ output "sh" "-c" (printf "git -C %s config --local --get core.hooksPath 2>/dev/null || echo unset" (.chezmoi.sourceDir | quote)) | trim }}
 
 set -euo pipefail
 
