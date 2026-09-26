@@ -57,7 +57,6 @@ packages:
 
     personal:
       taps:
-        - dbcli/tap
         - int128/kubelogin
       brews:
         - autoenv
@@ -81,7 +80,6 @@ packages:
 
     work:
       taps:
-        - dbcli/tap
         - int128/kubelogin
       brews:
         - autoenv

@@ -1,0 +1,31 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+#
+# Point this repository's git at its own .githooks/.
+#
+# core.hooksPath is set GLOBALLY to ~/.config/git/hooks (dot_gitconfig.tmpl) so
+# the secret scanner runs in every repo on the machine. A global value fully
+# REPLACES per-repo hooks - git has no layering and no per-repo fallback - so
+# without a local override this repo's .githooks/ never runs at all: no
+# auto-push after commit, and the pre-commit shim is dead code.
+#
+# .githooks/pre-commit exists specifically to delegate back to the global
+# scanner, so this does not bypass secret scanning; it keeps one scanner with
+# one set of rules while letting the repo add post-commit auto-push.
+#
+# Deliberately run_after_ (every apply) rather than run_once_: a re-clone
+# recreates the repo without local config, and a chezmoi state DB carried
+# across that re-clone would make run_once skip precisely when it is needed.
+
+set -euo pipefail
+
+SOURCE_DIR="{{ .chezmoi.sourceDir }}"
+
+if [ -d "$SOURCE_DIR/.git" ] && [ -d "$SOURCE_DIR/.githooks" ]; then
+    current="$(git -C "$SOURCE_DIR" config --local --get core.hooksPath 2>/dev/null || true)"
+    if [ "$current" != ".githooks" ]; then
+        git -C "$SOURCE_DIR" config --local core.hooksPath .githooks
+        echo "🪝 Wired source repo hooks to .githooks (was: ${current:-unset})"
+    fi
+fi
+{{ end -}}
