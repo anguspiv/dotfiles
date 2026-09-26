@@ -68,6 +68,12 @@ packages:
         - kubernetes-cli
         - int128/kubelogin/kubelogin
         - pgcli
+        # Version-pinned to match what is installed. The tmux status line uses
+        # python3 opportunistically (it is guarded by `command -v`, so its
+        # absence only drops a segment), but python3 is wanted on this machine
+        # in its own right and would not survive a rebuild undeclared.
+        # Bumping to a newer series is a deliberate edit here.
+        - python@3.13
         - ruby
         - rust
       casks:
