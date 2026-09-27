@@ -14,6 +14,34 @@ export VISUAL="$EDITOR"
 
 # GPG configuration
 export GPG_TTY=$(tty)
+{{- if dig "auth" "sshPublicKey" "" . }}
+
+# Point at the Proton Pass ssh-agent when the session did not inherit one.
+#
+# The com.protonpass.ssh-agent LaunchAgent publishes SSH_AUTH_SOCK with
+# `launchctl setenv`, which reaches the Aqua/GUI session. An sshd-spawned
+# session is NOT a child of that session and inherits nothing, so over SSH the
+# variable is simply unset - and since commit.gpgsign is mandatory and git signs
+# via `ssh-keygen -Y sign`, which finds the key only through SSH_AUTH_SOCK,
+# `git commit` fails outright:
+#     error: Couldn't get agent socket?
+#     fatal: failed to write commit object
+# That is the whole point of remote dev on this machine, so it has to work here
+# and not only in the GUI. The plist covers GUI login; this covers SSH login.
+# They are complementary, not alternatives: zshenv is read by every zsh
+# including SSH sessions, and never by a GUI app.
+#
+# Conditional on being empty so a forwarded agent (`ssh -A`) always wins, and
+# on the socket existing so a machine whose agent is not running does not get a
+# variable pointing at nothing.
+#
+# `dig` rather than .auth.sshPublicKey for the reason recorded in §9.3: chezmoi
+# does not regenerate an existing chezmoi.yaml when its template changes, so a
+# direct lookup aborts every apply on a machine whose config predates the key.
+if [[ -z "${SSH_AUTH_SOCK:-}" && -S "$HOME/.ssh/proton-pass-agent.sock" ]]; then
+  export SSH_AUTH_SOCK="$HOME/.ssh/proton-pass-agent.sock"
+fi
+{{- end }}
 
 # PATH management - using typeset -U to keep unique entries
 typeset -U path
