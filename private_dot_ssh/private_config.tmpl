@@ -25,3 +25,15 @@ Host github.com
     IdentityFile ~/.ssh/github-auth.pub
     IdentitiesOnly yes
 {{- end }}
+{{- if and .auth.sshPublicKey (eq .machine.type "light") }}
+
+# Mac Mini over the tailnet (MagicDNS name). Only the laptop gets this: it is
+# the one machine the Mini trusts (fleet.sshAuthorizedKeys.personal), and it
+# logs in with the same Proton Pass key it uses for GitHub.
+Host mini
+    HostName anguss-mac-mini
+    User angusp
+    IdentityAgent ~/.ssh/proton-pass-agent.sock
+    IdentityFile ~/.ssh/github-auth.pub
+    IdentitiesOnly yes
+{{- end }}
