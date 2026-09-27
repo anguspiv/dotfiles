@@ -3,6 +3,11 @@ packages:
     core:
       taps: []
       brews:
+        # Modern bash for this repo's own scripts (#!/usr/bin/env bash).
+        # macOS ships bash 3.2, where scripts/init-roundtrip-check.sh dies on
+        # "RUN[@]: unbound variable" - the empty-array-under-set-u bug fixed in
+        # bash 4.4. CI is unaffected (ubuntu has bash 5); this is for local runs.
+        - bash
         - bat
         - chezmoi
         - curl
