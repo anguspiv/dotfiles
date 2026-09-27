@@ -107,7 +107,13 @@ if [ "$brew_bundle_status" -ne 0 ]; then
   echo "" >&2
   echo "⚠️  brew bundle exited $brew_bundle_status - one or more packages did not install." >&2
   echo "   Continuing so the remaining chezmoi scripts still run." >&2
-  echo "   See the brew output above for the failing package, then re-run: chezmoi apply" >&2
+  echo "   See the brew output above for the failing package." >&2
+  # A bare `chezmoi apply` will NOT retry: this script exits 0, so chezmoi has
+  # already recorded this content hash as run. The entryState record is what
+  # it checks (verified - scriptState alone does not suppress a re-run), so
+  # deleting that one key re-queues exactly this script and nothing else.
+  echo "   To retry, in an interactive terminal (casks may prompt for sudo):" >&2
+  echo "     chezmoi state delete --bucket=entryState --key=\"\$HOME/darwin-install-packages.sh\" && chezmoi apply" >&2
 fi
 
 exit 0
