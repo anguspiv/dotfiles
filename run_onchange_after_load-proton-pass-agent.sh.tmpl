@@ -60,7 +60,29 @@ for _ in $(seq 1 40); do
 done
 
 if [ -S "$SOCKET" ]; then
-    echo "🔑 Proton Pass ssh-agent loaded on $SOCKET"
+    # Publish the socket to the launchd GUI session, not just to shells.
+    #
+    # git signs via `ssh-keygen -Y sign`, which locates the private half ONLY
+    # through SSH_AUTH_SOCK. It does not read ssh_config, so the IdentityAgent
+    # pin that makes `ssh` work for github.com does nothing for signing. Login
+    # leaves SSH_AUTH_SOCK on launchd's own agent, which is in-memory and empty
+    # after a reboot - and because commit.gpgsign is mandatory, `git commit`
+    # then fails outright rather than falling back to unsigned:
+    #     error: Couldn't find key in agent?
+    #     fatal: failed to write commit object
+    # Reproduced by clearing the default agent, which is exactly what a reboot
+    # does. Under GPG this could not happen: gpg-agent reads keys from ~/.gnupg
+    # on disk, so availability was durable by construction. Moving the private
+    # half into an agent is the security win, and it made key availability a
+    # login-time concern that nothing else handles.
+    #
+    # `launchctl setenv` rather than an export in dot_zshenv, because a shell
+    # export misses commits made from GUI apps (Zed, Tower) that never source
+    # zsh. This reaches every process launched afterwards in the session and
+    # keeps the socket path defined in exactly one place. Already-running
+    # applications need restarting once to inherit it.
+    launchctl setenv SSH_AUTH_SOCK "$SOCKET"
+    echo "🔑 Proton Pass ssh-agent loaded on $SOCKET (published as SSH_AUTH_SOCK)"
 else
     echo "⚠️  $LABEL loaded but $SOCKET did not appear; see ~/.ssh/proton-pass-agent.log" >&2
 fi
