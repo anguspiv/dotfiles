@@ -74,6 +74,37 @@ if [[ "$(df -h / | awk 'NR==2{print $5}' | sed 's/%//')" -gt 85 ]]; then
     echo "💾 Disk space low (>85% full)"
 fi
 
+# Check inbound SSH hardening.
+#
+# Gated on this profile authorising any inbound key: if nobody may log in,
+# there is nothing to harden. /etc is outside chezmoi (see .chezmoidata/sshd.yml
+# for why), so this REPORTS drift rather than fixing it.
+{{- if index .fleet.sshAuthorizedKeys .machine.type }}
+SSHD_DROPIN="{{ .sshd.hardeningDropIn }}"
+if [ ! -f "$SSHD_DROPIN" ]; then
+    echo "🔓 inbound SSH is NOT hardened: $SSHD_DROPIN is missing."
+    echo "   This machine authorises inbound SSH keys, so password auth is open."
+    echo "   Install it:"
+    echo "     sudo tee $SSHD_DROPIN >/dev/null <<'SSHDEOF'"
+{{- range .sshd.directives }}
+    echo "     {{ . }}"
+{{- end }}
+    echo "     SSHDEOF"
+    echo "     sudo chown root:wheel $SSHD_DROPIN && sudo chmod 644 $SSHD_DROPIN"
+    echo "     sudo sshd -t && sudo sshd -T | grep -Ei 'passwordauth|kbdinteractive|permitroot'"
+else
+    _sshd_missing=""
+{{- range .sshd.directives }}
+    grep -qxF '{{ . }}' "$SSHD_DROPIN" 2>/dev/null || _sshd_missing="$_sshd_missing {{ . }};"
+{{- end }}
+    if [ -n "$_sshd_missing" ]; then
+        echo "🔓 $SSHD_DROPIN exists but declared directives are missing:$_sshd_missing"
+        echo "   Compare against .chezmoidata/sshd.yml, then re-check with:"
+        echo "     sudo sshd -T | grep -Ei 'passwordauth|kbdinteractive|permitroot'"
+    fi
+fi
+{{- end }}
+
 echo "✅ Health check complete!"
 
 # Hash for change detection: {{ .chezmoi.version }}-{{ .chezmoi.hostname }}-{{ now | date "2006-01-02" }}

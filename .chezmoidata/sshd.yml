@@ -1,0 +1,28 @@
+# Inbound SSH hardening, for machines that accept inbound SSH.
+#
+# /etc is outside chezmoi and always will be: it is root-owned, and
+# `chezmoi apply` must never need a password unattended. There is no
+# SUDO_ASKPASS on this fleet, so an apply that prompts hangs forever - from CI,
+# from an agent, or from a setup script. A run_onchange_ script shelling out to
+# `sudo tee` would reintroduce exactly that.
+#
+# So the desired state is DECLARED here and health-check.sh REPORTS drift.
+# Installing it stays a deliberate sudo command that a human runs. Same policy
+# as brew in this repo: make what is declared visible, never act privileged
+# behind the user's back.
+#
+# Why this matters more than an undeclared package: a missing tool is obvious
+# the first time you reach for it, whereas undeclared sshd hardening means a
+# rebuilt machine quietly re-opens password authentication and looks fine.
+sshd:
+  # 010- so it sorts before 100-macos.conf. sshd keeps the FIRST value it reads
+  # for each keyword, so the lowest-numbered drop-in wins.
+  hardeningDropIn: /etc/ssh/sshd_config.d/010-hardening.conf
+  directives:
+    - "PasswordAuthentication no"
+    # Separate from PasswordAuthentication and equally necessary: 100-macos.conf
+    # sets UsePAM yes, so macOS can still offer a password through the
+    # keyboard-interactive path with password auth nominally off.
+    - "KbdInteractiveAuthentication no"
+    # Was "prohibit-password", i.e. root could still log in with a key.
+    - "PermitRootLogin no"
