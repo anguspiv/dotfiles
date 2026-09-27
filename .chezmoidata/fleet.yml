@@ -24,3 +24,21 @@ fleet:
     # one-directional by design: the laptop is a client, the Mini is the target.
     light: []
     work: []
+
+  # Every machine's SSH commit-signing key. Rendered into
+  # ~/.config/git/allowed_signers on SSH-signing machines so `git log
+  # --show-signature` verifies commits made on ANY fleet machine, not only the
+  # local one. GitHub verifies server-side from the account's Signing Keys and
+  # never reads this; each key here must also be registered there as a signing
+  # key (the laptop's is id 1201133, the Mini's 1202606).
+  #
+  # Not keyed by profile, unlike sshAuthorizedKeys: trusting a signature is not
+  # granting a login. `email` is the principal - the committer email the key
+  # signs as - because that is what git matches a signature against.
+  sshSigningKeys:
+    - comment: "MacBook Pro 16 (light) — Proton Pass"
+      email: "angusp@angusp.com"
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICVsQ26p/9AAmuFfBUIfB79ig5FLvG23E1Y+vnwWGwBT"
+    - comment: "Mac Mini M4 (personal) — Proton Pass"
+      email: "angusp@angusp.com"
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHCUYFvgFe1B/xWnIngZydGEILzI4iTj1dfnTEwHaCpf"

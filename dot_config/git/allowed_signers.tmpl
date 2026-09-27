@@ -1,8 +1,16 @@
 {{- /*
    ssh-keygen's allowed_signers list, consumed by gpg.ssh.allowedSignersFile so
-   `git log --show-signature` can verify our own SSH-signed commits locally.
-   GitHub verifies server-side from the Signing Keys on the account and never
-   reads this file.
+   `git log --show-signature` can verify SSH-signed commits locally. GitHub
+   verifies server-side from the Signing Keys on the account and never reads
+   this file.
+
+   Lists this machine's own key plus every fleet key in
+   .chezmoidata/fleet.yml (sshSigningKeys). Own key alone was not enough: each
+   machine could verify only its own commits, so a commit signed on the Mini
+   showed as unverifiable on the laptop and vice versa. The own key stays even
+   though it is normally in the fleet list too, so a machine not yet declared
+   there can still verify itself; fleet entries are de-duplicated against it by
+   the base64 field, so a trailing comment on either side does not matter.
 
    `dig` rather than .signing.sshPublicKey: machines whose chezmoi.yaml predates
    the signing block have no such key, and a direct lookup would abort apply.
@@ -11,5 +19,12 @@
    which is right, because they never set gpg.ssh.allowedSignersFile either.
 */ -}}
 {{- $sshSigningKey := dig "signing" "sshPublicKey" "" . -}}
-{{- if $sshSigningKey }}{{ .email }} {{ $sshSigningKey }}
+{{- if $sshSigningKey -}}
+{{- $ownBlob := index (splitList " " $sshSigningKey) 1 -}}
+{{ .email }} {{ $sshSigningKey }}
+{{ range (dig "fleet" "sshSigningKeys" (list) .) -}}
+{{- if ne (index (splitList " " .key) 1) $ownBlob -}}
+{{ .email }} {{ .key }}
 {{ end -}}
+{{- end -}}
+{{- end -}}
