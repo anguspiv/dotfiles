@@ -20,15 +20,32 @@
 <dict>
     <key>Label</key>
     <string>com.protonpass.ssh-agent</string>
+    <!--
+      Wrapped in /bin/sh to publish SSH_AUTH_SOCK to the launchd GUI session
+      at EVERY login, then exec the agent (exec keeps one process, so KeepAlive
+      still supervises pass-cli itself). This is what makes commit signing
+      survive a reboot: git signs via `ssh-keygen -Y sign`, which finds the key
+      only through SSH_AUTH_SOCK and ignores ssh_config's IdentityAgent, and a
+      login otherwise leaves SSH_AUTH_SOCK on launchd's own agent - empty after
+      a reboot, so `git commit` fails with "Couldn't find key in agent?".
+
+      It must live here rather than only in the run_onchange loader script:
+      `launchctl setenv` does not persist across reboots, and run_onchange runs
+      only when its content changes, never at login. This job runs at login.
+
+      `;` not `&&`: if setenv ever fails, the agent must still start, since
+      github.com auth pins IdentityAgent and does not depend on the variable.
+      Processes launched in the second before the socket appears get a path
+      that does not exist yet; that resolves itself once pass-cli binds it.
+      $0 = pass-cli path, $1 = socket path.
+    -->
     <key>ProgramArguments</key>
     <array>
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>/bin/launchctl setenv SSH_AUTH_SOCK "$1"; exec "$0" ssh-agent start --socket-path "$1" --vault-name Personal</string>
         <string>{{ lookPath "pass-cli" }}</string>
-        <string>ssh-agent</string>
-        <string>start</string>
-        <string>--socket-path</string>
         <string>{{ .chezmoi.homeDir }}/.ssh/proton-pass-agent.sock</string>
-        <string>--vault-name</string>
-        <string>Personal</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
