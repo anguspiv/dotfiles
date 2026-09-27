@@ -51,6 +51,10 @@ packages:
       brews: []
       casks:
         - brave-browser
+        # Claude desktop app. Per-profile rather than core so it stays off work
+        # machines. The app self-updates (Squirrel); the bundle runs with
+        # --no-upgrade, so brew only ensures presence and never races it.
+        - claude
         - slack
         - tailscale-app
         - zoom
@@ -78,6 +82,7 @@ packages:
         - rust
       casks:
         - brave-browser
+        - claude
         - docker-desktop
         - figma
         - obs
