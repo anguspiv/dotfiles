@@ -1,0 +1,69 @@
+{{- if and (eq .chezmoi.os "darwin") .auth.sshPublicKey (lookPath "pass-cli") -}}
+#!/bin/bash
+#
+# Load the Proton Pass ssh-agent LaunchAgent into launchd.
+#
+# Deploying the plist into ~/Library/LaunchAgents is not enough on its own:
+# launchd only scans that directory at login. Without this, a freshly applied
+# machine has ~/.ssh/config pointing github.com at a socket nothing is serving
+# until the next logout, and every git operation fails - ssh falls back to
+# reading ~/.ssh/github-auth.pub as a private key and rejects it with
+# "UNPROTECTED PRIVATE KEY FILE". That happened on the first rebuild.
+#
+# Gated exactly like the plist in .chezmoiignore, so this exists only where the
+# plist does.
+#
+# run_onchange_ keyed on the RENDERED plist below, so it runs on first deploy
+# and again whenever the plist changes (bootout + bootstrap picks up the new
+# definition), then stays quiet. It deliberately does not hash live launchd
+# state: RunAtLoad already reloads the agent at every login, so a live-state
+# hash would buy nothing and would cost a second apply to converge.
+#
+# plist sha256: {{ includeTemplate "private_Library/LaunchAgents/com.protonpass.ssh-agent.plist.tmpl" . | sha256sum }}
+#
+# Never exits non-zero: a failure here must not cancel the rest of chezmoi's
+# run_* queue. It warns instead, with the command to retry by hand.
+
+set -uo pipefail
+
+LABEL="com.protonpass.ssh-agent"
+PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+SOCKET="$HOME/.ssh/proton-pass-agent.sock"
+DOMAIN="gui/$(id -u)"
+
+if [ ! -f "$PLIST" ]; then
+    echo "⚠️  $PLIST not found; skipping agent load." >&2
+    exit 0
+fi
+
+# Reload if already loaded, so a changed plist takes effect.
+if launchctl print "$DOMAIN/$LABEL" >/dev/null 2>&1; then
+    launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
+    # bootout returns before the job is fully torn down; bootstrapping too soon
+    # fails with "5: Input/output error".
+    for _ in $(seq 1 20); do
+        launchctl print "$DOMAIN/$LABEL" >/dev/null 2>&1 || break
+        sleep 0.25
+    done
+    rm -f "$SOCKET"
+fi
+
+if ! launchctl bootstrap "$DOMAIN" "$PLIST"; then
+    echo "⚠️  Could not load $LABEL. Retry with:" >&2
+    echo "     launchctl bootstrap $DOMAIN $PLIST" >&2
+    exit 0
+fi
+
+for _ in $(seq 1 40); do
+    [ -S "$SOCKET" ] && break
+    sleep 0.25
+done
+
+if [ -S "$SOCKET" ]; then
+    echo "🔑 Proton Pass ssh-agent loaded on $SOCKET"
+else
+    echo "⚠️  $LABEL loaded but $SOCKET did not appear; see ~/.ssh/proton-pass-agent.log" >&2
+fi
+
+exit 0
+{{ end -}}
