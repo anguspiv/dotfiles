@@ -57,7 +57,8 @@ for profile in "${PROFILES[@]}"; do
   # two diagonal cases. Throwaway fixture key: generated for this fixture with
   # its private half discarded, so nothing can authenticate with it. It must
   # NOT be a real fleet key - an earlier version reused the Mac Mini's GitHub
-  # key here while calling it a throwaway. Real keys live in fleet.yml.
+  # key here while calling it a throwaway. A machine's real auth key belongs in
+  # its own ~/.config/chezmoi/chezmoi.yaml (auth.sshPublicKey), never here.
   if [ "$profile" = "personal" ]; then
     ssh_auth_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbjZ529fc1s3z+OoRQE0G5f9UARNrBUzycrplYk/P9f render-check@example.invalid"
   else
