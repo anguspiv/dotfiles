@@ -30,6 +30,13 @@ packages:
         - proton-pass-cli
         - reattach-to-user-namespace
         - ripgrep
+        # Homebrew rsync, not macOS's. /usr/bin/rsync is openrsync, which lacks
+        # flags real rsync has - which is why this was installed by hand on
+        # 2026-09-06, the same day ~/.ssh/config.kindle appeared: pushing files
+        # to the Kindle's dropbear needs the real thing. Declared because
+        # removing it breaks nothing visibly (openrsync stays on PATH) and then
+        # fails weeks later on an unsupported flag.
+        - rsync
         - starship
         - tmux
         - tmuxinator
