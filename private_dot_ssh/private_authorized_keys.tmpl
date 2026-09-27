@@ -1,0 +1,6 @@
+# Managed by chezmoi from .chezmoidata/fleet.yml — edits here are lost on apply.
+# Add keys to fleet.yml under the profile of the machine being logged in to.
+{{ range (index .fleet.sshAuthorizedKeys .machine.type) }}
+# {{ .comment }}
+{{ .key }}
+{{- end }}

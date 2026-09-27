@@ -1,0 +1,26 @@
+# SSH public keys for machines in the fleet, and which of them may log in to
+# which profile.
+#
+# Public halves only. These are public by design - GitHub serves the same bytes
+# at https://github.com/anguspiv.keys - so committing them to a public repo
+# leaks nothing. The private halves live in Proton Pass and never touch disk.
+#
+# Keyed by the profile of the machine being logged IN TO, not the machine the
+# key belongs to. `personal` lists who may reach the Mac Mini.
+#
+# Declared here rather than appended to ~/.ssh/authorized_keys by hand, because
+# a hand-edited authorized_keys is exactly the "would not survive a rebuild"
+# defect this project is cleaning up (Appendix B). Note the consequence:
+# ~/.ssh/authorized_keys is now chezmoi-managed, so a key added by hand will be
+# removed on the next apply. Add it here instead.
+fleet:
+  sshAuthorizedKeys:
+    # The Mac Mini is the always-on remote target (§7.1). The laptop reaches it
+    # over the tailnet on tcp:22.
+    personal:
+      - comment: "MacBook Pro 16 (light) — Proton Pass, same key as its GitHub auth key"
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICVsQ26p/9AAmuFfBUIfB79ig5FLvG23E1Y+vnwWGwBT angusp@macbookpro16-light"
+    # Nothing SSHes in to the laptop or the work machine. Remote access is
+    # one-directional by design: the laptop is a client, the Mini is the target.
+    light: []
+    work: []
