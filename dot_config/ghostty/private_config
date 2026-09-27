@@ -1735,7 +1735,9 @@ shell-integration = zsh
 #   * `title` - Set the window title via shell integration.
 #
 # Example: `cursor`, `no-cursor`, `sudo`, `no-sudo`, `title`, `no-title`
-shell-integration-features = cursor,no-sudo,title
+# ssh-terminfo: copy xterm-ghostty terminfo to hosts on first ssh (the Mini
+# lacked it, garbling input). ssh-env: fall back to TERM=xterm-256color.
+shell-integration-features = cursor,no-sudo,title,ssh-terminfo,ssh-env
 
 # Sets the reporting format for OSC sequences that request color information.
 # Ghostty currently supports OSC 10 (foreground), OSC 11 (background), and
