@@ -16,7 +16,11 @@
 set -euo pipefail
 
 current="$(cat)"
-[ -n "${current//[[:space:]]/}" ] || current='{}'
+# Whitespace test via grep, not ${current//[[:space:]]/}: /bin/bash is 3.2 on
+# macOS and its pattern substitution is superlinear in the string length. At
+# 3 KB it took a second; at the 14 KB this file has grown to, `chezmoi status`
+# and `chezmoi apply` sat silent for minutes with bash spinning at 100% CPU.
+printf '%s' "$current" | grep -q '[^[:space:]]' || current='{}'
 
 # jq preserves input key order, so re-running this does not churn the file.
 printf '%s' "$current" | jq \
