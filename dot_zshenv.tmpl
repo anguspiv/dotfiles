@@ -44,14 +44,22 @@ export SUDO_ASKPASS="$HOME/.local/bin/sudo-askpass.sh"
 # They are complementary, not alternatives: zshenv is read by every zsh
 # including SSH sessions, and never by a GUI app.
 #
-# Conditional on being empty so a forwarded agent (`ssh -A`) always wins, and
-# on the socket existing so a machine whose agent is not running does not get a
-# variable pointing at nothing.
+# Fires when the variable is empty (SSH login) OR still points at macOS's own
+# per-session agent (`/private/tmp/com.apple.launchd.*/Listeners`, also seen as
+# `/var/run/...`). The second case is a GUI terminal that started before the
+# LaunchAgent published the socket - the login race, and on 2026-09-29 also a
+# freshly relaunched terminal, which still inherited the Apple socket even though
+# `launchctl print gui/<uid>` showed the Proton one published. Apple's agent is
+# never the one holding the signing key, so replacing it loses nothing. A
+# forwarded agent (`ssh -A`, path `/tmp/ssh-*/agent.*`) matches neither case and
+# always wins. Still conditional on the socket existing, so a machine whose agent
+# is not running does not get a variable pointing at nothing.
 #
 # `dig` rather than .auth.sshPublicKey for the reason recorded in §9.3: chezmoi
 # does not regenerate an existing chezmoi.yaml when its template changes, so a
 # direct lookup aborts every apply on a machine whose config predates the key.
-if [[ -z "${SSH_AUTH_SOCK:-}" && -S "$HOME/.ssh/proton-pass-agent.sock" ]]; then
+if [[ ( -z "${SSH_AUTH_SOCK:-}" || "${SSH_AUTH_SOCK:-}" == */com.apple.launchd.*/Listeners ) \
+      && -S "$HOME/.ssh/proton-pass-agent.sock" ]]; then
   export SSH_AUTH_SOCK="$HOME/.ssh/proton-pass-agent.sock"
 fi
 {{- end }}
