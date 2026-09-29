@@ -36,6 +36,9 @@ fleet:
   # granting a login. `email` is the principal - the committer email the key
   # signs as - because that is what git matches a signature against.
   sshSigningKeys:
+    - comment: "Work MacBook Pro (FNVF299JMC) — Proton Pass"
+      email: "angus.perkerson@disney.com"
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIATugtZ9K7IVuBTZPhQS+J8C7ZG2fMpy2WVi8TmnzDp+"
     - comment: "MacBook Pro 16 (light) — Proton Pass"
       email: "angusp@angusp.com"
       key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICVsQ26p/9AAmuFfBUIfB79ig5FLvG23E1Y+vnwWGwBT"
