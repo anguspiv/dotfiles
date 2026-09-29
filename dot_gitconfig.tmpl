@@ -116,3 +116,13 @@
 [credential "https://{{ .secrets.gitlab_host }}"]
 	helper = osxkeychain
 {{- end }}
+[push]
+	autoSetupRemote = true
+[fetch]
+	prune = true
+{{- if eq .machine.type "work" }}
+# GitHub Enterprise: authenticate with the AIX-managed gh, not the Homebrew one.
+[credential "https://github.twdcgrid.net"]
+	helper = 
+	helper = !{{ .chezmoi.homeDir }}/.aix/bin/gh auth git-credential
+{{- end }}

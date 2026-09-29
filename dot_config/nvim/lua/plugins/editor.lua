@@ -1,15 +1,5 @@
 -- Editor plugin customizations on top of LazyVim defaults
 return {
-  -- fzf-lua: vertical preview layout
-  {
-    "ibhagwan/fzf-lua",
-    opts = {
-      winopts = {
-        preview = { layout = "vertical", vertical = "up:40%" },
-      },
-    },
-  },
-
   -- Trouble: auto-focus and preview
   {
     "folke/trouble.nvim",
