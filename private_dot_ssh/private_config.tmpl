@@ -30,8 +30,13 @@ Host github.com
 # Mac Mini over the tailnet (MagicDNS name). Only the laptop gets this: it is
 # the one machine the Mini trusts (fleet.sshAuthorizedKeys.personal), and it
 # logs in with the same Proton Pass key it uses for GitHub.
+# HostName follows the Mini's macOS computer name (Tailscale derives it), so a
+# rename breaks it - as on 2026-09-30, anguss-mac-mini -> angusp-mac-mini.
+# HostKeyAlias keeps the known_hosts entry under "mini" so a rename doesn't
+# also re-prompt for the host key.
 Host mini
-    HostName anguss-mac-mini
+    HostName angusp-mac-mini
+    HostKeyAlias mini
     User angusp
     IdentityAgent ~/.ssh/proton-pass-agent.sock
     IdentityFile ~/.ssh/github-auth.pub
