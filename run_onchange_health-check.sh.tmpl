@@ -12,7 +12,10 @@ critical_tools=("git" "zsh" "{{ .editor }}")
 critical_tools+=("node" "npm")
 {{- end }}
 
-{{- if .features.development_tools }}
+{{- /* Expect docker only where this profile installs it (packages.yml), so the
+     light profile - which omits Docker by design - does not warn every run. */}}
+{{- $casks := concat .packages.darwin.core.casks (index .packages.darwin .machine.type).casks }}
+{{- if and .features.development_tools (has "docker-desktop" $casks) }}
 critical_tools+=("docker")
 {{- end }}
 
