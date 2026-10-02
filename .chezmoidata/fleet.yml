@@ -20,6 +20,14 @@ fleet:
     personal:
       - comment: "MacBook Pro 16 (light) — Proton Pass, same key as its GitHub auth key"
         key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICVsQ26p/9AAmuFfBUIfB79ig5FLvG23E1Y+vnwWGwBT angusp@macbookpro16-light"
+      # iPad Pro 11 running Blink Shell, over the tailnet. Private half is the
+      # Proton Pass item "SSH - iPad Pro 11 (Blink)" in the Personal vault,
+      # imported into Blink's keychain by hand (docs/REMOTE_ACCESS.md). Public
+      # half fetched with:
+      #   pass-cli item view --vault-name Personal \
+      #     --item-title "SSH - iPad Pro 11 (Blink)" --field public_key
+      - comment: "iPad Pro 11 (Blink Shell) — Proton Pass"
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPbrHqJuLRi1dIZvOTUKL9tAK+0BkDKFzORMRRVVNd4c angusp@ipad-pro-11-blink"
     # Nothing SSHes in to the laptop or the work machine. Remote access is
     # one-directional by design: the laptop is a client, the Mini is the target.
     light: []
