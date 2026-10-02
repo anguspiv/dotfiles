@@ -60,7 +60,12 @@ packages:
 
     light:
       taps: []
-      brews: []
+      brews:
+        # mosh CLIENT only on this profile: the laptop reaches the Mini with
+        # `mosh mini` so a tmux session survives wifi roaming and sleep. The
+        # server half lives under personal (the Mini). The iPad needs nothing
+        # here - Blink Shell bundles its own mosh client.
+        - mosh
       casks:
         - brave-browser
         # Claude desktop app. Per-profile rather than core so it stays off work
@@ -83,6 +88,14 @@ packages:
         - k9s
         - kubernetes-cli
         - int128/kubelogin/kubelogin
+        # mosh SERVER for the Mini. Clients: the laptop (light profile) and
+        # Blink Shell on the iPad, both over the tailnet. mosh bootstraps
+        # mosh-server over a NON-interactive ssh shell, so it relies on
+        # ~/.zshenv (not .zprofile) putting /opt/homebrew/bin on PATH and
+        # exporting LANG - both already true in this repo. The macOS firewall
+        # also needs an explicit rule for the binary; see .chezmoidata/mosh.yml
+        # and the health check.
+        - mosh
         - pgcli
         # Version-pinned to match what is installed. The tmux status line uses
         # python3 opportunistically (it is guarded by `command -v`, so its
