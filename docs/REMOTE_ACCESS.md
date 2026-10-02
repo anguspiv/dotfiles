@@ -17,9 +17,11 @@ the laptop, and nothing from the iPad. SSH worked, mosh sat forever on
 `mosh: Nothing received from server on UDP port 60002`, and nothing on either
 Mac could have fixed it.
 
-The policy is not managed by this repo. It lives in the Tailscale admin
-console (Access controls) and uses `grants`. Fixed 2026-10-02 with these
-three grants, after which `mosh mini` from the laptop connected:
+The policy is not managed by this repo. It lives in
+`github.com/anguspiv/tailnet-policy` (`policy.hujson`, applied to the tailnet
+by GitHub Actions on push to main; the admin console is a read-only view).
+Fixed 2026-10-02 with these three grants, after which `mosh mini` from the
+laptop connected:
 
 ```jsonc
 {"src": ["100.77.197.72"],                   "dst": ["100.67.48.86"], "ip": ["tcp:22", "tcp:5900"]},
