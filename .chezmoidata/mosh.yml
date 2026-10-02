@@ -6,14 +6,21 @@
 # allowed. A Homebrew mosh-server is only ad-hoc signed, so the firewall will
 # not auto-allow it the way it does Developer-ID-signed apps, and the GUI
 # "allow incoming connections?" dialog it raises instead can never be answered
-# from an SSH session. Symptom without the rule: the client reports no traffic
-# on the UDP port and silently falls back to plain SSH.
+# from an SSH session. Symptom without the rule: the SSH bootstrap succeeds,
+# mosh-server starts, then the client sits forever on "mosh: Nothing received
+# from server on UDP port 600xx. [To quit: Ctrl-^ .]" (mosh never falls back
+# to plain SSH; the client just waits for a UDP reply the firewall dropped).
 #
-# Adding the rule needs root (socketfilterfw --add/--unblockapp), and `chezmoi
-# apply` must never prompt for sudo (see .chezmoidata/sshd.yml for why). So,
-# same policy: desired state is DECLARED here, health-check.sh REPORTS drift
-# and prints the exact commands, a human runs them. Without this declaration a
-# rebuilt Mini would quietly fall back to SSH and look fine.
+# The firewall keys the entry on the binary, not the path string: with the
+# symlink entry present, `--add <Cellar path>` prints nothing and adds nothing
+# (2026-10-02), so the symlink below is the right target and the health check
+# accepts either path in `--listapps`.
+#
+# The Mini's firewall is not the only place UDP can die, nor the first. The
+# tailnet ACL filters per protocol on the receiving node before the macOS
+# firewall; on 2026-10-02 it allowed only TCP 22/5900 from the laptop, so SSH
+# worked and mosh sat on "Nothing received from server". The ACL lives in the
+# Tailscale admin console, not here; docs/REMOTE_ACCESS.md section 0.
 mosh:
   # Target of the firewall rule. The Homebrew symlink, not the Cellar path, so
   # the declaration survives `brew upgrade` renaming the Cellar directory.

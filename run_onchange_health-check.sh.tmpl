@@ -117,9 +117,12 @@ fi
 # Quiet when mosh-server is not installed (the package script already reports
 # that, and the rule is meaningless without the binary) and when the firewall
 # is off (nothing to allow through). `--listapps` needs no sudo; both the
-# symlink and its resolved Cellar path are checked because the firewall may
-# record either. `--getappblocked` is NOT used: it answers "permitted" for a
-# path that does not exist, so it cannot tell "allowed" from "unknown".
+# symlink and its resolved Cellar path are accepted because the firewall keys
+# the entry on the binary and lists whichever path was given to `--add`
+# (2026-10-02: with the symlink entry present, `--add <Cellar path>` printed
+# nothing and added nothing). `--getappblocked` is NOT used: it answers
+# "permitted" for a path that does not exist, so it cannot tell "allowed"
+# from "unknown".
 {{- if and (eq .chezmoi.os "darwin") (index .fleet.sshAuthorizedKeys .machine.type) }}
 MOSH_SERVER="{{ .mosh.server }}"
 SFW=/usr/libexec/ApplicationFirewall/socketfilterfw
@@ -131,7 +134,7 @@ if [ -x "$MOSH_SERVER" ] && [ -x "$SFW" ] && "$SFW" --getglobalstate 2>/dev/null
         | grep -A1 -F -e "$MOSH_SERVER" -e "$_mosh_real" \
         | grep -q 'Allow incoming connections'; then
         echo "🔓 mosh-server is NOT allowed through the macOS firewall."
-        echo "   mosh will silently fall back to SSH (no traffic on the UDP port)."
+        echo "   Symptom: mosh-server starts, then the client sits on: mosh: Nothing received from server on UDP port 600xx."
         echo "   Allow it (one-time, needs sudo):"
         echo "     sudo $SFW --add $MOSH_SERVER"
         echo "     sudo $SFW --unblockapp $MOSH_SERVER"
