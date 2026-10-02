@@ -108,6 +108,38 @@ else
 fi
 {{- end }}
 
+# Check the macOS firewall allows mosh-server.
+#
+# Same gate as the sshd block: only a host that authorises inbound keys has a
+# mosh server to expose. Same policy too - the rule needs root, so this REPORTS
+# and prints the commands (see .chezmoidata/mosh.yml for why).
+#
+# Quiet when mosh-server is not installed (the package script already reports
+# that, and the rule is meaningless without the binary) and when the firewall
+# is off (nothing to allow through). `--listapps` needs no sudo; both the
+# symlink and its resolved Cellar path are checked because the firewall may
+# record either. `--getappblocked` is NOT used: it answers "permitted" for a
+# path that does not exist, so it cannot tell "allowed" from "unknown".
+{{- if and (eq .chezmoi.os "darwin") (index .fleet.sshAuthorizedKeys .machine.type) }}
+MOSH_SERVER="{{ .mosh.server }}"
+SFW=/usr/libexec/ApplicationFirewall/socketfilterfw
+if [ -x "$MOSH_SERVER" ] && [ -x "$SFW" ] && "$SFW" --getglobalstate 2>/dev/null | grep -q 'enabled'; then
+    _mosh_real="$(readlink -f "$MOSH_SERVER" 2>/dev/null || echo "$MOSH_SERVER")"
+    # One entry is two lines: the path, then "(Allow incoming connections)" or
+    # "(Block incoming connections)". grep -A1 pairs them.
+    if ! "$SFW" --listapps 2>/dev/null \
+        | grep -A1 -F -e "$MOSH_SERVER" -e "$_mosh_real" \
+        | grep -q 'Allow incoming connections'; then
+        echo "🔓 mosh-server is NOT allowed through the macOS firewall."
+        echo "   mosh will silently fall back to SSH (no traffic on the UDP port)."
+        echo "   Allow it (one-time, needs sudo):"
+        echo "     sudo $SFW --add $MOSH_SERVER"
+        echo "     sudo $SFW --unblockapp $MOSH_SERVER"
+        echo "     $SFW --listapps | grep -A1 mosh-server"
+    fi
+fi
+{{- end }}
+
 echo "✅ Health check complete!"
 
 # Hash for change detection: {{ .chezmoi.version }}-{{ .chezmoi.hostname }}-{{ now | date "2006-01-02" }}

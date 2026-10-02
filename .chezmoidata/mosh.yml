@@ -1,0 +1,20 @@
+# mosh server exposure on machines that accept inbound SSH.
+#
+# mosh bootstraps over SSH, then switches to UDP (one port per session in
+# 60000-61000). The macOS application firewall is per-APPLICATION, not
+# per-port: there is no port list to declare, the binary itself must be
+# allowed. A Homebrew mosh-server is only ad-hoc signed, so the firewall will
+# not auto-allow it the way it does Developer-ID-signed apps, and the GUI
+# "allow incoming connections?" dialog it raises instead can never be answered
+# from an SSH session. Symptom without the rule: the client reports no traffic
+# on the UDP port and silently falls back to plain SSH.
+#
+# Adding the rule needs root (socketfilterfw --add/--unblockapp), and `chezmoi
+# apply` must never prompt for sudo (see .chezmoidata/sshd.yml for why). So,
+# same policy: desired state is DECLARED here, health-check.sh REPORTS drift
+# and prints the exact commands, a human runs them. Without this declaration a
+# rebuilt Mini would quietly fall back to SSH and look fine.
+mosh:
+  # Target of the firewall rule. The Homebrew symlink, not the Cellar path, so
+  # the declaration survives `brew upgrade` renaming the Cellar directory.
+  server: /opt/homebrew/bin/mosh-server
