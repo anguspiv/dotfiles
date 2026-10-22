@@ -99,6 +99,9 @@ alias gpl="git pull"
 {{- if eq .machine.type "work" }}
 # Work machine specific paths
 export PATH="/opt/company-tools/bin:$PATH"
+
+# Mermaid CLI renders through the installed Google Chrome (see packages.yml)
+alias mmdc="mmdc -p ${HOME}/.config/mermaid/puppeteer-config.json"
 {{- end }}
 {{- else if eq .chezmoi.os "linux" }}
 # Linux specific settings

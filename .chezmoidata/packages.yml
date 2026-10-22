@@ -130,6 +130,11 @@ packages:
         - kubernetes-cli
         - int128/kubelogin/kubelogin
         - openshift-cli
+        # Mermaid CLI (mmdc) to render and syntax-check the diagrams in docs and PR bodies
+        # before GitHub/GitLab render them. It drives a headless browser; the Homebrew
+        # formula ships no browser, so ~/.config/mermaid/puppeteer-config.json points it at
+        # the installed Google Chrome and the mmdc alias in .zshrc passes that file.
+        - mermaid-cli
         - docker-credential-helper-ecr
         - pgcli
         - ruby
