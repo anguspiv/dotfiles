@@ -18,6 +18,10 @@ So chezmoi only has to own those two keys:
 private_dot_claude/modify_private_settings.json.tmpl # merges it into settings.json
 ```
 
+The same script also merges `permissions.deny` from
+`.chezmoidata/claude_permissions.yml`. Each rule is appended if missing, and
+rules added by hand stay.
+
 A `modify_` script rather than a managed file, because Claude Code writes
 `settings.json` at runtime — model, theme, `claude plugin marketplace add`. The
 script takes the live file on stdin and emits the merged result, so every key
