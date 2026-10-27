@@ -28,8 +28,10 @@ printf '%s' "$current" | jq \
   --argjson enabled '{{ .claude_plugins.enabled | toJson }}' \
   --argjson deny '{{ .claude_permissions.deny | toJson }}' \
   --argjson hooks '{{ .claude_hooks | toJson }}' \
+  --argjson env '{{ .claude_env | toJson }}' \
   '.extraKnownMarketplaces = ((.extraKnownMarketplaces // {}) * $marketplaces)
    | .enabledPlugins      = ((.enabledPlugins      // {}) * $enabled)
+   | .env                 = ((.env                 // {}) * $env)
    | .permissions.deny    = (reduce $deny[] as $rule (.permissions.deny // [];
                                if index([$rule]) then . else . + [$rule] end))
    | .hooks               = (reduce ($hooks | to_entries[]) as $e (.hooks // {};
