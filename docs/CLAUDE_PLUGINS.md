@@ -74,29 +74,41 @@ skill from standalone to plugin therefore changes how it is called —
 `/brainstorming` becomes `/superpowers:brainstorming`. Check that before
 swapping one for the other.
 
-## Why superpowers is standalone and not a plugin
+## Superpowers is a plugin; skills.sh is retired
 
-`superpowers@claude-plugins-official` exists and bundles exactly the fourteen
-skills this repo used to name individually. It is deliberately **not** enabled,
-and is uninstalled. The fourteen live as plain skills in `~/.claude/skills/`,
-installed with `npx skills add obra/superpowers`.
+Until 2026-10-26 the fourteen superpowers skills were standalone skills from
+`npx skills add obra/superpowers`, kept that way for two reasons. Both were
+checked before migrating to `superpowers@superpowers-marketplace`:
 
-Two reasons, either sufficient:
+- **Invocation changes** from `/brainstorming` to `/superpowers:brainstorming`.
+  Every existing reference already used the namespaced form: the skills' own
+  cross-references and every recipe-box plan say `superpowers:executing-plans`.
+  Only typed bare-name habits change.
+- **The content differs** because the standalone copies were a 2026-06-28
+  snapshot and the plugin tracks upstream (7.0.1 at migration). That is version
+  drift, not a fork.
 
-- **Invocation would change.** The plugin's manifest name is `superpowers`, so
-  its skills load as `/superpowers:brainstorming`. As plain skills they are
-  `/brainstorming`. Swapping breaks every bare-name habit and reference.
-- **The content is not the same.** `diff` between the standalone copies and the
-  plugin's 6.4.1 files shows they differ, `SKILL.md` included. This is not a
-  repackaging of the same bytes; it is a different version.
+Use `superpowers-marketplace`, not obra/superpowers' own marketplace: that one
+is `superpowers-dev` and installs the dev branch.
 
-Do not "fix" this by enabling the plugin. If it is ever worth doing, it is a
-deliberate migration: check what the namespace change breaks first, and diff the
-skill content rather than assuming the names matching means the files do.
+skills.sh (`npx skills`) was retired at the same time. It was not synced by
+chezmoi, so machines drifted, and it left dangling symlinks in
+`~/.claude/skills/`. The other sources were dropped, not migrated: mattpocock
+(barely used, a third of the copies gone upstream), fullstackrecipes (unused,
+no project on that stack), ralph-tui, ralph-wiggum and find-skills (unused).
+`mattpocock-skills@mattpocock` exists if it is wanted later.
+
+To retire skills.sh on a machine, after `chezmoi apply` and a restart:
+
+```
+find ~/.claude/skills -maxdepth 1 -lname '*.agents/skills/*' -delete
+rm -rf ~/.agents/skills ~/.agents/.skill-lock.json
+```
 
 ## What is NOT managed here
 
-`~/.claude/skills/` holds ~269 skills from assorted sources. None are managed by
-chezmoi, and the old manifest only ever named 16 of them, so it was never the
-source of truth it looked like. Nothing here pretends otherwise: this file
-manages plugins, and plugins only.
+`~/.claude/skills/synced/` is written by Claude Code from the signed-in
+claude.ai account (the `anthropic-skills:*` set). It differs per account, and
+the work and home machines use different accounts, so it is not portable and
+chezmoi leaves it alone. Skills that must exist on every machine come from
+plugins declared here.

@@ -29,6 +29,12 @@ claude_plugins:
       source:
         source: github
         repo: buvis/claude-checkup
+    # The stable superpowers channel. obra/superpowers' own marketplace is
+    # superpowers-dev and installs the dev branch.
+    superpowers-marketplace:
+      source:
+        source: github
+        repo: obra/superpowers-marketplace
   enabled:
     # document-skills = docx, pdf, pptx, xlsx. All four wanted, no extras.
     # example-skills is deliberately NOT here: it bundles 12 skills to deliver
@@ -43,3 +49,6 @@ claude_plugins:
     # ~/.claude.json and .mcp.json; its orphan-project rm -rf also deletes
     # memory/. Review every fix before running it.
     "claude-checkup@claude-checkup": true
+    # Replaces the skills.sh installs (see docs/CLAUDE_PLUGINS.md). Adds a
+    # SessionStart hook that injects using-superpowers.
+    "superpowers@superpowers-marketplace": true
