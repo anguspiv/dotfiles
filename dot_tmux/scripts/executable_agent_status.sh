@@ -43,6 +43,23 @@ while IFS='|' read -r session window window_panes pane command title; do
     ((total++))
 done <<< "$panes"
 
+# Background agents (claude --bg) have no pane. Count them from
+# `claude agents --json`, cached 30s: it costs ~0.2s and status-interval is 10s.
+cache="$HOME/.cache/tmux-status/claude_bg"
+mkdir -p "${cache%/*}"
+if [[ ! -f "$cache" ]] || (( $(date +%s) - $(stat -f %m "$cache") >= 30 )); then
+    claude agents --json 2>/dev/null | jq -r \
+        '[.[] | select(.kind == "background")] | "\(length) \([.[] | select(.state != "working")] | length)"' \
+        > "$cache.tmp.$$" 2>/dev/null && mv -f "$cache.tmp.$$" "$cache" || rm -f "$cache.tmp.$$"
+fi
+read -r bg_total bg_idle < "$cache" 2>/dev/null
+if (( ${bg_total:-0} > 0 )); then
+    # yellow when any background agent has stopped working (finished or waiting)
+    if (( ${bg_idle:-0} > 0 )); then color="#ebcb8b"; ((attention++)); else color="#a3be8c"; fi
+    agents+="#[fg=${color}]󰒲 ${bg_total} bg "
+    ((total++))
+fi
+
 [[ $total -eq 0 ]] && exit 0
 
 if [[ $attention -gt 0 ]]; then

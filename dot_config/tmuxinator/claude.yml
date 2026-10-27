@@ -1,0 +1,14 @@
+# Claude Code project layout. Start with the `tc` zsh function:
+#   tc                 # current directory
+#   tc ~/workspace/x   # any directory; session is named after it
+# or directly: tmuxinator start claude <session-name> <directory>
+#
+# Window 1 resumes this directory's last Claude conversation, or starts one.
+name: <%= @args[0] %>
+root: <%= @args[1] %>
+
+windows:
+  - claude: claude --continue || claude
+  - editor: nvim
+  - git: lazygit
+  - shell:

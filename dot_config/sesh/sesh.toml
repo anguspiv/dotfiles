@@ -1,0 +1,5 @@
+# sesh config. Picker: prefix + T (~/.tmux/scripts/sesh_pick.sh).
+
+# The tmuxinator "claude" layout needs a name and directory (use `tc`), so
+# starting it bare from the picker fails. Keep it out of the list.
+blacklist = ["claude"]

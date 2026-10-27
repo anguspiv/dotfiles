@@ -126,6 +126,20 @@ cw() {
   claude --worktree "$1" --tmux=classic --name "$1" "${@:2}"
 }
 
+# tc [dir]: open the tmuxinator "claude" layout (claude, nvim, lazygit,
+# shell) for dir (default: here), in a session named after the directory.
+# Attaches instead if that session already exists.
+tc() {
+  local dir="${1:-$PWD}"
+  dir="${dir:A}"
+  local name="${${dir:t}//[.:]/_}"
+  if tmux has-session -t "=$name" 2>/dev/null; then
+    if [[ -n "$TMUX" ]]; then tmux switch-client -t "=$name"; else tmux attach -t "=$name"; fi
+  else
+    tmuxinator start claude "$name" "$dir"
+  fi
+}
+
 # Google Cloud SDK integration (disabled for performance)
 # if [ -f '/usr/local/share/google-cloud-sdk/path.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/path.zsh.inc'; fi
 # if [ -f '/usr/local/share/google-cloud-sdk/completion.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/completion.zsh.inc'; fi
