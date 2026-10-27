@@ -42,7 +42,7 @@ claude_plugins:
     "document-skills@anthropic-agent-skills": true
     "agent-skills@addy-agent-skills": true
     "frontend-design@claude-plugins-official": true
-    "browser-use@claude-plugins-official": true
+    "browser-use@claude-plugins-official": false
     # One skill: read-only automation recommender (hooks, MCP, subagents).
     "claude-code-setup@claude-plugins-official": true
     # Config audits. Its MCP check reads only settings.json, so it misses
