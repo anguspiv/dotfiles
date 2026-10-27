@@ -12,14 +12,14 @@
 # -u and a printable delimiter: in a non-UTF-8 locale (env -i, some mosh
 # shells) the tmux client rewrites tabs and non-ASCII to "_". Title is last, so
 # a "|" inside it lands intact in $title.
-panes=$(tmux -u list-panes -a -F '#{session_name}|#{window_index}|#{pane_current_command}|#{pane_title}' 2>/dev/null) || exit 0
+panes=$(tmux -u list-panes -a -F '#{session_name}|#{window_index}|#{window_panes}|#{pane_index}|#{pane_current_command}|#{pane_title}' 2>/dev/null) || exit 0
 [[ -z "$panes" ]] && exit 0
 
 agents=""
 attention=0
 total=0
 
-while IFS='|' read -r session window command title; do
+while IFS='|' read -r session window window_panes pane command title; do
     if [[ "$title" == *": needs approval" ]]; then
         color="#bf616a"; icon="●"; ((attention++))   # red - blocked on you
     elif [[ "$title" == *": done" ]]; then
@@ -35,6 +35,8 @@ while IFS='|' read -r session window command title; do
     fi
 
     name="$session:$window"
+    # Split windows hold several panes; name the pane so the dots are distinguishable
+    (( window_panes > 1 )) && name+=".$pane"
     [[ ${#name} -gt 16 ]] && name="${name:0:14}.."
 
     agents+="#[fg=${color}]${icon} ${name} "
