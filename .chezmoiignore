@@ -5,11 +5,6 @@ config/nvim/.netrwhist
 config/nvim/plugin/packer_compiled.lua
 config/nvim/lazy-lock.json
 
-# Zed compiled extensions and logs
-config/zed/extensions/
-config/zed/logs/
-config/zed/worktrees/
-
 # VS Code workspace settings (machine-specific)
 config/vscode/workspaceStorage/
 config/vscode/logs/
