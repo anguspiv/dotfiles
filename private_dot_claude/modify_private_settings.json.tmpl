@@ -27,7 +27,13 @@ printf '%s' "$current" | jq \
   --argjson marketplaces '{{ .claude_plugins.marketplaces | toJson }}' \
   --argjson enabled '{{ .claude_plugins.enabled | toJson }}' \
   --argjson deny '{{ .claude_permissions.deny | toJson }}' \
+  --argjson hooks '{{ .claude_hooks | toJson }}' \
   '.extraKnownMarketplaces = ((.extraKnownMarketplaces // {}) * $marketplaces)
    | .enabledPlugins      = ((.enabledPlugins      // {}) * $enabled)
    | .permissions.deny    = (reduce $deny[] as $rule (.permissions.deny // [];
-                               if index([$rule]) then . else . + [$rule] end))'
+                               if index([$rule]) then . else . + [$rule] end))
+   | .hooks               = (reduce ($hooks | to_entries[]) as $e (.hooks // {};
+                               reduce $e.value[] as $cmd (.;
+                                 if any((.[$e.key] // [])[] | .hooks[]?; .command == $cmd) then .
+                                 else .[$e.key] = ((.[$e.key] // []) + [{hooks: [{type: "command", command: $cmd}]}])
+                                 end)))'
