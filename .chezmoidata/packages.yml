@@ -37,8 +37,16 @@ packages:
         # removing it breaks nothing visibly (openrsync stays on PATH) and then
         # fails weeks later on an unsupported flag.
         - rsync
+        # Session picker for tmux (prefix + T): tmux sessions, zoxide dirs and
+        # ~/workspace repos in one fzf list; attaches or creates the session.
+        - sesh
         - starship
         - tmux
+        # Hint-key copy of paths, hashes and URLs in a pane (prefix + F). Claude
+        # Code's fullscreen TUI hides its history from tmux copy-mode, so this
+        # is how to grab what it prints. Homebrew build, not the TPM plugin,
+        # which compiles on first run.
+        - tmux-fingers
         - tmuxinator
         - tpm
         - uv

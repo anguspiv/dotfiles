@@ -115,6 +115,17 @@ elif command -v claude >/dev/null 2>&1; then
   alias claude="claude"
 fi
 
+# cw <task> [claude args]: Claude in a fresh git worktree with its own tmux
+# session, both named <task>, so parallel tasks never share a checkout.
+# --tmux=classic forces real tmux rather than iTerm2 native panes.
+cw() {
+  if [[ -z "$1" ]]; then
+    echo "usage: cw <task-name> [claude args...]" >&2
+    return 1
+  fi
+  claude --worktree "$1" --tmux=classic --name "$1" "${@:2}"
+}
+
 # Google Cloud SDK integration (disabled for performance)
 # if [ -f '/usr/local/share/google-cloud-sdk/path.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/path.zsh.inc'; fi
 # if [ -f '/usr/local/share/google-cloud-sdk/completion.zsh.inc' ]; then . '/usr/local/share/google-cloud-sdk/completion.zsh.inc'; fi
