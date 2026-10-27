@@ -1,0 +1,32 @@
+#!/bin/bash
+# run_onchange_after_install-tmux-plugins.sh.tmpl
+# Ensures every tmux plugin declared in ~/.tmux.conf is INSTALLED.
+#
+# The TPM bootstrap at the bottom of .tmux.conf only clones TPM itself the
+# first time; the plugins it lists are never fetched until someone presses
+# prefix + I by hand. On this machine that never happened, so resurrect, yank,
+# sensible, vim-tmux-navigator and battery were all declared and all absent.
+#
+# Same policy as the other installers here: present, not current. TPM's
+# install_plugins only fetches what is missing; updating stays a deliberate
+# prefix + U.
+#
+# Re-runs whenever .tmux.conf changes, so adding a @plugin line installs it.
+# tmux.conf hash: {{ include "dot_tmux.conf" | sha256sum }}
+
+set -euo pipefail
+
+TPM_DIR="{{ .chezmoi.homeDir }}/.tmux/plugins/tpm"
+
+if ! command -v tmux >/dev/null 2>&1; then
+    echo "tmux not installed, skipping plugin install"
+    exit 0
+fi
+
+if [ ! -d "$TPM_DIR" ]; then
+    echo "Cloning TPM..."
+    git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
+fi
+
+echo "Installing tmux plugins..."
+"$TPM_DIR/bin/install_plugins"
