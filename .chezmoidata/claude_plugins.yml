@@ -23,6 +23,12 @@ claude_plugins:
       source:
         source: github
         repo: anthropics/skills
+    # Repo-as-marketplace, not buvis/claude-plugins: the central catalogue pins
+    # its own version, and this repo is the code that was reviewed (v0.2.2).
+    claude-checkup:
+      source:
+        source: github
+        repo: buvis/claude-checkup
   enabled:
     # document-skills = docx, pdf, pptx, xlsx. All four wanted, no extras.
     # example-skills is deliberately NOT here: it bundles 12 skills to deliver
@@ -31,3 +37,9 @@ claude_plugins:
     "agent-skills@addy-agent-skills": true
     "frontend-design@claude-plugins-official": true
     "browser-use@claude-plugins-official": true
+    # One skill: read-only automation recommender (hooks, MCP, subagents).
+    "claude-code-setup@claude-plugins-official": true
+    # Config audits. Its MCP check reads only settings.json, so it misses
+    # ~/.claude.json and .mcp.json; its orphan-project rm -rf also deletes
+    # memory/. Review every fix before running it.
+    "claude-checkup@claude-checkup": true
