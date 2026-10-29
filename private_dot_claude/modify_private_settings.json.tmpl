@@ -23,7 +23,10 @@ current="$(cat)"
 printf '%s' "$current" | grep -q '[^[:space:]]' || current='{}'
 
 # jq preserves input key order, so re-running this does not churn the file.
-printf '%s' "$current" | jq \
+# -a (ASCII output) matches how the other writers of this file escape non-ASCII
+# (\u2014, not a literal em dash); without it every apply rewrites the file
+# and `chezmoi status` reports MM for a content-identical file.
+printf '%s' "$current" | jq -a \
   --argjson marketplaces '{{ .claude_plugins.marketplaces | toJson }}' \
   --argjson enabled '{{ .claude_plugins.enabled | toJson }}' \
   --argjson deny '{{ .claude_permissions.deny | toJson }}' \
