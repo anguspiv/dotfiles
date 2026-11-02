@@ -55,7 +55,9 @@ packages:
         - zplug
         - zsh-syntax-highlighting
       casks:
-        - claude-code
+        # claude-code is NOT a cask here: Claude Code uses the native installer
+        # (~/.local/bin/claude, self-updating). A cask copy sat earlier on PATH
+        # and pinned sessions to an older build (removed 2026-11-02).
         - font-monaspice-nerd-font
         - font-victor-mono-nerd-font
         - ghostty
