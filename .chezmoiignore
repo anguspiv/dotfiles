@@ -29,7 +29,8 @@ config/vscode/CachedExtensions/
 .bash_history
 .zsh_sessions/
 
-# Local shell customizations (modified by external tools)
+# Machine-local shell files: sourced by the managed .zprofile/.zshrc when
+# present, never managed, so `chezmoi add`/`apply` never touch them.
 .zprofile.local
 .zshrc.local
 

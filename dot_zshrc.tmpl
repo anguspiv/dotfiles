@@ -246,11 +246,6 @@ git-cleanup() {
 # in both files is what put the directory on PATH twice.
 fpath=("$HOME/.aix/completions" "$HOME/.claude-access/completions" "$HOME/.docker/completions" $fpath)
 autoload -Uz compinit && compinit
-
-# Employer-specific helpers (identifiers, internal hostnames) live in an
-# UNMANAGED ~/.zshrc.local, because this repo is public. Same pattern as
-# ~/.zprofile.local and ~/.config/secrets.sh. Absent on other machines = no-op.
-source_if_exists "${HOME}/.zshrc.local"
 {{- end }}
 
 {{- /*
@@ -263,3 +258,16 @@ source_if_exists "${HOME}/.zshrc.local"
   never reached tool/agent shells -- which is the failure it was meant to fix.
 */}}
 export HOMEBREW_PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
+
+# =====================================================
+# MACHINE-LOCAL OVERRIDES (keep this block last)
+# =====================================================
+# ~/.zshrc.local is per-machine and never managed by chezmoi (.chezmoiignore).
+# It holds anything that must not land in this public repo: employer CLIs and
+# their completions, internal hostnames, machine-specific aliases. Sourced last
+# so it can override anything above. Absent = no-op. An if-block rather than
+# `[[ -r ]] && source`, so a missing file does not leave the shell's last
+# status at 1. Do not start background jobs from it (see the auto-sync note).
+if [[ -r "${HOME}/.zshrc.local" ]]; then
+  source "${HOME}/.zshrc.local"
+fi
