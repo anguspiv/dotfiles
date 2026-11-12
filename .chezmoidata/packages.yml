@@ -76,6 +76,8 @@ packages:
         # server half lives under personal (the Mini). The iPad needs nothing
         # here - Blink Shell bundles its own mosh client.
         - mosh
+        # Fly.io CLI for the valheim-server repo (deploys, secrets, machine control).
+        - flyctl
       casks:
         - brave-browser
         # Claude desktop app. Per-profile rather than core so it stays off work
@@ -98,6 +100,8 @@ packages:
         - k9s
         - kubernetes-cli
         - int128/kubelogin/kubelogin
+        # Fly.io CLI for the valheim-server repo (deploys, secrets, machine control).
+        - flyctl
         # mosh SERVER for the Mini. Clients: the laptop (light profile) and
         # Blink Shell on the iPad, both over the tailnet. mosh bootstraps
         # mosh-server over a NON-interactive ssh shell, so it relies on
